@@ -341,14 +341,17 @@ void Game::Draw(float deltaTime, float totalTime)
 
 
 // --------------------------------------------------------
-// Initializes the value of all variables that can be
-// modified for the simulation
+// Initializes the all simulation variables
+// to their default values
 // --------------------------------------------------------
 void Game::InitializeSimulationParameters() {
 	pShowImGuiDemo = false;
-	float color[4] = {0.4f, 0.6f, 0.75f, 0.0f};
+	float color[4] = {0.4f, 0.6f, 0.75f, 1.0f};
 	for (int i = 0; i < 4; i++) {
 		pBackgroundColor[i] = color[i];
+	}
+	for (int i = 0; i < 3; i++) {
+		pTripleSlider[i] = 0.0f;
 	}
 }
 
@@ -369,24 +372,23 @@ void Game::ImGuiUpdate(float deltaTime) {
 	// Determine new input capture
 	Input::SetKeyboardCapture(io.WantCaptureKeyboard);
 	Input::SetMouseCapture(io.WantCaptureMouse);
+	// Show the demo window if it's activated
+	if (pShowImGuiDemo) {
+		ImGui::ShowDemoWindow();
+	}
 }
 
 // --------------------------------------------------------
 // Builds the ImGui UI window structure each frame
 // --------------------------------------------------------
 void Game::ImGuiBuild() {
-	if (pShowImGuiDemo) {
-		// Show the demo window
-		ImGui::ShowDemoWindow();
-	}
-
 	ImGui::Begin("Inspector");
 	if (ImGui::CollapsingHeader("App Details")) {				// Statistics about the app window and performance; no input elements
 		if (ImGui::TreeNode("Window")) {							// Meta stats about the window, mouse, and other stuff outside the simulation
 			ImGui::Spacing();
 			ImVec2 mousePos = ImGui::GetIO().MousePos;
 			
-			ImGui::Text("Resolution:  (%6dx %6d)", Window::Width(), Window::Height());
+			ImGui::Text("Resolution:   %6dx %6d", Window::Width(), Window::Height());
 			ImGui::SetItemTooltip("Screen resolution in pixels");
 
 			ImGui::Text("Mouse (px):  (%6d, %6d)", (int)mousePos.x, (int)mousePos.y);
@@ -419,6 +421,15 @@ void Game::ImGuiBuild() {
 		
 		ImGui::ColorEdit4("Background Color", pBackgroundColor);
 		
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Testing")) {					// Miscellaneous UI inputs/elements for testing and debugging
+		ImGui::Spacing();
+
+		ImGui::SliderFloat3("Triple Slider", pTripleSlider, 0.0f, 1.0f);
+		ImGui::SetItemTooltip("Could be used for XYZ coordinates");
+
 		ImGui::Spacing();
 	}
 

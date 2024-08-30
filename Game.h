@@ -35,6 +35,7 @@ private:
 	// All start with a "p" for "parameter"
 	bool pShowImGuiDemo;
 	float pBackgroundColor[4];
+	float pTripleSlider[3];
 
 
 	// Note the usage of ComPtr below
