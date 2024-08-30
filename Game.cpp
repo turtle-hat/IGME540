@@ -31,6 +31,7 @@ void Game::Initialize()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateGeometry();
+	InitializeSimulationParameters();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -260,6 +261,7 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	ImGuiUpdate(deltaTime);
+	ImGuiBuild();
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -277,8 +279,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erase what's on screen) and depth buffer
-		const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
-		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	color);
+		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	pBackgroundColor);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
@@ -329,6 +330,31 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 }
 
+
+
+// --------------------------------------------------------
+// 
+//                 CUSTOM HELPER METHODS
+// 
+// --------------------------------------------------------
+
+
+
+// --------------------------------------------------------
+// Initializes the value of all variables that can be
+// modified for the simulation
+// --------------------------------------------------------
+void Game::InitializeSimulationParameters() {
+	pShowImGuiDemo = false;
+	float color[4] = {0.4f, 0.6f, 0.75f, 0.0f};
+	for (int i = 0; i < 4; i++) {
+		pBackgroundColor[i] = color[i];
+	}
+}
+
+// --------------------------------------------------------
+// Prepares the ImGui UI window for being created
+// --------------------------------------------------------
 void Game::ImGuiUpdate(float deltaTime) {
 	// Put this all in a helper method that is called from Game::Update()
 	// Feed fresh data to ImGui
@@ -343,7 +369,69 @@ void Game::ImGuiUpdate(float deltaTime) {
 	// Determine new input capture
 	Input::SetKeyboardCapture(io.WantCaptureKeyboard);
 	Input::SetMouseCapture(io.WantCaptureMouse);
-	// Show the demo window
-	ImGui::ShowDemoWindow();
+}
+
+// --------------------------------------------------------
+// Builds the ImGui UI window structure each frame
+// --------------------------------------------------------
+void Game::ImGuiBuild() {
+	if (pShowImGuiDemo) {
+		// Show the demo window
+		ImGui::ShowDemoWindow();
+	}
+
+	ImGui::Begin("Inspector");
+	if (ImGui::CollapsingHeader("App Details")) {				// Statistics about the app window and performance; no input elements
+		if (ImGui::TreeNode("Window")) {							// Meta stats about the window, mouse, and other stuff outside the simulation
+			ImGui::Spacing();
+			ImVec2 mousePos = ImGui::GetIO().MousePos;
+			
+			ImGui::Text("Resolution:  (%6dx %6d)", Window::Width(), Window::Height());
+			ImGui::SetItemTooltip("Screen resolution in pixels");
+
+			ImGui::Text("Mouse (px):  (%6d, %6d)", (int)mousePos.x, (int)mousePos.y);
+			ImGui::SetItemTooltip("Mouse position in pixels,\nstarting at top-left corner");
+			
+			ImGui::Text("Mouse (NDC): (%+6.3f, %+6.3f)",
+				2.0f * (mousePos.x - (Window::Width() * 0.5f)) / Window::Width(),
+				2.0f * (mousePos.y - (Window::Height() * 0.5f)) / Window::Height()
+			);
+			ImGui::SetItemTooltip("Mouse position in Normalized Device Coordinates\n(-1 to 1), starting at top-left corner");
+			
+			ImGui::TreePop();
+			ImGui::Spacing();
+		}
+		if (ImGui::TreeNode("Performance")) {						// Stats about the app's performance
+			ImGui::Spacing();
+			
+			ImGui::Text("Framerate:    %6dfps", (int)ImGui::GetIO().Framerate);
+
+			ImGui::Text("Delta Time:   %6dus", (int)(ImGui::GetIO().DeltaTime * 1000000));
+			ImGui::SetItemTooltip("Time between frames in microseconds\n(I didn't want to break things by trying to print the mu)");
+			
+			ImGui::TreePop();
+			ImGui::Spacing();
+		}
+	}
+	
+	if (ImGui::CollapsingHeader("Basics")) {					// Basic parameters (e.g. Background color)
+		ImGui::Spacing();
+		
+		ImGui::ColorEdit4("Background Color", pBackgroundColor);
+		
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Dear ImGui")) {				// Settings related to ImGui itself
+		ImGui::Spacing();
+
+		if (ImGui::Button("Toggle Dear ImGui Demo")) {				// Toggles the ImGui Demo window
+			pShowImGuiDemo = !pShowImGuiDemo;
+		}
+
+		ImGui::Spacing();
+	}
+
+	ImGui::End();
 }
 

@@ -23,7 +23,19 @@ private:
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
 	void CreateGeometry();
+	void InitializeSimulationParameters();
 	void ImGuiUpdate(float deltaTime);
+
+	// Update helper methods
+	void ImGuiBuild();
+
+	// Draw helper methods
+
+	// Simulation Parameter Variables
+	// All start with a "p" for "parameter"
+	bool pShowImGuiDemo;
+	float pBackgroundColor[4];
+
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
