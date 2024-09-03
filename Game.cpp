@@ -79,6 +79,9 @@ Game::~Game()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	// Helper function cleanup
+	CleanupSimulationParameters();
 }
 
 
@@ -353,6 +356,9 @@ void Game::InitializeSimulationParameters() {
 	for (int i = 0; i < 3; i++) {
 		pTripleSlider[i] = 0.0f;
 	}
+
+	pFrameTimes = new float[1000];
+	pFrameInterval = 1.0f;
 }
 
 // --------------------------------------------------------
@@ -446,3 +452,12 @@ void Game::ImGuiBuild() {
 	ImGui::End();
 }
 
+// --------------------------------------------------------
+// Called by destructor, cleans up pointers used by helper methods
+// --------------------------------------------------------
+void Game::CleanupSimulationParameters() {
+	if (pFrameTimes != nullptr) {
+		delete[] pFrameTimes;
+		pFrameTimes = nullptr;
+	}
+}

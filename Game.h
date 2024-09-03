@@ -31,12 +31,16 @@ private:
 
 	// Draw helper methods
 
+	// Desctructor helper methods
+	void CleanupSimulationParameters();
+	
 	// Simulation Parameter Variables
 	// All start with a "p" for "parameter"
 	bool pShowImGuiDemo;
 	float pBackgroundColor[4];
 	float pTripleSlider[3];
-
+	float* pFrameTimes;
+	float pFrameInterval;
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
