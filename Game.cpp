@@ -6,6 +6,7 @@
 #include "Window.h"
 
 #include <DirectXMath.h>
+#include <cmath>
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -80,7 +81,7 @@ Game::~Game()
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	// Helper function cleanup
+	// Cleanup other variables from helper methods
 	CleanupSimulationParameters();
 }
 
@@ -357,8 +358,11 @@ void Game::InitializeSimulationParameters() {
 		pTripleSlider[i] = 0.0f;
 	}
 
-	pFrameTimes = new float[1000];
-	pFrameInterval = 1.0f;
+	pFrameTimes = new float[P_FRAME_SAMPLES];
+	pFrameRefreshTime = 0.0;
+	pFrameRefreshRate = 60.0f;
+	pFrameTimeOffset = 0;
+	pFramerateHighest = 0.0f;
 }
 
 // --------------------------------------------------------
@@ -417,6 +421,23 @@ void Game::ImGuiBuild() {
 			ImGui::Text("Delta Time:   %6dus", (int)(ImGui::GetIO().DeltaTime * 1000000));
 			ImGui::SetItemTooltip("Time between frames in microseconds\n(I didn't want to break things by trying to print the mu)");
 			
+			if (pFrameRefreshTime == 0.0) {
+				pFrameRefreshTime = ImGui::GetTime();
+			}
+			while (pFrameRefreshTime < ImGui::GetTime()) {
+				float framerate = ImGui::GetIO().Framerate;
+				pFrameTimes[pFrameTimeOffset] = framerate;
+				pFrameTimeOffset = (pFrameTimeOffset + 1) % P_FRAME_SAMPLES;
+				pFrameRefreshTime += 1.0f / pFrameRefreshRate;
+				if (framerate > pFramerateHighest) {
+					pFramerateHighest = framerate;
+				}
+			}
+			
+			ImGui::PlotLines("Framerate", pFrameTimes, P_FRAME_SAMPLES, pFrameTimeOffset, "", 0.0f, pFramerateHighest, ImVec2(0, 100.0f));
+			ImGui::Text("Graph Refresh Rate:");
+			ImGui::SliderFloat("", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
+
 			ImGui::TreePop();
 			ImGui::Spacing();
 		}
@@ -453,7 +474,7 @@ void Game::ImGuiBuild() {
 }
 
 // --------------------------------------------------------
-// Called by destructor, cleans up pointers used by helper methods
+// Cleans up pointers used by helper functions
 // --------------------------------------------------------
 void Game::CleanupSimulationParameters() {
 	if (pFrameTimes != nullptr) {
