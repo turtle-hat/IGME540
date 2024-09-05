@@ -36,17 +36,35 @@ private:
 
 	// Simulation Parameter Variables
 	// All start with a "p" for "parameter"
-	bool pShowImGuiDemo;
+	// The background color used by Direct3D
 	float pBackgroundColor[4];
+	// An arbitrary slider
 	float pTripleSlider[3];
 
-	const int P_FRAME_SAMPLES = 100;
-	int pFrameGraphSamples;
-	float* pFrameTimes;
-	double pFrameRefreshTime;
-	float pFrameRefreshRate;
-	int pFrameTimeOffset;
-	float pFramerateHighest;
+	// IMGUI-SPECIFIC VARIABLES
+	// All start with a "ig" for "ImGui"
+	
+	// Whether to show the ImGui demo
+	bool igShowDemo;
+
+	// Framerate Graph Variables
+
+	// How many framerate samples are recorded for the graph
+	const int IG_FRAME_GRAPH_TOTAL_SAMPLES = 1000;
+	// Array of recorded framerate samples
+	float* igFrameGraphSamples;
+	// How many framerate samples are displayed on the graph
+	int igFrameGraphSampleCount;
+	// The rate at which new framerate samples should be added to the graph
+	float igFrameGraphSampleRate;
+	// The timestamp at which to add new framerate samples
+	double igFrameGraphNextSampleTime;
+	// The index of pFrameTimes to write the next sample to
+	int igFrameGraphSampleOffset;
+	// The highest recorded framerate; sets the scale of the framerate graph
+	float igFrameGraphHighest;
+	// Whether to continue sampling framerate for the graph
+	bool igFrameGraphDoAnimate;
 
 
 	// Note the usage of ComPtr below

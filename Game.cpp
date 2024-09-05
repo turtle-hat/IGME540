@@ -349,7 +349,10 @@ void Game::Draw(float deltaTime, float totalTime)
 // to their default values
 // --------------------------------------------------------
 void Game::InitializeSimulationParameters() {
-	pShowImGuiDemo = false;
+	
+	// IMGUI PARAMETERS
+
+	igShowDemo = false;
 	float color[4] = {0.4f, 0.6f, 0.75f, 1.0f};
 	for (int i = 0; i < 4; i++) {
 		pBackgroundColor[i] = color[i];
@@ -358,12 +361,18 @@ void Game::InitializeSimulationParameters() {
 		pTripleSlider[i] = 0.0f;
 	}
 
-	pFrameTimes = new float[P_FRAME_SAMPLES];
-	pFrameGraphSamples = P_FRAME_SAMPLES;
-	pFrameRefreshTime = 0.0;
-	pFrameRefreshRate = 60.0f;
-	pFrameTimeOffset = 0;
-	pFramerateHighest = 0.0f;
+	// Framerate graph variables
+	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
+	// Zero out all of our sample array
+	for (int i = 0; i < IG_FRAME_GRAPH_TOTAL_SAMPLES; i++) {
+		igFrameGraphSamples[i] = 0;
+	}
+	igFrameGraphSampleCount = 240;
+	igFrameGraphSampleRate = 60.0f;
+	igFrameGraphNextSampleTime = 0.0;
+	igFrameGraphSampleOffset = 0;
+	igFrameGraphHighest = 0.0f;
+	igFrameGraphDoAnimate = true;
 }
 
 // --------------------------------------------------------
@@ -384,7 +393,7 @@ void Game::ImGuiUpdate(float deltaTime) {
 	Input::SetKeyboardCapture(io.WantCaptureKeyboard);
 	Input::SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window if it's activated
-	if (pShowImGuiDemo) {
+	if (igShowDemo) {
 		ImGui::ShowDemoWindow();
 	}
 }
@@ -421,24 +430,58 @@ void Game::ImGuiBuild() {
 
 			ImGui::Text("Delta Time:   %6dus", (int)(ImGui::GetIO().DeltaTime * 1000000));
 			ImGui::SetItemTooltip("Time between frames in microseconds\n(I didn't want to break things by trying to print the mu)");
+
+			if (ImGui::TreeNode("Framerate Graph")) {					// Graph of framerate over time
+				// Sets tooptip of enclosing TreeNode
+				ImGui::SetItemTooltip("Records the framerate over time\n(Slows down performance in Debug build while open)");
+				
+				ImGui::Spacing();
 			
-			if (pFrameRefreshTime == 0.0) {
-				pFrameRefreshTime = ImGui::GetTime();
-			}
-			while (pFrameRefreshTime < ImGui::GetTime()) {
-				float framerate = ImGui::GetIO().Framerate;
-				pFrameTimes[pFrameTimeOffset] = framerate;
-				pFrameTimeOffset = (pFrameTimeOffset + 1) % P_FRAME_SAMPLES;
-				pFrameRefreshTime += 1.0f / pFrameRefreshRate;
-				if (framerate > pFramerateHighest) {
-					pFramerateHighest = framerate;
+				// Plotting code taken from ImGui demo
+
+				// If not animating or just initialized
+				if (!igFrameGraphDoAnimate || igFrameGraphNextSampleTime == 0.0) {
+					// Reset refresh time
+					igFrameGraphNextSampleTime = ImGui::GetTime();
 				}
-			}
+				// Record however many samples should have been captured within the elapsed time this frame
+				while (igFrameGraphNextSampleTime < ImGui::GetTime()) {
+					// Get the framerate for this frame
+					float framerate = ImGui::GetIO().Framerate;
+					// Record framerate in array at the current place
+					igFrameGraphSamples[igFrameGraphSampleOffset] = framerate;
+					// Step one sample further in the array, mod the current number of samples we're supposed to capture
+					igFrameGraphSampleOffset = (igFrameGraphSampleOffset + 1) % (igFrameGraphSampleCount);
+					// Set next sample time based on sample rate
+					igFrameGraphNextSampleTime += 1.0f / igFrameGraphSampleRate;
+					// If this framerate is the highest recorded, rescale graph so it's in view
+					if (framerate > igFrameGraphHighest) {
+						igFrameGraphHighest = framerate;
+					}
+				}
+				// Draw the graph
+				ImGui::PlotLines("Framerate", igFrameGraphSamples, igFrameGraphSampleCount, igFrameGraphSampleOffset, "", 0.0f, igFrameGraphHighest, ImVec2(0, 100.0f));
 			
-			ImGui::PlotLines("Framerate", pFrameTimes, P_FRAME_SAMPLES, pFrameTimeOffset, "", 0.0f, pFramerateHighest, ImVec2(0, 100.0f));
-			ImGui::Text("Graph Refresh Rate:");
-			ImGui::SliderFloat("Graph Rate", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
-			ImGui::SliderInt("Graph Samples", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
+				// Pauses or resumes the graph
+				if (ImGui::Button(igFrameGraphDoAnimate ? "Pause Framerate Graph" : "Resume Framerate Graph")) {
+					igFrameGraphDoAnimate = !igFrameGraphDoAnimate;
+				}
+
+				ImGui::SliderFloat("Graph Rate", &igFrameGraphSampleRate, 0.5f, 120.0f, "%3.1fHz", ImGuiSliderFlags_Logarithmic);
+				ImGui::SetItemTooltip("How often the graph updates per second\n(Rate will update after next sample)");
+			
+				ImGui::SliderInt("Graph Scale", &igFrameGraphSampleCount, 1, 1000, "%d samples", ImGuiSliderFlags_Logarithmic);
+				ImGui::SetItemTooltip("How many samples are shown on the graph\n(WARNING: Changing will mess up the current graph!)");
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			else {
+				// Sets tooptip of enclosing TreeNode if it's closed
+				ImGui::SetItemTooltip("Slows down performance in Debug mode");
+				// Resets sample time
+				igFrameGraphNextSampleTime = 0.0;
+			}
 
 			ImGui::TreePop();
 			ImGui::Spacing();
@@ -466,7 +509,7 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 
 		if (ImGui::Button("Toggle Dear ImGui Demo")) {				// Toggles the ImGui Demo window
-			pShowImGuiDemo = !pShowImGuiDemo;
+			igShowDemo = !igShowDemo;
 		}
 
 		ImGui::Spacing();
@@ -476,11 +519,11 @@ void Game::ImGuiBuild() {
 }
 
 // --------------------------------------------------------
-// Cleans up pointers used by helper functions
+// Called by destructor, cleans up pointers used by helper functions
 // --------------------------------------------------------
 void Game::CleanupSimulationParameters() {
-	if (pFrameTimes != nullptr) {
-		delete[] pFrameTimes;
-		pFrameTimes = nullptr;
+	if (igFrameGraphSamples != nullptr) {
+		delete[] igFrameGraphSamples;
+		igFrameGraphSamples = nullptr;
 	}
 }
