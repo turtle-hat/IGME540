@@ -359,6 +359,7 @@ void Game::InitializeSimulationParameters() {
 	}
 
 	pFrameTimes = new float[P_FRAME_SAMPLES];
+	pFrameGraphSamples = P_FRAME_SAMPLES;
 	pFrameRefreshTime = 0.0;
 	pFrameRefreshRate = 60.0f;
 	pFrameTimeOffset = 0;
@@ -436,7 +437,8 @@ void Game::ImGuiBuild() {
 			
 			ImGui::PlotLines("Framerate", pFrameTimes, P_FRAME_SAMPLES, pFrameTimeOffset, "", 0.0f, pFramerateHighest, ImVec2(0, 100.0f));
 			ImGui::Text("Graph Refresh Rate:");
-			ImGui::SliderFloat("", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
+			ImGui::SliderFloat("Graph Rate", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
+			ImGui::SliderInt("Graph Samples", &pFrameRefreshRate, 0.5f, 120.0f, "%3.2fHz", ImGuiSliderFlags_Logarithmic);
 
 			ImGui::TreePop();
 			ImGui::Spacing();

@@ -41,6 +41,7 @@ private:
 	float pTripleSlider[3];
 
 	const int P_FRAME_SAMPLES = 100;
+	int pFrameGraphSamples;
 	float* pFrameTimes;
 	double pFrameRefreshTime;
 	float pFrameRefreshRate;
