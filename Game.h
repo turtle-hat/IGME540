@@ -34,12 +34,24 @@ private:
 	// Destructor helper methods
 	void CleanupSimulationParameters();
 
-	// Simulation Parameter Variables
+
+
+
+	// SIMULATION PARAMETERS
 	// All start with a "p" for "parameter"
+	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
 	// An arbitrary slider
 	float pTripleSlider[3];
+
+
+
+	// MESHES
+	// All start with a "m" for "mesh"
+	std::shared_ptr<Mesh> mStarterTriangle;
+
+
 
 	// IMGUI-SPECIFIC VARIABLES
 	// All start with a "ig" for "ImGui"
