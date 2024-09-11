@@ -21,7 +21,7 @@ public:
 	~Mesh();
 	// Draws Mesh to screen
 	void Draw();
-	// Accessors for vertex and index buffer info
+	// Accessors for Mesh info
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 	int GetVertexCount();

@@ -169,9 +169,9 @@ void Game::CreateGeometry()
 	XMFLOAT4 green			= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 cyan			= XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
 	XMFLOAT4 blue			= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	XMFLOAT4 red2			= XMFLOAT4(0.9f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 red3			= XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 red4			= XMFLOAT4(0.7f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red2			= XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red3			= XMFLOAT4(0.6f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red4			= XMFLOAT4(0.4f, 0.0f, 0.0f, 1.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
@@ -242,6 +242,7 @@ void Game::CreateGeometry()
 	
 
 	// Mirror's Edge Logo
+	// (I think it looks cool)
 	Vertex vMirrorsEdge[] = {
 		{ XMFLOAT3(+0.50f, +0.50f, +0.0f), red },
 		{ XMFLOAT3(+0.56f, +0.50f, +0.0f), red },
@@ -409,7 +410,7 @@ void Game::ImGuiBuild() {
 			ImVec2 mousePos = ImGui::GetIO().MousePos;
 			
 			ImGui::Text("Resolution:   %6dx %6d", Window::Width(), Window::Height());
-			ImGui::SetItemTooltip("Screen resolution in pixels");
+			ImGui::SetItemTooltip("Window resolution in pixels");
 
 			ImGui::Text("Mouse (px):  (%6d, %6d)", (int)mousePos.x, (int)mousePos.y);
 			ImGui::SetItemTooltip("Mouse position in pixels,\nstarting at top-left corner");
@@ -419,6 +420,9 @@ void Game::ImGuiBuild() {
 				-2.0f * (mousePos.y - (Window::Height() * 0.5f)) / Window::Height()
 			);
 			ImGui::SetItemTooltip("Mouse position in Normalized Device Coordinates\n(-1 to 1), starting at top-left corner");
+
+			ImGui::Text("Aspect Ratio: %6.3f", ((Window::Width() + 0.0f) / Window::Height()));
+			ImGui::SetItemTooltip("Window aspect ratio (width/height)");
 			
 			ImGui::TreePop();
 			ImGui::Spacing();
@@ -499,7 +503,21 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Meshes")) {					// Info about each mesh
 		ImGui::Spacing();
 
-		ImGui::Text("Pootis penser here");
+		for (int i = 0; i < meshes.size(); i++) {
+
+			ImGui::PushID(i);
+			if (ImGui::TreeNode("", "Mesh %06d", i)) {				// Each mesh gets its own Tree Node
+				ImGui::Spacing();
+
+				ImGui::Text("Triangles: %6d", meshes[i]->GetIndexCount() / 3);
+				ImGui::Text("Vertices:  %6d", meshes[i]->GetVertexCount());
+				ImGui::Text("Indices:   %6d", meshes[i]->GetIndexCount());
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			ImGui::PopID();
+		}
 
 		ImGui::Spacing();
 	}
