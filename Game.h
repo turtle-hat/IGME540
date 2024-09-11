@@ -2,6 +2,10 @@
 
 #include <d3d11.h>
 #include <wrl/client.h>
+#include <memory>
+#include <vector>
+
+#include "Mesh.h"
 
 class Game
 {
@@ -49,7 +53,7 @@ private:
 
 	// MESHES
 	// All start with a "m" for "mesh"
-	std::shared_ptr<Mesh> mStarterTriangle;
+	std::vector<std::shared_ptr<Mesh>> meshes;
 
 
 
@@ -83,10 +87,6 @@ private:
 	//  - This is a smart pointer for objects that abide by the
 	//     Component Object Model, which DirectX objects do
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
-
-	// Buffers to hold actual geometry data
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;

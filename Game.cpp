@@ -4,11 +4,9 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
-#include "Mesh.h"
 
 #include <DirectXMath.h>
 #include <cmath>
-#include <memory>
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -166,9 +164,14 @@ void Game::CreateGeometry()
 {
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 red			= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 yellow			= XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	XMFLOAT4 green			= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	XMFLOAT4 cyan			= XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 blue			= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 red2			= XMFLOAT4(0.9f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red3			= XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 red4			= XMFLOAT4(0.7f, 0.0f, 0.0f, 1.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
@@ -182,7 +185,7 @@ void Game::CreateGeometry()
 	//    knowing the exact size (in pixels) of the image/window/etc.  
 	// - Long story short: Resizing the window also resizes the triangle,
 	//    since we're describing the triangle in terms of the window itself
-	Vertex vertices[] =
+	Vertex vStarterTriangle[] =
 	{
 		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
 		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
@@ -194,10 +197,77 @@ void Game::CreateGeometry()
 	// - Indices are technically not required if the vertices are in the buffer 
 	//    in the correct order and each one will be used exactly once
 	// - But just to see how it's done...
-	unsigned int indices[] = { 0, 1, 2 };
+	unsigned int iStarterTriangle[] = { 0, 1, 2 };
+
+	meshes.push_back(std::make_shared<Mesh>(
+		vStarterTriangle,
+		iStarterTriangle,
+		3,
+		3
+	));
 
 
-	mStarterTriangle = std::make_shared<Mesh>(vertices, indices);
+
+	// Gradient Rectangle
+	Vertex vGradientRectangle[] = {
+		{ XMFLOAT3(-0.5f, +0.5f, +0.0f), red },
+		{ XMFLOAT3(-0.5f, +0.4f, +0.0f), red },
+		{ XMFLOAT3(-0.4f, +0.5f, +0.0f), yellow },
+		{ XMFLOAT3(-0.4f, +0.4f, +0.0f), yellow },
+		{ XMFLOAT3(-0.3f, +0.5f, +0.0f), green },
+		{ XMFLOAT3(-0.3f, +0.4f, +0.0f), green },
+		{ XMFLOAT3(-0.2f, +0.5f, +0.0f), cyan },
+		{ XMFLOAT3(-0.2f, +0.4f, +0.0f), cyan },
+		{ XMFLOAT3(-0.1f, +0.5f, +0.0f), blue },
+		{ XMFLOAT3(-0.1f, +0.4f, +0.0f), blue },
+	};
+
+	unsigned int iGradientRectangle[] = {
+		0, 2, 1,
+		1, 2, 3,
+		2, 4, 5,
+		2, 5, 3,
+		4, 6, 7,
+		4, 7, 5,
+		6, 8, 9,
+		6, 9, 7
+	};
+
+	meshes.push_back(std::make_shared<Mesh>(
+		vGradientRectangle,
+		iGradientRectangle,
+		10,
+		24
+	));
+	
+
+	// Mirror's Edge Logo
+	Vertex vMirrorsEdge[] = {
+		{ XMFLOAT3(+0.50f, +0.50f, +0.0f), red },
+		{ XMFLOAT3(+0.56f, +0.50f, +0.0f), red },
+		{ XMFLOAT3(+0.52f, +0.48f, +0.0f), red2 },
+		{ XMFLOAT3(+0.54f, +0.46f, +0.0f), red3 },
+		{ XMFLOAT3(+0.58f, +0.46f, +0.0f), red3 },
+		{ XMFLOAT3(+0.60f, +0.46f, +0.0f), red3 },
+		{ XMFLOAT3(+0.51f, +0.44f, +0.0f), red3 },
+		{ XMFLOAT3(+0.56f, +0.38f, +0.0f), red4 },
+	};
+
+	unsigned int iMirrorsEdge[] = {
+		0, 1, 2,
+		2, 1, 3,
+		3, 1, 4,
+		4, 1, 5,
+		2, 3, 6,
+		3, 4, 7
+	};
+
+	meshes.push_back(std::make_shared<Mesh>(
+		vMirrorsEdge,
+		iMirrorsEdge,
+		8,
+		18
+	));
 }
 
 
@@ -238,30 +308,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
-	{
-		// Set buffers in the input assembler (IA) stage
-		//  - Do this ONCE PER OBJECT, since each object may have different geometry
-		//  - For this demo, this step *could* simply be done once during Init()
-		//  - However, this needs to be done between EACH DrawIndexed() call
-		//     when drawing different geometry, so it's here as an example
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		Graphics::Context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-		Graphics::Context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-		// Tell Direct3D to draw
-		//  - Begins the rendering pipeline on the GPU
-		//  - Do this ONCE PER OBJECT you intend to draw
-		//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
-		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-		//     vertices in the currently set VERTEX BUFFER
-		Graphics::Context->DrawIndexed(
-			3,     // The number of indices to use (we could draw a subset if we wanted)
-			0,     // Offset to the first index we want to use
-			0);    // Offset to add to each index when looking up vertices
+	// Loop through every mesh and draw it
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i]->Draw();
 	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
@@ -367,7 +416,7 @@ void Game::ImGuiBuild() {
 			
 			ImGui::Text("Mouse (NDC): (%+6.3f, %+6.3f)",
 				2.0f * (mousePos.x - (Window::Width() * 0.5f)) / Window::Width(),
-				2.0f * (mousePos.y - (Window::Height() * 0.5f)) / Window::Height()
+				-2.0f * (mousePos.y - (Window::Height() * 0.5f)) / Window::Height()
 			);
 			ImGui::SetItemTooltip("Mouse position in Normalized Device Coordinates\n(-1 to 1), starting at top-left corner");
 			
@@ -444,6 +493,14 @@ void Game::ImGuiBuild() {
 		
 		ImGui::ColorEdit4("Background Color", pBackgroundColor);
 		
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Meshes")) {					// Info about each mesh
+		ImGui::Spacing();
+
+		ImGui::Text("Pootis penser here");
+
 		ImGui::Spacing();
 	}
 

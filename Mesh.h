@@ -17,14 +17,14 @@ private:
 
 public:
 	// Constructor/Destructor
-	Mesh(Vertex* vertices, unsigned int* indices);
+	Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount);
 	~Mesh();
+	// Draws Mesh to screen
+	void Draw();
 	// Accessors for vertex and index buffer info
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 	int GetVertexCount();
 	int GetIndexCount();
-	// Draws Mesh to screen
-	void Draw();
 };
 
