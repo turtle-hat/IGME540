@@ -200,10 +200,11 @@ void Game::CreateGeometry()
 	unsigned int iStarterTriangle[] = { 0, 1, 2 };
 
 	meshes.push_back(std::make_shared<Mesh>(
+		"Starter Triangle",
 		vStarterTriangle,
 		iStarterTriangle,
-		3,
-		3
+		ARRAYSIZE(vStarterTriangle),
+		ARRAYSIZE(iStarterTriangle)
 	));
 
 
@@ -234,10 +235,11 @@ void Game::CreateGeometry()
 	};
 
 	meshes.push_back(std::make_shared<Mesh>(
+		"Gradient Rectangle",
 		vGradientRectangle,
 		iGradientRectangle,
-		10,
-		24
+		ARRAYSIZE(vGradientRectangle),
+		ARRAYSIZE(iGradientRectangle)
 	));
 	
 
@@ -264,10 +266,11 @@ void Game::CreateGeometry()
 	};
 
 	meshes.push_back(std::make_shared<Mesh>(
+		"ME Logo",
 		vMirrorsEdge,
 		iMirrorsEdge,
-		8,
-		18
+		ARRAYSIZE(vMirrorsEdge),
+		ARRAYSIZE(iMirrorsEdge)
 	));
 }
 
@@ -506,7 +509,7 @@ void Game::ImGuiBuild() {
 		for (int i = 0; i < meshes.size(); i++) {
 
 			ImGui::PushID(i);
-			if (ImGui::TreeNode("", "Mesh %06d", i)) {				// Each mesh gets its own Tree Node
+			if (ImGui::TreeNode("", "(%06d) %s", i, meshes[i]->GetName())) {				// Each mesh gets its own Tree Node
 				ImGui::Spacing();
 
 				ImGui::Text("Triangles: %6d", meshes[i]->GetIndexCount() / 3);

@@ -3,7 +3,10 @@
 // --------------------------------------------------------
 // Constructs Mesh from list of vertices and indices
 // --------------------------------------------------------
-Mesh::Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount) {
+Mesh::Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount) {
+	// Thankfully I don't think name needs to be deleted? I might be wrong though
+	name = _name;
+	
 	// Code migrated from Game::CreateGeometry()
 
 	// Create a VERTEX BUFFER
@@ -12,7 +15,7 @@ Mesh::Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount,
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
 	{
 		// Record number of vertices in this mesh
-		vertexCount = _vertexCount;
+		vertexCount = (unsigned int)_vertexCount;
 
 		// First, we need to describe the buffer we want Direct3D to make on the GPU
 		//  - Note that this variable is created on the stack since we only need it once
@@ -43,7 +46,7 @@ Mesh::Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount,
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
 	{
 		// Record number of indices
-		indexCount = _indexCount;
+		indexCount = (unsigned int)_indexCount;
 
 		// Describe the buffer, as we did above, with two major differences
 		//  - Byte Width (3 unsigned integers vs. 3 whole vertices)
@@ -71,7 +74,7 @@ Mesh::Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount,
 // --------------------------------------------------------
 Mesh::~Mesh()
 {
-
+	
 }
 
 // --------------------------------------------------------
@@ -139,4 +142,9 @@ int Mesh::GetVertexCount()
 int Mesh::GetIndexCount()
 {
 	return indexCount;
+}
+
+const char* Mesh::GetName()
+{
+	return name;
 }

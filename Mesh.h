@@ -12,12 +12,15 @@ private:
 	// Vertex and index buffers, as well as the size of each
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
-	int vertexCount;
-	int indexCount;
+	unsigned int vertexCount;
+	unsigned int indexCount;
+
+	// Name for UI
+	const char* name;
 
 public:
 	// Constructor/Destructor
-	Mesh(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount);
+	Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount);
 	~Mesh();
 	// Draws Mesh to screen
 	void Draw();
@@ -26,5 +29,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 	int GetVertexCount();
 	int GetIndexCount();
+	const char* GetName();
 };
 
