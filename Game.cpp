@@ -314,17 +314,16 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-
+	// FILL CONSTANT BUFFER WITH NEW DATA
+	constBufferData.colorTint = XMFLOAT4(pCBColorTint);
+	constBufferData.positionOffset = XMFLOAT3(pCBPositionOffset);
 
 	// COPY DATA TO CONSTANT BUFFER
-
 	// Map constant buffer's location on GPU
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 	Graphics::Context->Map(constBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-
 	// Copy data to GPU memory
 	memcpy(mappedBuffer.pData, &constBufferData, sizeof(constBufferData));
-
 	// Unmap location on GPU
 	Graphics::Context->Unmap(constBuffer.Get(), 0);
 
@@ -380,13 +379,18 @@ void Game::InitializeSimulationParameters() {
 		pBackgroundColor[i] = color[i];
 	}
 
-	// Constant Buffer Slider Variables
+	// Constant Buffer Variables
+	// Starting color tint: (1.0f, 0.5f, 1.0f, 1.0f)
 	for (int i = 0; i < 4; i++) {
 		pCBColorTint[i] = 1.0f;
 	}
+	pCBColorTint[1] = 0.5f;
+
+	// Starting position offset: (-0.5f, 0.0f, 0.0f)
 	for (int i = 0; i < 3; i++) {
 		pCBPositionOffset[i] = 0.0f;
 	}
+	pCBPositionOffset[0] = -0.5f;
 	
 	// Define initial values for primary constant buffer data
 	constBufferData = {};
@@ -552,10 +556,20 @@ void Game::ImGuiBuild() {
 		}
 	}
 	
-	if (ImGui::CollapsingHeader("Basics")) {					// Basic parameters (e.g. Background color)
+	if (ImGui::CollapsingHeader("Basics")) {					// Basic parameters (e.g. colors and positions)
 		ImGui::Spacing();
 		
 		ImGui::ColorEdit4("Background Color", pBackgroundColor);
+
+		ImGui::Spacing();
+		ImGui::Text("Constant Buffer Data:");
+		ImGui::Spacing();
+
+		ImGui::ColorEdit4("Color Tint", pCBColorTint);
+		ImGui::SetItemTooltip("Color to multiply to each pixel's final color");
+
+		ImGui::DragFloat3("Position Offset", pCBPositionOffset, 0.01f, -2.0f, 2.0f);
+		ImGui::SetItemTooltip("XYZ coordinates to add to all triangles' position");
 		
 		ImGui::Spacing();
 	}
@@ -565,8 +579,9 @@ void Game::ImGuiBuild() {
 
 		for (int i = 0; i < meshes.size(); i++) {
 
+			// Each mesh gets its own Tree Node
 			ImGui::PushID(i);
-			if (ImGui::TreeNode("", "(%06d) %s", i, meshes[i]->GetName())) {				// Each mesh gets its own Tree Node
+			if (ImGui::TreeNode("", "(%06d) %s", i, meshes[i]->GetName())) {
 				ImGui::Spacing();
 
 				ImGui::Text("Triangles: %6d", meshes[i]->GetIndexCount() / 3);
@@ -582,11 +597,10 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 	}
 
-	if (ImGui::CollapsingHeader("Testing")) {					// Miscellaneous UI inputs/elements for testing and debugging
+	if (ImGui::CollapsingHeader("Testing (Unused)")) {			// Miscellaneous UI inputs/elements for testing and debugging
 		ImGui::Spacing();
 
-		ImGui::SliderFloat3("Triple Slider", pCBPositionOffset, 0.0f, 1.0f);
-		ImGui::SetItemTooltip("Could be used for XYZ coordinates");
+		ImGui::Text("N/A");
 
 		ImGui::Spacing();
 	}
