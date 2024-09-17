@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
+#include "BufferStructs.h"
 
 #include <DirectXMath.h>
 #include <cmath>
@@ -33,6 +34,7 @@ void Game::Initialize()
 	LoadShaders();
 	CreateGeometry();
 	InitializeSimulationParameters();
+	CreateConstantBuffers();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -312,6 +314,22 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
+
+
+	// COPY DATA TO CONSTANT BUFFER
+
+	// Map constant buffer's location on GPU
+	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	Graphics::Context->Map(constBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+
+	// Copy data to GPU memory
+	memcpy(mappedBuffer.pData, &constBufferData, sizeof(constBufferData));
+
+	// Unmap location on GPU
+	Graphics::Context->Unmap(constBuffer.Get(), 0);
+
+
+
 	// Loop through every mesh and draw it
 	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i]->Draw();
@@ -361,9 +379,19 @@ void Game::InitializeSimulationParameters() {
 	for (int i = 0; i < 4; i++) {
 		pBackgroundColor[i] = color[i];
 	}
-	for (int i = 0; i < 3; i++) {
-		pTripleSlider[i] = 0.0f;
+
+	// Constant Buffer Slider Variables
+	for (int i = 0; i < 4; i++) {
+		pCBColorTint[i] = 1.0f;
 	}
+	for (int i = 0; i < 3; i++) {
+		pCBPositionOffset[i] = 0.0f;
+	}
+	
+	// Define initial values for primary constant buffer data
+	constBufferData = {};
+	constBufferData.colorTint		= XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	constBufferData.positionOffset	= XMFLOAT3(0.25f, 0.0f, 0.0f);
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -377,6 +405,35 @@ void Game::InitializeSimulationParameters() {
 	igFrameGraphSampleOffset = 0;
 	igFrameGraphHighest = 0.0f;
 	igFrameGraphDoAnimate = true;
+}
+
+// --------------------------------------------------------
+// Creates all constant buffers used by our shaders
+// --------------------------------------------------------
+void Game::CreateConstantBuffers()
+{
+	// Find size of constant buffer struct
+	unsigned int size = sizeof(VertexShaderData);
+	// Get lowest multiple of 16 that is >= the size
+	// of the buffer struct using integer division
+	size = (size + 15) / 16 * 16;
+
+	// Define constant buffer parameters
+	D3D11_BUFFER_DESC bufferDesc	= {};
+	bufferDesc.BindFlags			= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.ByteWidth			= size;
+	bufferDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
+
+	// Create the buffer itself
+	Graphics::Device->CreateBuffer(&bufferDesc, 0, constBuffer.GetAddressOf());
+
+	// Bind the buffer
+	Graphics::Context->VSSetConstantBuffers(
+		0,
+		1,
+		constBuffer.GetAddressOf()
+	);
 }
 
 // --------------------------------------------------------
@@ -528,7 +585,7 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Testing")) {					// Miscellaneous UI inputs/elements for testing and debugging
 		ImGui::Spacing();
 
-		ImGui::SliderFloat3("Triple Slider", pTripleSlider, 0.0f, 1.0f);
+		ImGui::SliderFloat3("Triple Slider", pCBPositionOffset, 0.0f, 1.0f);
 		ImGui::SetItemTooltip("Could be used for XYZ coordinates");
 
 		ImGui::Spacing();

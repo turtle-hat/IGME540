@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Mesh.h"
+#include "BufferStructs.h"
 
 class Game
 {
@@ -28,6 +29,7 @@ private:
 	void LoadShaders();
 	void CreateGeometry();
 	void InitializeSimulationParameters();
+	void CreateConstantBuffers();
 	void ImGuiUpdate(float deltaTime);
 
 	// Update helper methods
@@ -46,10 +48,15 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
-	// An arbitrary slider
-	float pTripleSlider[3];
+	// Stores color tint to be sent through constant buffer
+	float pCBColorTint[4];
+	// Stores position offset to be sent through constant buffer
+	float pCBPositionOffset[3];
 
 
+
+	// Data to be sent through the primary constant buffer
+	VertexShaderData constBufferData;
 
 	// MESHES
 	// All start with a "m" for "mesh"
@@ -92,5 +99,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+
+	// Primary constant buffer
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
 };
 
