@@ -48,10 +48,10 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
+	// Stores translation offset for World transformation to be sent through constant buffer
+	float pCBTfWorldTl[3];
 	// Stores color tint to be sent through constant buffer
 	float pCBColorTint[4];
-	// Stores position offset to be sent through constant buffer
-	float pCBPositionOffset[3];
 
 
 

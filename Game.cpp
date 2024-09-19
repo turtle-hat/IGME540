@@ -316,7 +316,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// FILL CONSTANT BUFFER WITH NEW DATA
 	constBufferData.colorTint = XMFLOAT4(pCBColorTint);
-	constBufferData.positionOffset = XMFLOAT3(pCBPositionOffset);
+	//constBufferData.positionOffset = XMFLOAT3(pCBPositionOffset);
 
 	// COPY DATA TO CONSTANT BUFFER
 	// Map constant buffer's location on GPU
@@ -388,14 +388,19 @@ void Game::InitializeSimulationParameters() {
 
 	// Starting position offset: (-0.5f, 0.0f, 0.0f)
 	for (int i = 0; i < 3; i++) {
-		pCBPositionOffset[i] = 0.0f;
+		pCBTfWorldTl[i] = 0.0f;
 	}
-	pCBPositionOffset[0] = -0.5f;
+	pCBTfWorldTl[0] = -0.5f;
 	
 	// Define initial values for primary constant buffer data
 	constBufferData = {};
-	constBufferData.colorTint		= XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
-	constBufferData.positionOffset	= XMFLOAT3(0.25f, 0.0f, 0.0f);
+	constBufferData.tfWorld	= XMFLOAT4X4(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+	constBufferData.colorTint	= XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -565,11 +570,11 @@ void Game::ImGuiBuild() {
 		ImGui::Text("Constant Buffer Data:");
 		ImGui::Spacing();
 
+		ImGui::DragFloat3("World Translation", pCBTfWorldTl, 0.01f, -2.0f, 2.0f);
+		ImGui::SetItemTooltip("XYZ coordinates to add to all triangles' position");
+
 		ImGui::ColorEdit4("Color Tint", pCBColorTint);
 		ImGui::SetItemTooltip("Color to multiply to each pixel's final color");
-
-		ImGui::DragFloat3("Position Offset", pCBPositionOffset, 0.01f, -2.0f, 2.0f);
-		ImGui::SetItemTooltip("XYZ coordinates to add to all triangles' position");
 		
 		ImGui::Spacing();
 	}
