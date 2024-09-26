@@ -213,16 +213,16 @@ void Game::CreateGeometry()
 
 	// Gradient Rectangle
 	Vertex vGradientRectangle[] = {
-		{ XMFLOAT3(-0.5f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(-0.5f, +0.4f, +0.0f), red },
-		{ XMFLOAT3(-0.4f, +0.5f, +0.0f), yellow },
-		{ XMFLOAT3(-0.4f, +0.4f, +0.0f), yellow },
-		{ XMFLOAT3(-0.3f, +0.5f, +0.0f), green },
-		{ XMFLOAT3(-0.3f, +0.4f, +0.0f), green },
-		{ XMFLOAT3(-0.2f, +0.5f, +0.0f), cyan },
-		{ XMFLOAT3(-0.2f, +0.4f, +0.0f), cyan },
-		{ XMFLOAT3(-0.1f, +0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.1f, +0.4f, +0.0f), blue },
+		{ XMFLOAT3(-0.2f, +0.05f, +0.0f), red },
+		{ XMFLOAT3(-0.2f, -0.05f, +0.0f), red },
+		{ XMFLOAT3(-0.1f, +0.05f, +0.0f), yellow },
+		{ XMFLOAT3(-0.1f, -0.05f, +0.0f), yellow },
+		{ XMFLOAT3(+0.0f, +0.05f, +0.0f), green },
+		{ XMFLOAT3(+0.0f, -0.05f, +0.0f), green },
+		{ XMFLOAT3(+0.1f, +0.05f, +0.0f), cyan },
+		{ XMFLOAT3(+0.1f, -0.05f, +0.0f), cyan },
+		{ XMFLOAT3(+0.2f, +0.05f, +0.0f), blue },
+		{ XMFLOAT3(+0.2f, -0.05f, +0.0f), blue },
 	};
 
 	unsigned int iGradientRectangle[] = {
@@ -248,14 +248,14 @@ void Game::CreateGeometry()
 	// Mirror's Edge Logo
 	// (I think it looks cool)
 	Vertex vMirrorsEdge[] = {
-		{ XMFLOAT3(+0.50f, +0.50f, +0.0f), red },
-		{ XMFLOAT3(+0.56f, +0.50f, +0.0f), red },
-		{ XMFLOAT3(+0.52f, +0.48f, +0.0f), red2 },
-		{ XMFLOAT3(+0.54f, +0.46f, +0.0f), red3 },
-		{ XMFLOAT3(+0.58f, +0.46f, +0.0f), red3 },
-		{ XMFLOAT3(+0.60f, +0.46f, +0.0f), red3 },
-		{ XMFLOAT3(+0.51f, +0.44f, +0.0f), red3 },
-		{ XMFLOAT3(+0.56f, +0.38f, +0.0f), red4 },
+		{ XMFLOAT3(-0.05f, +0.06f, +0.0f), red },
+		{ XMFLOAT3(+0.01f, +0.06f, +0.0f), red },
+		{ XMFLOAT3(-0.03f, +0.04f, +0.0f), red2 },
+		{ XMFLOAT3(-0.01f, +0.02f, +0.0f), red3 },
+		{ XMFLOAT3(+0.03f, +0.02f, +0.0f), red3 },
+		{ XMFLOAT3(+0.05f, +0.02f, +0.0f), red3 },
+		{ XMFLOAT3(-0.04f, +0.00f, +0.0f), red3 },
+		{ XMFLOAT3(+0.01f, -0.06f, +0.0f), red4 },
 	};
 
 	unsigned int iMirrorsEdge[] = {
@@ -281,6 +281,22 @@ void Game::CreateGeometry()
 	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0]));
 	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1]));
 	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2]));
+	entities.push_back(std::make_shared<Entity>("E_BigTriangle", meshes[0]));
+	entities.push_back(std::make_shared<Entity>("E_UpsideDownTriangle", meshes[0]));
+
+	// Set special parameters for each mesh
+	entities[1]->GetTransform()->SetPosition(XMFLOAT3(-0.5f, 0.5f, 0.0f));
+	
+	entities[2]->GetTransform()->SetPosition(XMFLOAT3(0.5f, 0.5f, 0.0f));
+	
+	entities[3]->GetTransform()->SetPosition(XMFLOAT3(0.0f, 0.8f, 0.0f));
+	entities[3]->GetTransform()->SetScale(XMFLOAT3(2.0f, 0.5f, 1.0f));
+	entities[3]->SetTint(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	
+	entities[4]->GetTransform()->SetPosition(XMFLOAT3(0.7f, -0.5f, 0.0f));
+	entities[4]->GetTransform()->SetRotation(XMFLOAT3(0.0f, 0.0f, XM_PI));
+	entities[4]->GetTransform()->SetScale(XMFLOAT3(0.5f, 0.5f, 0.5f));
+	entities[4]->SetTint(XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f));
 }
 
 
@@ -320,25 +336,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	pBackgroundColor);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
-
-	// FILL CONSTANT BUFFER WITH NEW DATA
-	constBufferData.colorTint = XMFLOAT4(pCBColorTint);
-	//constBufferData.positionOffset = XMFLOAT3(pCBPositionOffset);
-
-	// COPY DATA TO CONSTANT BUFFER
-	// Map constant buffer's location on GPU
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	Graphics::Context->Map(constBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	// Copy data to GPU memory
-	memcpy(mappedBuffer.pData, &constBufferData, sizeof(constBufferData));
-	// Unmap location on GPU
-	Graphics::Context->Unmap(constBuffer.Get(), 0);
-
-
-
-	// Loop through every mesh and draw it
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i]->Draw();
+	
+	// Loop through every entity and draw it
+	for (int i = 0; i < entities.size(); i++) {
+		entities[i]->Draw(constBuffer);
 	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
@@ -398,16 +399,6 @@ void Game::InitializeSimulationParameters() {
 		pCBTfWorldTl[i] = 0.0f;
 	}
 	pCBTfWorldTl[0] = -0.5f;
-	
-	// Define initial values for primary constant buffer data
-	constBufferData = {};
-	constBufferData.tfWorld	= XMFLOAT4X4(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-	constBufferData.colorTint	= XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -592,13 +583,35 @@ void Game::ImGuiBuild() {
 		for (int i = 0; i < meshes.size(); i++) {
 
 			// Each mesh gets its own Tree Node
-			ImGui::PushID(i);
+			ImGui::PushID("MESH" + i);
 			if (ImGui::TreeNode("", "(%06d) %s", i, meshes[i]->GetName())) {
 				ImGui::Spacing();
 
 				ImGui::Text("Triangles: %6d", meshes[i]->GetIndexCount() / 3);
 				ImGui::Text("Vertices:  %6d", meshes[i]->GetVertexCount());
 				ImGui::Text("Indices:   %6d", meshes[i]->GetIndexCount());
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			ImGui::PopID();
+		}
+
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Entities")) {				// Info about each entity
+		ImGui::Spacing();
+
+		for (int i = 0; i < entities.size(); i++) {
+
+			// Each entity gets its own Tree Node
+			ImGui::PushID("ENTITY" + i);
+			if (ImGui::TreeNode("", "(%06d) %s", i, entities[i]->GetName())) {
+				ImGui::Spacing();
+
+				ImGui::Text("Mesh:      %s", (entities[i]->GetMesh()->GetName()));
+				ImGui::Text("Position:  (%6d", (entities[i]->GetMesh()->GetName()));
 
 				ImGui::TreePop();
 				ImGui::Spacing();

@@ -56,9 +56,6 @@ private:
 
 
 
-	// Data to be sent through the primary constant buffer
-	VertexShaderData constBufferData;
-
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	

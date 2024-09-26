@@ -14,11 +14,15 @@ public:
 	std::shared_ptr<Transform> GetTransform();
 	const char* GetName();
 
-	void Draw();
+	void SetTint(DirectX::XMFLOAT4 rgba);
+	void SetTint(float r, float g, float b, float a);
+
+	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer);
 
 private:
 	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<Transform> transform;
+	DirectX::XMFLOAT4 tint;
 
 	// Name for UI
 	const char* name;
