@@ -36,6 +36,11 @@ const char* Entity::GetName()
     return name;
 }
 
+DirectX::XMFLOAT4 Entity::GetTint()
+{
+    return tint;
+}
+
 void Entity::SetTint(DirectX::XMFLOAT4 rgba)
 {
     tint = rgba;

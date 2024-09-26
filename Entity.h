@@ -13,6 +13,7 @@ public:
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Transform> GetTransform();
 	const char* GetName();
+	DirectX::XMFLOAT4 GetTint();
 
 	void SetTint(DirectX::XMFLOAT4 rgba);
 	void SetTint(float r, float g, float b, float a);

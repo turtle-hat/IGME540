@@ -317,6 +317,14 @@ void Game::Update(float deltaTime, float totalTime)
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
 
+	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, 0.5f, 0.5f);
+	entities[1]->GetTransform()->SetScale(sin(totalTime * XM_PI) + 1.5f, 1.0f, 1.0f);
+
+	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f), 0.0f);
+
+	// TODO: Figure out why this doesn't work
+	entities[2]->GetTransform()->Rotate(0.0f, 0.0f, 0.05f * deltaTime);
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
