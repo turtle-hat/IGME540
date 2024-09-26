@@ -202,7 +202,7 @@ void Game::CreateGeometry()
 	unsigned int iStarterTriangle[] = { 0, 1, 2 };
 
 	meshes.push_back(std::make_shared<Mesh>(
-		"Starter Triangle",
+		"M_StarterTriangle",
 		vStarterTriangle,
 		iStarterTriangle,
 		ARRAYSIZE(vStarterTriangle),
@@ -237,7 +237,7 @@ void Game::CreateGeometry()
 	};
 
 	meshes.push_back(std::make_shared<Mesh>(
-		"Gradient Rectangle",
+		"M_GradientRectangle",
 		vGradientRectangle,
 		iGradientRectangle,
 		ARRAYSIZE(vGradientRectangle),
@@ -268,12 +268,19 @@ void Game::CreateGeometry()
 	};
 
 	meshes.push_back(std::make_shared<Mesh>(
-		"ME Logo",
+		"M_MELogo",
 		vMirrorsEdge,
 		iMirrorsEdge,
 		ARRAYSIZE(vMirrorsEdge),
 		ARRAYSIZE(iMirrorsEdge)
 	));
+
+
+
+	// Create entities for these meshes
+	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0]));
+	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1]));
+	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2]));
 }
 
 

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Mesh.h"
+#include "Entity.h"
 #include "BufferStructs.h"
 
 class Game
@@ -59,8 +60,12 @@ private:
 	VertexShaderData constBufferData;
 
 	// MESHES
-	// All start with a "m" for "mesh"
 	std::vector<std::shared_ptr<Mesh>> meshes;
+	
+	
+	
+	// ENTITIES
+	std::vector<std::shared_ptr<Entity>> entities;
 
 
 

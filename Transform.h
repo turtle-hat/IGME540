@@ -44,6 +44,9 @@ private:
 	// Final Inverse Transpose World Matrix
 	DirectX::XMFLOAT4X4 worldInverseTranspose;
 
-	// Whether transform matrix needs to be rebuilt
-	bool isMatrixDirty;
+	// Whether World and World Inverse Transpose matrices needs to be rebuilt
+	bool areMatricesDirty;
+
+	// Rebuilds World and WorldInverseTranspose
+	void RebuildMatrices();
 };
