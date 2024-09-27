@@ -20,6 +20,7 @@
 #include "ImGui/imgui_impl_win32.h"
 
 // For the DirectX Math library
+using namespace std;
 using namespace DirectX;
 
 // --------------------------------------------------------
@@ -314,16 +315,27 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	ImGuiUpdate(deltaTime);
-	ImGuiBuild();
+	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f), 0.0f);
 
 	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, 0.5f, 0.5f);
 	entities[1]->GetTransform()->SetScale(sin(totalTime * XM_PI) + 1.5f, 1.0f, 1.0f);
 
-	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f), 0.0f);
+	entities[2]->GetTransform()->Rotate(0.0f, 0.0f, 25.0f * deltaTime);
+	entities[2]->GetTransform()->SetScale(1.0f, (sin(totalTime * 0.5f) + 1) * 2, 1.0f);
+	entities[2]->GetTransform()->SetScale(1.0f, (sin(totalTime * 0.5f) + 1) * 2, 1.0f);
 
-	// TODO: Figure out why this doesn't work
-	entities[2]->GetTransform()->Rotate(0.0f, 0.0f, 0.05f * deltaTime);
+	entities[3]->GetTransform()->Rotate(deltaTime * -5.0f, deltaTime * -5.0f, 0.0f);
+
+	entities[4]->GetTransform()->SetScale(sin(totalTime) * 0.5f + 1.1f, cos(totalTime) * 0.5f + 1.1f, 1.0f);
+	entities[4]->SetTint(XMFLOAT4(
+		sin(totalTime) * 0.5f + 0.5f,
+		sin(totalTime + (2.0f * XM_PI / 3.0f)) * 0.5f + 0.5f,
+		sin(totalTime + (4.0f * XM_PI / 3.0f)) * 0.5f + 0.5f,
+		1.0f
+	));
+
+	ImGuiUpdate(deltaTime);
+	ImGuiBuild();
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -395,18 +407,18 @@ void Game::InitializeSimulationParameters() {
 		pBackgroundColor[i] = color[i];
 	}
 
-	// Constant Buffer Variables
-	// Starting color tint: (1.0f, 0.5f, 1.0f, 1.0f)
-	for (int i = 0; i < 4; i++) {
-		pCBColorTint[i] = 1.0f;
-	}
-	pCBColorTint[1] = 0.5f;
+	//// Constant Buffer Variables
+	//// Starting color tint: (1.0f, 0.5f, 1.0f, 1.0f)
+	//for (int i = 0; i < 4; i++) {
+	//	pCBColorTint[i] = 1.0f;
+	//}
+	//pCBColorTint[1] = 0.5f;
 
-	// Starting position offset: (-0.5f, 0.0f, 0.0f)
-	for (int i = 0; i < 3; i++) {
-		pCBTfWorldTl[i] = 0.0f;
-	}
-	pCBTfWorldTl[0] = -0.5f;
+	//// Starting position offset: (-0.5f, 0.0f, 0.0f)
+	//for (int i = 0; i < 3; i++) {
+	//	pCBTfWorldTl[i] = 0.0f;
+	//}
+	//pCBTfWorldTl[0] = -0.5f;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -571,16 +583,9 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 		
 		ImGui::ColorEdit4("Background Color", pBackgroundColor);
-
+		
 		ImGui::Spacing();
-		ImGui::Text("Constant Buffer Data:");
-		ImGui::Spacing();
-
-		ImGui::DragFloat3("World Translation", pCBTfWorldTl, 0.01f, -2.0f, 2.0f);
-		ImGui::SetItemTooltip("XYZ coordinates to add to all triangles' position");
-
-		ImGui::ColorEdit4("Color Tint", pCBColorTint);
-		ImGui::SetItemTooltip("Color to multiply to each pixel's final color");
+		ImGui::Text("NOTE: Tint is now applied per Entity!\nIt can be found in the Entities section.");
 		
 		ImGui::Spacing();
 	}
@@ -611,7 +616,15 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Entities")) {				// Info about each entity
 		ImGui::Spacing();
 
+		// Store the position, rotation, scale, and tint of each entity as they're read in
+		
+
 		for (int i = 0; i < entities.size(); i++) {
+			// Get position, rotation, scale, and tint
+			XMFLOAT3 entityPos = entities[i]->GetTransform()->GetPosition();
+			XMFLOAT3 entityRot = entities[i]->GetTransform()->GetRotation();
+			XMFLOAT3 entitySca = entities[i]->GetTransform()->GetScale();
+			XMFLOAT4 entityTin = entities[i]->GetTint();
 
 			// Each entity gets its own Tree Node
 			ImGui::PushID("ENTITY" + i);
@@ -619,12 +632,30 @@ void Game::ImGuiBuild() {
 				ImGui::Spacing();
 
 				ImGui::Text("Mesh:      %s", (entities[i]->GetMesh()->GetName()));
-				ImGui::Text("Position:  (%6d", (entities[i]->GetMesh()->GetName()));
+				ImGui::Spacing();
+
+				ImGui::DragFloat3("Position", &entityPos.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &entityRot.x, 0.01f);
+				ImGui::SetItemTooltip("In radians");
+				ImGui::DragFloat3("Scale", &entitySca.x, 0.01f, 0.0f);
+				// Clamp scale to 0
+				if (entitySca.x < 0.0f) entitySca.x = 0.0f;
+				if (entitySca.y < 0.0f) entitySca.y = 0.0f;
+				if (entitySca.z < 0.0f) entitySca.z = 0.0f;
+				
+				ImGui::Spacing();
+				ImGui::ColorEdit4("Tint", &entityTin.x);
 
 				ImGui::TreePop();
 				ImGui::Spacing();
 			}
 			ImGui::PopID();
+
+			// Store position, rotation, scale, and tint
+			entities[i]->GetTransform()->SetPosition(entityPos);
+			entities[i]->GetTransform()->SetRotation(entityRot);
+			entities[i]->GetTransform()->SetScale(entitySca);
+			entities[i]->SetTint(entityTin);
 		}
 
 		ImGui::Spacing();

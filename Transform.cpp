@@ -91,6 +91,7 @@ void Transform::MoveAbsolute(DirectX::XMFLOAT3 xyz)
 {
 	// Add translation vector to position and store the result back
 	XMStoreFloat3(&position, XMLoadFloat3(&position) + XMLoadFloat3(&xyz));
+	areMatricesDirty = true;
 }
 
 void Transform::Rotate(float pitch, float yaw, float roll)
@@ -105,6 +106,7 @@ void Transform::Rotate(DirectX::XMFLOAT3 pitchYawRoll)
 	// Add rotation vector to rotation and store the result back
 	// (I'm not worrying about gimbal lock)
 	XMStoreFloat3(&rotation, XMLoadFloat3(&rotation) + XMLoadFloat3(&pitchYawRoll));
+	areMatricesDirty = true;
 }
 
 void Transform::Scale(float x, float y, float z)
@@ -116,6 +118,7 @@ void Transform::Scale(float x, float y, float z)
 		scale.y * y,
 		scale.z * z
 	);
+	areMatricesDirty = true;
 }
 
 void Transform::Scale(DirectX::XMFLOAT3 xyz)
@@ -127,6 +130,7 @@ void Transform::Scale(DirectX::XMFLOAT3 xyz)
 		scale.y * xyz.y,
 		scale.z * xyz.z
 	);
+	areMatricesDirty = true;
 }
 
 void Transform::RebuildMatrices()
