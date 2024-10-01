@@ -7,16 +7,19 @@
 class Entity
 {
 public:
+	// Constructor
 	Entity(const char* _name, std::shared_ptr<Mesh> _mesh);
 	Entity(const char* _name, std::shared_ptr<Mesh> _mesh, std::shared_ptr<Transform> _transform);
 
+	// Getters
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Transform> GetTransform();
 	const char* GetName();
 	DirectX::XMFLOAT4 GetTint();
 
-	void SetTint(DirectX::XMFLOAT4 rgba);
-	void SetTint(float r, float g, float b, float a);
+	// Setters
+	void SetTint(DirectX::XMFLOAT4 _rgba);
+	void SetTint(float _r, float _g, float _b, float _a);
 
 	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer);
 

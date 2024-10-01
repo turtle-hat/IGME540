@@ -7,6 +7,7 @@
 
 #include "Mesh.h"
 #include "Entity.h"
+#include "Camera.h"
 #include "BufferStructs.h"
 
 class Game
@@ -55,10 +56,11 @@ private:
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
-	
-	
 	// ENTITIES
 	std::vector<std::shared_ptr<Entity>> entities;
+
+	// CAMERAS
+	std::vector<std::shared_ptr<Camera>> cameras;
 
 
 

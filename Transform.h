@@ -20,22 +20,22 @@ public:
 	DirectX::XMFLOAT3 GetUp();
 
 	// Setters
-	void SetPosition(float x, float y, float z);
-	void SetPosition(DirectX::XMFLOAT3 xyz);
-	void SetRotation(float pitch, float yaw, float roll);
-	void SetRotation(DirectX::XMFLOAT3 pitchYawRoll);
-	void SetScale(float x, float y, float z);
-	void SetScale(DirectX::XMFLOAT3 xyz);
+	void SetPosition(float _x, float _y, float _z);
+	void SetPosition(DirectX::XMFLOAT3 _xyz);
+	void SetRotation(float _pitch, float _yaw, float _roll);
+	void SetRotation(DirectX::XMFLOAT3 _pitchYawRoll);
+	void SetScale(float _x, float _y, float _z);
+	void SetScale(DirectX::XMFLOAT3 _xyz);
 
 	// Mutators
-	void MoveAbsolute(float x, float y, float z);
-	void MoveAbsolute(DirectX::XMFLOAT3 xyz);
-	void MoveRelative(float x, float y, float z);
-	void MoveRelative(DirectX::XMFLOAT3 xyz);
-	void Rotate(float pitch, float yaw, float roll);
-	void Rotate(DirectX::XMFLOAT3 pitchYawRoll);
-	void Scale(float x, float y, float z);
-	void Scale(DirectX::XMFLOAT3 xyz);
+	void MoveAbsolute(float _x, float _y, float _z);
+	void MoveAbsolute(DirectX::XMFLOAT3 _xyz);
+	void MoveRelative(float _x, float _y, float _z);
+	void MoveRelative(DirectX::XMFLOAT3 _xyz);
+	void Rotate(float _pitch, float _yaw, float _roll);
+	void Rotate(DirectX::XMFLOAT3 _pitchYawRoll);
+	void Scale(float _x, float _y, float _z);
+	void Scale(DirectX::XMFLOAT3 _xyz);
 
 private:
 	// Translation
