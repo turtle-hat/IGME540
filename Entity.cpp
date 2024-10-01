@@ -4,21 +4,32 @@
 using namespace std;
 using namespace DirectX;
 
-Entity::Entity(const char* _name, shared_ptr<Mesh> _mesh)
+/// <summary>
+/// Constructs a new Entity at XYZ (0, 0, 0)
+/// </summary>
+/// <param name="_name">The internal name for the Entity</param>
+/// <param name="_mesh">The mesh the Entity will be drawn with</param>
+Entity::Entity(const char* _name, shared_ptr<Mesh> _mesh) :
+    tint(1.0f, 1.0f, 1.0f, 1.0f)
 {
     // I forget how to make this constructor call the one with more parameters :P
     name = _name;
     mesh = _mesh;
     transform = make_shared<Transform>();
-    tint = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-Entity::Entity(const char* _name, shared_ptr<Mesh> _mesh, shared_ptr<Transform> _transform)
+/// <summary>
+/// Constructs a new Entity
+/// </summary>
+/// <param name="_name">The internal name for the Entity</param>
+/// <param name="_mesh">The mesh the Entity will be drawn with</param>
+/// <param name="_transform">The Entity's Transform object</param>
+Entity::Entity(const char* _name, shared_ptr<Mesh> _mesh, shared_ptr<Transform> _transform) :
+    tint(1.0f, 1.0f, 1.0f, 1.0f)
 {
     name = _name;
     mesh = _mesh;
     transform = _transform;
-    tint = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 std::shared_ptr<Mesh> Entity::GetMesh()

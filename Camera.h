@@ -11,26 +11,31 @@ public:
 	// Constructors
 	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect);
 	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, float _fov);
-	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, float _fov, bool _isPerspective);
+	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic, float _orthoWidth);
 
 	// Getters
 	std::shared_ptr<Transform> GetTransform();
 	const char* GetName();
 	float GetFov();
+	float GetOrthographicWidth();
 	float GetMoveSpeed();
 	float GetLookSpeed();
 	float GetNearClip();
 	float GetFarClip();
+	bool GetProjectionMode();
 
 	// Setters
 	void SetAspect(float _aspect);
 	void SetFov(float _fov);
+	void SetOrthographicWidth(float _orthoWidth);
 	void SetMoveSpeed(float _speed);
 	void SetLookSpeed(float _speed);
 	void SetNearClip(float _distance);
 	void SetFarClip(float _distance);
+	void SetProjectionMode(bool _isOrthographic);
+	void ToggleProjectionMode();
 
-	void UpdateViewMatrix();
+	void Update(float dt);
 
 private:
 	std::shared_ptr<Transform> transform;
@@ -39,21 +44,25 @@ private:
 
 	// Name for UI
 	const char* name;
+	// Aspect Ratio
+	float aspect;
+	// (Perspective Camera Only) Field of View, in radians
+	float fov;
+	// (Orthographic Camera Only) Width of the orthographic camera, in units
+	float orthoWidth;
+	// Whether the camera uses an orthographic projection instead of a perspective projection
+	bool isOrthographic;
 	// Near and far clip planes
 	float nearDist;
 	float farDist;
-	// Aspect Ratio
-	float aspect;
-	// Field of View, in radians
-	float fov;
 	// Move speed in units per second
 	float moveSpeed;
 	// Move speed in milliradians per pixel
 	float lookSpeed;
-	// Whether the camera uses a perspective projection instead of an orthographic projection
-	bool isPerspective;
 
-	// Called by SetAspect() and SetFov()
-	void UpdateProjectionMatrix(float _aspect);
+	// Called in Update()
+	void UpdateViewMatrix();
+	// Called whenever aspect ratio, FOV, orthographic width, near clip plane, or far clip plane are changed
+	void UpdateProjectionMatrix();
 };
 
