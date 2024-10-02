@@ -328,7 +328,7 @@ void Game::CreateGeometry()
 		true
 	));
 
-	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -10.0f);
+	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -5.0f);
 
 	cameras[1]->GetTransform()->SetPosition(100.0f, 0.0f, 0.0f);
 	cameras[1]->GetTransform()->SetRotation(0.0f, -XM_PIDIV2, 0.0f);
@@ -721,6 +721,8 @@ void Game::ImGuiBuild() {
 			ImGui::PushID("CAMERA" + i);
 			ImGui::AlignTextToFramePadding();
 			ImGui::RadioButton("", &pCameraCurrent, i);
+			ImGui::SetItemTooltip("Set as active camera");
+
 			ImGui::SameLine();
 			if (ImGui::TreeNode("", "(%06d) %s", i, cameras[i]->GetName())) {
 				ImGui::Spacing();
@@ -733,12 +735,14 @@ void Game::ImGuiBuild() {
 					if (ImGui::DragFloat("Width", &cameraWidth, 1.0f, 1.0f, 1000.0f, "%.0f")) {
 						cameras[i]->SetOrthographicWidth(cameraWidth);
 					}
+					ImGui::SetItemTooltip("In world units");
 				}
 				else {
 					float cameraFov = (cameras[i]->GetFov() * 180 * XM_1DIVPI);
 					if (ImGui::DragFloat("Field of View", &cameraFov, 1.0f, 1.0f, 179.0f, "%.0f")) {
 						cameras[i]->SetFov(cameraFov * XM_PI / 180);
 					}
+					ImGui::SetItemTooltip("In degrees (stored as radians)");
 				}
 				ImGui::Spacing();
 				
@@ -757,9 +761,11 @@ void Game::ImGuiBuild() {
 				if (ImGui::DragFloat("Move Speed", &cameraMove, 0.1f, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_Logarithmic)) {
 					cameras[i]->SetMoveSpeed(cameraMove);
 				}
+				ImGui::SetItemTooltip("In units per second");
 				if (ImGui::DragFloat("Look Speed", &cameraLook, 0.01f, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
 					cameras[i]->SetLookSpeed(cameraLook);
 				}
+				ImGui::SetItemTooltip("In milliradians per pixel\nof mouse movement");
 				ImGui::Spacing();
 
 				if (ImGui::DragFloat("Near Clip", &cameraNear, 0.01f, 0.001f, 10.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
