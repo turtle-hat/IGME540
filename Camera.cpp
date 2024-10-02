@@ -67,6 +67,36 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// - Move Speed: 5.0f
 /// - Look Speed: 10.0f
 /// - Field of View: pi radians
+/// - Orthographic Width: 10.0f
+/// </summary>
+/// <param name="_name">The internal name for the Camera</param>
+/// <param name="_transform">The Camera's Transform object</param>
+/// <param name="_aspect">The aspect ratio of the Camera, usually that of the Window</param>
+/// <param name="_isOrthographic">Whether the camera uses an orthographic projection instead of a perspective projection</param>
+Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic) :
+	fov(XM_PI),
+	orthoWidth(10.0f),
+	nearDist(0.01f),
+	farDist(1000.0f),
+	moveSpeed(5.0f),
+	lookSpeed(10.0f)
+{
+	name = _name;
+	transform = _transform;
+	aspect = _aspect;
+	isOrthographic = _isOrthographic;
+
+	UpdateViewMatrix();
+	UpdateProjectionMatrix();
+}
+
+/// <summary>
+/// Constructs a new orthographic Camera. Defaults:
+/// - Near Clip Plane: 0.01f
+/// - Far Clip Plane: 1000.0f
+/// - Move Speed: 5.0f
+/// - Look Speed: 10.0f
+/// - Field of View: pi radians
 /// </summary>
 /// <param name="_name">The internal name for the Camera</param>
 /// <param name="_transform">The Camera's Transform object</param>
@@ -274,36 +304,56 @@ void Camera::Update(float dt)
 {
 	// Process keyboard input
 
-	if (Input::KeyDown('W')) {
-		transform->MoveRelative(0.0f, 0.0f, moveSpeed * dt);
-	}
-	if (Input::KeyDown('S')) {
-		transform->MoveRelative(0.0f, 0.0f, -moveSpeed * dt);
-	}
-	if (Input::KeyDown('A')) {
-		transform->MoveRelative(-moveSpeed * dt, 0.0f, 0.0f);
-	}
-	if (Input::KeyDown('D')) {
-		transform->MoveRelative(moveSpeed * dt, 0.0f, 0.0f);
-	}
+	// Stores relative movement
+	XMFLOAT3 movementRel(0.0f, 0.0f, 0.0f);
+	// Stores absolute movement along the Z axis
+	float movementZAbs = 0.0f;
+
+	if (Input::KeyDown('D') && !Input::KeyDown('A')) { movementRel.x = moveSpeed * dt; }
+	else if (Input::KeyDown('A') && !Input::KeyDown('D')) { movementRel.x = -moveSpeed * dt; }
+
+	if (Input::KeyDown('W') && !Input::KeyDown('S')) { movementRel.z = moveSpeed * dt; }
+	else if (Input::KeyDown('S') && !Input::KeyDown('W')) { movementRel.z = -moveSpeed * dt; }
+
 	// Two different vertical movement styles:
 	// - E and Q move relative to camera
 	// - Space and Shift move relative to the world, like in Minecraft
-	if (Input::KeyDown('E')) {
-		transform->MoveRelative(0.0f, moveSpeed * dt, 0.0f);
+	if (Input::KeyDown('E') && !Input::KeyDown('Q')) { movementRel.y = moveSpeed * dt; }
+	else if (Input::KeyDown('Q') && !Input::KeyDown('E')) { movementRel.y = -moveSpeed * dt; }
+
+	if (Input::KeyDown(VK_SPACE) && !Input::KeyDown(VK_SHIFT)) { movementZAbs = moveSpeed * dt; }
+	else if (Input::KeyDown(VK_SHIFT) && !Input::KeyDown(VK_SPACE)) { movementZAbs = -moveSpeed * dt; }
+
+	// If movement was detected, move the camera's transform
+	if (movementRel.x != 0.0f || movementRel.y != 0.0f || movementRel.z != 0.0f) {
+		transform->MoveRelative(movementRel);
 	}
-	if (Input::KeyDown('Q')) {
-		transform->MoveRelative(0.0f, -moveSpeed * dt, 0.0f);
-	}
-	if (Input::KeyDown(VK_SPACE)) {
-		transform->MoveAbsolute(0.0f, moveSpeed * dt, 0.0f);
-	}
-	if (Input::KeyDown(VK_SHIFT)) {
-		transform->MoveAbsolute(0.0f, -moveSpeed * dt, 0.0f);
+	if (movementZAbs != 0.0f) {
+		transform->MoveAbsolute(0.0f, 0.0f, movementZAbs);
 	}
 
-	// Process mouse input
+	// Process mouse input if mouse is down
+	if (Input::MouseLeftDown()) {
+		// Find mouse rotation amount in radians
+		XMFLOAT2 mouseRot(
+			// Get mouse input since last frame (px) and multiply it by lookSpeed (mrad/px), then divide by 1000 (mrad/rad)
+			Input::GetMouseXDelta() * (lookSpeed / 1000.0f),
+			Input::GetMouseYDelta() * (lookSpeed / 1000.0f)
+		);
 
+		// Rotate the Camera
+		transform->Rotate(mouseRot.y, mouseRot.x, 0.0f);
+
+		// Clamp the final rotation within pi/2 to -pi/2
+		XMFLOAT3 finalRot = transform->GetRotation();
+		if (finalRot.x > XM_PIDIV2) {
+			transform->SetRotation(XM_PIDIV2, finalRot.y, finalRot.z);
+		} else if (finalRot.x < -XM_PIDIV2) {
+			transform->SetRotation(-XM_PIDIV2, finalRot.y, finalRot.z);
+		}
+	}
+
+	UpdateViewMatrix();
 }
 
 /// <summary>

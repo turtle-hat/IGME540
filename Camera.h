@@ -11,6 +11,7 @@ public:
 	// Constructors
 	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect);
 	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, float _fov);
+	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic);
 	Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic, float _orthoWidth);
 
 	// Getters

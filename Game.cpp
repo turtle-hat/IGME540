@@ -298,6 +298,35 @@ void Game::CreateGeometry()
 	entities[4]->GetTransform()->SetRotation(XMFLOAT3(0.0f, 0.0f, XM_PI));
 	entities[4]->GetTransform()->SetScale(XMFLOAT3(0.5f, 0.5f, 0.5f));
 	entities[4]->SetTint(XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f));
+
+
+
+	// Create cameras
+	float aspect = (Window::Width() + 0.0f) / Window::Height();
+	
+	cameras.push_back(std::make_shared<Camera>(
+		"C_Main",
+		make_shared<Transform>(),
+		aspect
+	));
+	cameras.push_back(std::make_shared<Camera>(
+		"C_OrthoX",
+		make_shared<Transform>(),
+		aspect,
+		true
+	));
+	cameras.push_back(std::make_shared<Camera>(
+		"C_OrthoY",
+		make_shared<Transform>(),
+		aspect,
+		true
+	));
+	cameras.push_back(std::make_shared<Camera>(
+		"C_OrthoZ",
+		make_shared<Transform>(),
+		aspect,
+		true
+	));
 }
 
 
@@ -307,6 +336,7 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
+	cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
 }
 
 
@@ -407,18 +437,7 @@ void Game::InitializeSimulationParameters() {
 		pBackgroundColor[i] = color[i];
 	}
 
-	//// Constant Buffer Variables
-	//// Starting color tint: (1.0f, 0.5f, 1.0f, 1.0f)
-	//for (int i = 0; i < 4; i++) {
-	//	pCBColorTint[i] = 1.0f;
-	//}
-	//pCBColorTint[1] = 0.5f;
-
-	//// Starting position offset: (-0.5f, 0.0f, 0.0f)
-	//for (int i = 0; i < 3; i++) {
-	//	pCBTfWorldTl[i] = 0.0f;
-	//}
-	//pCBTfWorldTl[0] = -0.5f;
+	pCameraCurrent = 0;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];

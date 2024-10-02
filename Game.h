@@ -61,6 +61,8 @@ private:
 
 	// CAMERAS
 	std::vector<std::shared_ptr<Camera>> cameras;
+	// Index of the current camera
+	int pCameraCurrent;
 
 
 
