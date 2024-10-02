@@ -327,6 +327,8 @@ void Game::CreateGeometry()
 		aspect,
 		true
 	));
+
+	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -50.0f);
 }
 
 
@@ -336,7 +338,10 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
-	cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
+	// If cameras exist, resize it
+	if (cameras.size() > 0) {
+		cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
+	}
 }
 
 
@@ -345,6 +350,9 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	// Update current camera
+	cameras[pCameraCurrent]->Update(deltaTime);
+
 	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f), 0.0f);
 
 	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, 0.5f, 0.5f);
@@ -389,7 +397,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	
 	// Loop through every entity and draw it
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(constBuffer);
+		entities[i]->Draw(constBuffer, cameras[pCameraCurrent]);
 	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles

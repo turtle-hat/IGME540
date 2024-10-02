@@ -3,6 +3,7 @@
 #include <memory>
 #include "Transform.h"
 #include "Mesh.h"
+#include "Camera.h"
 
 class Entity
 {
@@ -21,7 +22,7 @@ public:
 	void SetTint(DirectX::XMFLOAT4 _rgba);
 	void SetTint(float _r, float _g, float _b, float _a);
 
-	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer);
+	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer, std::shared_ptr<Camera> _camera);
 
 private:
 	std::shared_ptr<Mesh> mesh;

@@ -62,13 +62,15 @@ void Entity::SetTint(float _r, float _g, float _b, float _a)
     SetTint(XMFLOAT4(_r, _g, _b, _a));
 }
 
-void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> _constBuffer)
+void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> _constBuffer, std::shared_ptr<Camera> _camera)
 {
     // Data to be sent through the primary constant buffer
     VertexShaderData constBufferData = {};
 
     // FILL CONSTANT BUFFER WITH ENTITY'S DATA
     constBufferData.tfWorld = transform->GetWorld();
+    constBufferData.tfView = _camera->GetViewMatrix();
+    constBufferData.tfProjection = _camera->GetProjectionMatrix();
     constBufferData.colorTint = tint;
 
     // COPY DATA TO CONSTANT BUFFER

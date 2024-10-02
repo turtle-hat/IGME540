@@ -204,6 +204,24 @@ bool Camera::GetProjectionMode()
 }
 
 /// <summary>
+/// Gets the Camera's View matrix
+/// </summary>
+/// <returns>The Camera's View matrix</returns>
+XMFLOAT4X4 Camera::GetViewMatrix()
+{
+	return view;
+}
+
+/// <summary>
+/// Gets the Camera's Projection matrix
+/// </summary>
+/// <returns>The Camera's Projection matrix</returns>
+XMFLOAT4X4 Camera::GetProjectionMatrix()
+{
+	return projection;
+}
+
+/// <summary>
 /// Sets the Camera's aspect ratio, rebuilding its projection matrix
 /// </summary>
 /// <param name="_aspect">The Camera's new aspect ratio</param>
@@ -362,14 +380,15 @@ void Camera::Update(float dt)
 /// </summary>
 void Camera::UpdateViewMatrix()
 {
+	XMFLOAT3 eyePos = transform->GetPosition();
+	XMFLOAT3 lookDir = transform->GetForward();
 	XMFLOAT3 worldUp(0.0f, 1.0f, 0.0f);
-	XMStoreFloat4x4(&view, 
-		XMMatrixLookToLH(
-			XMLoadFloat3(&transform->GetPosition()),
-			XMLoadFloat3(&transform->GetForward()),
-			XMLoadFloat3(&worldUp)
-		)
-	);
+
+	XMStoreFloat4x4(&view, XMMatrixLookToLH(
+		XMLoadFloat3(&eyePos),
+		XMLoadFloat3(&lookDir),
+		XMLoadFloat3(&worldUp)
+	));
 }
 
 /// <summary>
