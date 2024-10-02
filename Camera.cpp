@@ -7,21 +7,21 @@ using namespace DirectX;
 /// - Near Clip Plane: 0.01f
 /// - Far Clip Plane: 1000.0f
 /// - Move Speed: 5.0f
-/// - Look Speed: 10.0f
-/// - Field of View: pi radians
+/// - Look Speed: 2.0f
+/// - Field of View: pi/2 radians
 /// - Orthographic Width: 10.0f
 /// </summary>
 /// <param name="_name">The internal name for the Camera</param>
 /// <param name="_transform">The Camera's Transform object</param>
 /// <param name="_aspect">The aspect ratio of the Camera, usually that of the Window</param>
 Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect) :
-	fov(XM_PI),
+	fov(XM_PIDIV2),
 	orthoWidth(10.0f),
 	isOrthographic(false),
 	nearDist(0.01f),
 	farDist(1000.0f),
 	moveSpeed(5.0f),
-	lookSpeed(10.0f)
+	lookSpeed(2.0f)
 {
 	name = _name;
 	transform = _transform;
@@ -36,7 +36,7 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// - Near Clip Plane: 0.01f
 /// - Far Clip Plane: 1000.0f
 /// - Move Speed: 5.0f
-/// - Look Speed: 10.0f
+/// - Look Speed: 2.0f
 /// - Orthographic Width: 10.0f
 /// </summary>
 /// <param name="_name">The internal name for the Camera</param>
@@ -49,7 +49,7 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 	nearDist(0.01f),
 	farDist(1000.0f),
 	moveSpeed(5.0f),
-	lookSpeed(10.0f)
+	lookSpeed(2.0f)
 {
 	name = _name;
 	transform = _transform;
@@ -65,8 +65,8 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// - Near Clip Plane: 0.01f
 /// - Far Clip Plane: 1000.0f
 /// - Move Speed: 5.0f
-/// - Look Speed: 10.0f
-/// - Field of View: pi radians
+/// - Look Speed: 2.0f
+/// - Field of View: pi/2 radians
 /// - Orthographic Width: 10.0f
 /// </summary>
 /// <param name="_name">The internal name for the Camera</param>
@@ -74,12 +74,12 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// <param name="_aspect">The aspect ratio of the Camera, usually that of the Window</param>
 /// <param name="_isOrthographic">Whether the camera uses an orthographic projection instead of a perspective projection</param>
 Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic) :
-	fov(XM_PI),
+	fov(XM_PIDIV2),
 	orthoWidth(10.0f),
 	nearDist(0.01f),
 	farDist(1000.0f),
 	moveSpeed(5.0f),
-	lookSpeed(10.0f)
+	lookSpeed(2.0f)
 {
 	name = _name;
 	transform = _transform;
@@ -95,8 +95,8 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// - Near Clip Plane: 0.01f
 /// - Far Clip Plane: 1000.0f
 /// - Move Speed: 5.0f
-/// - Look Speed: 10.0f
-/// - Field of View: pi radians
+/// - Look Speed: 2.0f
+/// - Field of View: pi/2 radians
 /// </summary>
 /// <param name="_name">The internal name for the Camera</param>
 /// <param name="_transform">The Camera's Transform object</param>
@@ -104,11 +104,11 @@ Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _
 /// <param name="_isOrthographic">Whether the camera uses an orthographic projection instead of a perspective projection</param>
 /// <param name="_orthoWidth">The width of the Camera's view box, in world units</param>
 Camera::Camera(const char* _name, std::shared_ptr<Transform> _transform, float _aspect, bool _isOrthographic, float _orthoWidth) :
-	fov(XM_PI),
+	fov(XM_PIDIV2),
 	nearDist(0.01f),
 	farDist(1000.0f),
 	moveSpeed(5.0f),
-	lookSpeed(10.0f)
+	lookSpeed(2.0f)
 {
 	name = _name;
 	transform = _transform;
@@ -324,8 +324,8 @@ void Camera::Update(float dt)
 
 	// Stores relative movement
 	XMFLOAT3 movementRel(0.0f, 0.0f, 0.0f);
-	// Stores absolute movement along the Z axis
-	float movementZAbs = 0.0f;
+	// Stores absolute movement along the Y axis
+	float movementYAbs = 0.0f;
 
 	if (Input::KeyDown('D') && !Input::KeyDown('A')) { movementRel.x = moveSpeed * dt; }
 	else if (Input::KeyDown('A') && !Input::KeyDown('D')) { movementRel.x = -moveSpeed * dt; }
@@ -339,15 +339,15 @@ void Camera::Update(float dt)
 	if (Input::KeyDown('E') && !Input::KeyDown('Q')) { movementRel.y = moveSpeed * dt; }
 	else if (Input::KeyDown('Q') && !Input::KeyDown('E')) { movementRel.y = -moveSpeed * dt; }
 
-	if (Input::KeyDown(VK_SPACE) && !Input::KeyDown(VK_SHIFT)) { movementZAbs = moveSpeed * dt; }
-	else if (Input::KeyDown(VK_SHIFT) && !Input::KeyDown(VK_SPACE)) { movementZAbs = -moveSpeed * dt; }
+	if (Input::KeyDown(VK_SPACE) && !Input::KeyDown(VK_SHIFT)) { movementYAbs = moveSpeed * dt; }
+	else if (Input::KeyDown(VK_SHIFT) && !Input::KeyDown(VK_SPACE)) { movementYAbs = -moveSpeed * dt; }
 
 	// If movement was detected, move the camera's transform
 	if (movementRel.x != 0.0f || movementRel.y != 0.0f || movementRel.z != 0.0f) {
 		transform->MoveRelative(movementRel);
 	}
-	if (movementZAbs != 0.0f) {
-		transform->MoveAbsolute(0.0f, 0.0f, movementZAbs);
+	if (movementYAbs != 0.0f) {
+		transform->MoveAbsolute(0.0f, movementYAbs, 0.0f);
 	}
 
 	// Process mouse input if mouse is down

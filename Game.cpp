@@ -310,25 +310,36 @@ void Game::CreateGeometry()
 		aspect
 	));
 	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoX",
+		"C_OrthoYZ",
 		make_shared<Transform>(),
 		aspect,
 		true
 	));
 	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoY",
+		"C_OrthoXZ",
 		make_shared<Transform>(),
 		aspect,
 		true
 	));
 	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoZ",
+		"C_OrthoXY",
 		make_shared<Transform>(),
 		aspect,
 		true
 	));
 
-	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -50.0f);
+	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -10.0f);
+
+	cameras[1]->GetTransform()->SetPosition(100.0f, 0.0f, 0.0f);
+	cameras[1]->GetTransform()->SetRotation(0.0f, -XM_PIDIV2, 0.0f);
+	cameras[1]->SetLookSpeed(1.0f);
+	
+	cameras[2]->GetTransform()->SetPosition(0.0f, 100.0f, 0.0f);
+	cameras[2]->GetTransform()->SetRotation(XM_PIDIV2, 0.0f, 0.0f);
+	cameras[2]->SetLookSpeed(1.0f);
+	
+	cameras[3]->GetTransform()->SetPosition(0.0f, 0.0f, -100.0f);
+	cameras[3]->SetLookSpeed(1.0f);
 }
 
 
@@ -661,28 +672,108 @@ void Game::ImGuiBuild() {
 				ImGui::Text("Mesh:      %s", (entities[i]->GetMesh()->GetName()));
 				ImGui::Spacing();
 
-				ImGui::DragFloat3("Position", &entityPos.x, 0.01f);
-				ImGui::DragFloat3("Rotation", &entityRot.x, 0.01f);
+				if (ImGui::DragFloat3("Position", &entityPos.x, 0.01f)) {
+					entities[i]->GetTransform()->SetPosition(entityPos);
+				}
+				if (ImGui::DragFloat3("Rotation", &entityRot.x, 0.01f)) {
+					entities[i]->GetTransform()->SetRotation(entityRot);
+				}
 				ImGui::SetItemTooltip("In radians");
-				ImGui::DragFloat3("Scale", &entitySca.x, 0.01f, 0.0f);
+				if (ImGui::DragFloat3("Scale", &entitySca.x, 0.01f, 0.0f)) {
+					entities[i]->GetTransform()->SetScale(entitySca);
+				}
 				// Clamp scale to 0
 				if (entitySca.x < 0.0f) entitySca.x = 0.0f;
 				if (entitySca.y < 0.0f) entitySca.y = 0.0f;
 				if (entitySca.z < 0.0f) entitySca.z = 0.0f;
 				
 				ImGui::Spacing();
-				ImGui::ColorEdit4("Tint", &entityTin.x);
+				if (ImGui::ColorEdit4("Tint", &entityTin.x)) {
+					entities[i]->SetTint(entityTin);
+				}
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			ImGui::PopID();
+		}
+
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Cameras")) {				// Info about each camera
+		ImGui::Spacing();
+
+		for (int i = 0; i < cameras.size(); i++) {
+			// Get position, rotation, scale, and tint
+			XMFLOAT3 cameraPos = cameras[i]->GetTransform()->GetPosition();
+			XMFLOAT3 cameraRot = cameras[i]->GetTransform()->GetRotation();
+			XMFLOAT3 cameraRight = cameras[i]->GetTransform()->GetRight();
+			XMFLOAT3 cameraUp = cameras[i]->GetTransform()->GetUp();
+			XMFLOAT3 cameraFwd = cameras[i]->GetTransform()->GetForward();
+			bool cameraMode = cameras[i]->GetProjectionMode();
+			float cameraMove = cameras[i]->GetMoveSpeed();
+			float cameraLook = cameras[i]->GetLookSpeed();
+			float cameraNear = cameras[i]->GetNearClip();
+			float cameraFar = cameras[i]->GetFarClip();
+
+			// Each entity gets its own Tree Node
+			ImGui::PushID("CAMERA" + i);
+			ImGui::AlignTextToFramePadding();
+			ImGui::RadioButton("", &pCameraCurrent, i);
+			ImGui::SameLine();
+			if (ImGui::TreeNode("", "(%06d) %s", i, cameras[i]->GetName())) {
+				ImGui::Spacing();
+
+				if (ImGui::Button(cameraMode ? "Mode: Orthographic" : "Mode: Perspective")) {
+					cameras[i]->ToggleProjectionMode();
+				}
+				if (cameraMode) {
+					float cameraWidth = cameras[i]->GetOrthographicWidth();
+					if (ImGui::DragFloat("Width", &cameraWidth, 1.0f, 1.0f, 1000.0f, "%.0f")) {
+						cameras[i]->SetOrthographicWidth(cameraWidth);
+					}
+				}
+				else {
+					float cameraFov = (cameras[i]->GetFov() * 180 * XM_1DIVPI);
+					if (ImGui::DragFloat("Field of View", &cameraFov, 1.0f, 1.0f, 179.0f, "%.0f")) {
+						cameras[i]->SetFov(cameraFov * XM_PI / 180);
+					}
+				}
+				ImGui::Spacing();
+				
+				if (ImGui::DragFloat3("Position", &cameraPos.x, 0.01f)) {
+					cameras[i]->GetTransform()->SetPosition(cameraPos);
+				}
+				if (ImGui::DragFloat3("Rotation", &cameraRot.x, 0.01f)) {
+					cameras[i]->GetTransform()->SetRotation(cameraRot);
+				}
+				ImGui::SetItemTooltip("In radians");
+				ImGui::Text("Right:       (%+6.3f, %+6.3f, %+6.3f)", cameraRight.x, cameraRight.y, cameraRight.z);
+				ImGui::Text("Up:          (%+6.3f, %+6.3f, %+6.3f)", cameraUp.x, cameraUp.y, cameraUp.z);
+				ImGui::Text("Forward:     (%+6.3f, %+6.3f, %+6.3f)", cameraFwd.x, cameraFwd.y, cameraFwd.z);
+				ImGui::Spacing();
+
+				if (ImGui::DragFloat("Move Speed", &cameraMove, 0.1f, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_Logarithmic)) {
+					cameras[i]->SetMoveSpeed(cameraMove);
+				}
+				if (ImGui::DragFloat("Look Speed", &cameraLook, 0.01f, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+					cameras[i]->SetLookSpeed(cameraLook);
+				}
+				ImGui::Spacing();
+
+				if (ImGui::DragFloat("Near Clip", &cameraNear, 0.01f, 0.001f, 10.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+					cameras[i]->SetNearClip(cameraNear);
+				}
+				if (ImGui::DragFloat("Far Clip", &cameraFar, 1.0f, 10.0f, 10000.0f, "%.0f", ImGuiSliderFlags_Logarithmic)) {
+					cameras[i]->SetFarClip(cameraFar);
+				}
 
 				ImGui::TreePop();
 				ImGui::Spacing();
 			}
 			ImGui::PopID();
 
-			// Store position, rotation, scale, and tint
-			entities[i]->GetTransform()->SetPosition(entityPos);
-			entities[i]->GetTransform()->SetRotation(entityRot);
-			entities[i]->GetTransform()->SetScale(entitySca);
-			entities[i]->SetTint(entityTin);
 		}
 
 		ImGui::Spacing();

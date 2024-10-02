@@ -80,6 +80,9 @@ DirectX::XMFLOAT4X4 Transform::GetWorldInverseTranspose()
 /// <returns>The Transform's forward vector</returns>
 DirectX::XMFLOAT3 Transform::GetForward()
 {
+	if (areVerticesDirty) {
+		RebuildVertices();
+	}
 	return forward;
 }
 
@@ -89,6 +92,9 @@ DirectX::XMFLOAT3 Transform::GetForward()
 /// <returns>The Transform's right vector</returns>
 DirectX::XMFLOAT3 Transform::GetRight()
 {
+	if (areVerticesDirty) {
+		RebuildVertices();
+	}
 	return right;
 }
 
@@ -98,6 +104,9 @@ DirectX::XMFLOAT3 Transform::GetRight()
 /// <returns>The Transform's up vector</returns>
 DirectX::XMFLOAT3 Transform::GetUp()
 {
+	if (areVerticesDirty) {
+		RebuildVertices();
+	}
 	return up;
 }
 
@@ -314,12 +323,12 @@ void Transform::RebuildVertices()
 {
 	XMVECTOR rotQuat = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
 	// Set all three vertices
-	right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	up = XMFLOAT3(0.0f, 1.0f, 1.0f);
-	forward = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	XMFLOAT3 worldRight = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 worldUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 worldForward = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	// Rotate each vertex by the Transform's rotation values
-	XMStoreFloat3(&right, XMVector3Rotate(XMLoadFloat3(&right), rotQuat));
-	XMStoreFloat3(&up, XMVector3Rotate(XMLoadFloat3(&up), rotQuat));
-	XMStoreFloat3(&forward, XMVector3Rotate(XMLoadFloat3(&forward), rotQuat));
+	XMStoreFloat3(&right, XMVector3Rotate(XMLoadFloat3(&worldRight), rotQuat));
+	XMStoreFloat3(&up, XMVector3Rotate(XMLoadFloat3(&worldUp), rotQuat));
+	XMStoreFloat3(&forward, XMVector3Rotate(XMLoadFloat3(&worldForward), rotQuat));
 	areVerticesDirty = false;
 }
