@@ -4,11 +4,14 @@
 #include <wrl/client.h>
 #include <memory>
 #include <vector>
+#include <DirectXMath.h>
 
 #include "Mesh.h"
+#include "Material.h"
 #include "Entity.h"
 #include "Camera.h"
 #include "BufferStructs.h"
+#include "SimpleShader.h"
 
 class Game
 {
@@ -56,6 +59,9 @@ private:
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
+	// MATERIALS
+	std::vector<std::shared_ptr<Material>> materials;
+
 	// ENTITIES
 	std::vector<std::shared_ptr<Entity>> entities;
 
@@ -63,6 +69,8 @@ private:
 	std::vector<std::shared_ptr<Camera>> cameras;
 	// Index of the current camera
 	int pCameraCurrent;
+
+
 
 
 
@@ -98,9 +106,8 @@ private:
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
 
 	// Shaders and shader-related constructs
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	std::shared_ptr<SimplePixelShader> pixelShader;
+	std::shared_ptr<SimpleVertexShader> vertexShader;
 
 	// Primary constant buffer
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
