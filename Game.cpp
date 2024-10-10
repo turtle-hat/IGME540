@@ -149,9 +149,9 @@ void Game::CreateGeometry()
 	//    since we're describing the triangle in terms of the window itself
 	Vertex vStarterTriangle[] =
 	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
+		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
 	};
 
 	// Set up indices, which tell us which vertices to use and in which order
@@ -173,16 +173,16 @@ void Game::CreateGeometry()
 
 	// Gradient Rectangle
 	Vertex vGradientRectangle[] = {
-		{ XMFLOAT3(-0.2f, +0.05f, +0.0f), red },
-		{ XMFLOAT3(-0.2f, -0.05f, +0.0f), red },
-		{ XMFLOAT3(-0.1f, +0.05f, +0.0f), yellow },
-		{ XMFLOAT3(-0.1f, -0.05f, +0.0f), yellow },
-		{ XMFLOAT3(+0.0f, +0.05f, +0.0f), green },
-		{ XMFLOAT3(+0.0f, -0.05f, +0.0f), green },
-		{ XMFLOAT3(+0.1f, +0.05f, +0.0f), cyan },
-		{ XMFLOAT3(+0.1f, -0.05f, +0.0f), cyan },
-		{ XMFLOAT3(+0.2f, +0.05f, +0.0f), blue },
-		{ XMFLOAT3(+0.2f, -0.05f, +0.0f), blue },
+		{ XMFLOAT3(-0.2f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.2f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.1f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.1f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.0f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.0f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.1f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.1f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.2f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.2f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
 	};
 
 	unsigned int iGradientRectangle[] = {
@@ -208,14 +208,14 @@ void Game::CreateGeometry()
 	// Mirror's Edge Logo
 	// (I think it looks cool)
 	Vertex vMirrorsEdge[] = {
-		{ XMFLOAT3(-0.05f, +0.06f, +0.0f), red },
-		{ XMFLOAT3(+0.01f, +0.06f, +0.0f), red },
-		{ XMFLOAT3(-0.03f, +0.04f, +0.0f), red2 },
-		{ XMFLOAT3(-0.01f, +0.02f, +0.0f), red3 },
-		{ XMFLOAT3(+0.03f, +0.02f, +0.0f), red3 },
-		{ XMFLOAT3(+0.05f, +0.02f, +0.0f), red3 },
-		{ XMFLOAT3(-0.04f, +0.00f, +0.0f), red3 },
-		{ XMFLOAT3(+0.01f, -0.06f, +0.0f), red4 },
+		{ XMFLOAT3(-0.05f, +0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.01f, +0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.03f, +0.04f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.01f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.03f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.05f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.04f, +0.00f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+0.01f, -0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
 	};
 
 	unsigned int iMirrorsEdge[] = {
