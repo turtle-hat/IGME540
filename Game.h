@@ -10,7 +10,6 @@
 #include "Material.h"
 #include "Entity.h"
 #include "Camera.h"
-#include "BufferStructs.h"
 #include "SimpleShader.h"
 
 class Game
@@ -34,7 +33,6 @@ private:
 	void LoadShaders();
 	void CreateGeometry();
 	void InitializeSimulationParameters();
-	void CreateConstantBuffers();
 	void ImGuiUpdate(float deltaTime);
 
 	// Update helper methods
@@ -106,10 +104,7 @@ private:
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
 
 	// Shaders and shader-related constructs
-	std::shared_ptr<SimplePixelShader> pixelShader;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
-
-	// Primary constant buffer
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
+	std::shared_ptr<SimplePixelShader> pixelShader;
 };
 

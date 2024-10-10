@@ -33,7 +33,6 @@ void Game::Initialize()
 	LoadShaders();
 	CreateGeometry();
 	InitializeSimulationParameters();
-	CreateConstantBuffers();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -239,11 +238,11 @@ void Game::CreateGeometry()
 
 
 	// Create entities for these meshes
-	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0]));
-	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1]));
-	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2]));
-	entities.push_back(std::make_shared<Entity>("E_BigTriangle", meshes[0]));
-	entities.push_back(std::make_shared<Entity>("E_UpsideDownTriangle", meshes[0]));
+	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_BigTriangle", meshes[0], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UpsideDownTriangle", meshes[0], materials[2]));
 
 	// Set special parameters for each mesh
 	entities[1]->GetTransform()->SetPosition(XMFLOAT3(-0.5f, 0.5f, 0.0f));
@@ -252,12 +251,10 @@ void Game::CreateGeometry()
 	
 	entities[3]->GetTransform()->SetPosition(XMFLOAT3(0.0f, 0.8f, 0.0f));
 	entities[3]->GetTransform()->SetScale(XMFLOAT3(2.0f, 0.5f, 1.0f));
-	entities[3]->SetTint(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 	
 	entities[4]->GetTransform()->SetPosition(XMFLOAT3(0.7f, -0.5f, 0.0f));
 	entities[4]->GetTransform()->SetRotation(XMFLOAT3(0.0f, 0.0f, XM_PI));
 	entities[4]->GetTransform()->SetScale(XMFLOAT3(0.5f, 0.5f, 0.5f));
-	entities[4]->SetTint(XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f));
 
 
 
@@ -339,12 +336,6 @@ void Game::Update(float deltaTime, float totalTime)
 	entities[3]->GetTransform()->Rotate(deltaTime * -5.0f, deltaTime * -5.0f, 0.0f);
 
 	entities[4]->GetTransform()->SetScale(sin(totalTime) * 0.5f + 1.1f, cos(totalTime) * 0.5f + 1.1f, 1.0f);
-	entities[4]->SetTint(XMFLOAT4(
-		sin(totalTime) * 0.5f + 0.5f,
-		sin(totalTime + (2.0f * XM_PI / 3.0f)) * 0.5f + 0.5f,
-		sin(totalTime + (4.0f * XM_PI / 3.0f)) * 0.5f + 0.5f,
-		1.0f
-	));
 
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
@@ -371,7 +362,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	
 	// Loop through every entity and draw it
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(constBuffer, cameras[pCameraCurrent]);
+		entities[i]->Draw(cameras[pCameraCurrent]);
 	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
@@ -433,35 +424,6 @@ void Game::InitializeSimulationParameters() {
 	igFrameGraphSampleOffset = 0;
 	igFrameGraphHighest = 0.0f;
 	igFrameGraphDoAnimate = true;
-}
-
-// --------------------------------------------------------
-// Creates all constant buffers used by our shaders
-// --------------------------------------------------------
-void Game::CreateConstantBuffers()
-{
-	// Find size of constant buffer struct
-	unsigned int size = sizeof(VertexShaderData);
-	// Get lowest multiple of 16 that is >= the size
-	// of the buffer struct using integer division
-	size = (size + 15) / 16 * 16;
-
-	// Define constant buffer parameters
-	D3D11_BUFFER_DESC bufferDesc	= {};
-	bufferDesc.BindFlags			= D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.ByteWidth			= size;
-	bufferDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
-
-	// Create the buffer itself
-	Graphics::Device->CreateBuffer(&bufferDesc, 0, constBuffer.GetAddressOf());
-
-	// Bind the buffer
-	Graphics::Context->VSSetConstantBuffers(
-		0,
-		1,
-		constBuffer.GetAddressOf()
-	);
 }
 
 // --------------------------------------------------------
@@ -625,7 +587,6 @@ void Game::ImGuiBuild() {
 			XMFLOAT3 entityPos = entities[i]->GetTransform()->GetPosition();
 			XMFLOAT3 entityRot = entities[i]->GetTransform()->GetRotation();
 			XMFLOAT3 entitySca = entities[i]->GetTransform()->GetScale();
-			XMFLOAT4 entityTin = entities[i]->GetTint();
 
 			// Each entity gets its own Tree Node
 			ImGui::PushID("ENTITY" + i);
@@ -649,11 +610,6 @@ void Game::ImGuiBuild() {
 				if (entitySca.x < 0.0f) entitySca.x = 0.0f;
 				if (entitySca.y < 0.0f) entitySca.y = 0.0f;
 				if (entitySca.z < 0.0f) entitySca.z = 0.0f;
-				
-				ImGui::Spacing();
-				if (ImGui::ColorEdit4("Tint", &entityTin.x)) {
-					entities[i]->SetTint(entityTin);
-				}
 
 				ImGui::TreePop();
 				ImGui::Spacing();

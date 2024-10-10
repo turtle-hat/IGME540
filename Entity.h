@@ -18,19 +18,16 @@ public:
 	std::shared_ptr<Material> GetMaterial();
 	std::shared_ptr<Transform> GetTransform();
 	const char* GetName();
-	DirectX::XMFLOAT4 GetTint();
 
 	// Setters
-	void SetTint(DirectX::XMFLOAT4 _rgba);
-	void SetTint(float _r, float _g, float _b, float _a);
+	void SetMaterial(std::shared_ptr<Material> _material);
 
-	void Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer, std::shared_ptr<Camera> _camera);
+	void Draw(std::shared_ptr<Camera> _camera);
 
 private:
 	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<Material> material;
 	std::shared_ptr<Transform> transform;
-	DirectX::XMFLOAT4 tint;
 
 	// Name for UI
 	const char* name;
