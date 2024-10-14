@@ -104,18 +104,8 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	// Create some temporary variables to represent colors
-	// - Not necessary, just makes things more readable
-	XMFLOAT4 red			= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 yellow			= XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 green			= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 cyan			= XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
-	XMFLOAT4 blue			= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	XMFLOAT4 red2			= XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 red3			= XMFLOAT4(0.6f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 red4			= XMFLOAT4(0.4f, 0.0f, 0.0f, 1.0f);
-
 	// Create materials
+	// MATERIALS 0-2
 	materials.push_back(std::make_shared<Material>(
 		"Mat_SolidGreen",
 		vertexShader,
@@ -161,6 +151,7 @@ void Game::CreateGeometry()
 	// - But just to see how it's done...
 	unsigned int iStarterTriangle[] = { 0, 1, 2 };
 
+	// MESH 0
 	meshes.push_back(std::make_shared<Mesh>(
 		"M_StarterTriangle",
 		vStarterTriangle,
@@ -196,6 +187,7 @@ void Game::CreateGeometry()
 		6, 9, 7
 	};
 
+	// MESH 1
 	meshes.push_back(std::make_shared<Mesh>(
 		"M_GradientRectangle",
 		vGradientRectangle,
@@ -227,6 +219,7 @@ void Game::CreateGeometry()
 		3, 4, 7
 	};
 
+	// MESH 2
 	meshes.push_back(std::make_shared<Mesh>(
 		"M_MELogo",
 		vMirrorsEdge,
@@ -237,7 +230,10 @@ void Game::CreateGeometry()
 
 
 
+
+
 	// Create entities for these meshes
+	// ENTITIES 0-4
 	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0], materials[0]));
 	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1], materials[0]));
 	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2], materials[1]));
@@ -245,22 +241,54 @@ void Game::CreateGeometry()
 	entities.push_back(std::make_shared<Entity>("E_UpsideDownTriangle", meshes[0], materials[2]));
 
 	// Set special parameters for each mesh
-	entities[1]->GetTransform()->SetPosition(XMFLOAT3(-0.5f, 0.5f, 0.0f));
+	entities[1]->GetTransform()->SetPosition(XMFLOAT3(-0.5f, -2.5f, 0.0f));
 	
-	entities[2]->GetTransform()->SetPosition(XMFLOAT3(0.5f, 0.5f, 0.0f));
+	entities[2]->GetTransform()->SetPosition(XMFLOAT3(0.5f, -2.5f, 0.0f));
 	
-	entities[3]->GetTransform()->SetPosition(XMFLOAT3(0.0f, 0.8f, 0.0f));
+	entities[3]->GetTransform()->SetPosition(XMFLOAT3(0.0f, -2.2f, 0.0f));
 	entities[3]->GetTransform()->SetScale(XMFLOAT3(2.0f, 0.5f, 1.0f));
 	
-	entities[4]->GetTransform()->SetPosition(XMFLOAT3(0.7f, -0.5f, 0.0f));
+	entities[4]->GetTransform()->SetPosition(XMFLOAT3(0.7f, -3.5f, 0.0f));
 	entities[4]->GetTransform()->SetRotation(XMFLOAT3(0.0f, 0.0f, XM_PI));
 	entities[4]->GetTransform()->SetScale(XMFLOAT3(0.5f, 0.5f, 0.5f));
 
 
 
+
+
+	// Create meshes from OBJ models
+	// MESHES 3-9
+	meshes.push_back(std::make_shared<Mesh>("M_Cube", FixPath(L"../../Assets/Models/cube.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Cylinder", FixPath(L"../../Assets/Models/cylinder.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Helix", FixPath(L"../../Assets/Models/helix.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Quad-SingleSided", FixPath(L"../../Assets/Models/quad.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Quad-DoubleSided", FixPath(L"../../Assets/Models/quad_double_sided.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Sphere", FixPath(L"../../Assets/Models/sphere.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
+
+	// ENTITIES 5-11
+	entities.push_back(std::make_shared<Entity>("E_Cube",				meshes[3], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Cylinder",			meshes[4], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Sphere",				meshes[8], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Helix",				meshes[5], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Torus",				meshes[9], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Quad-SingleSided",	meshes[6], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Quad-DoubleSided",	meshes[7], materials[2]));
+
+	entities[5]->GetTransform()->SetPosition(-9.0f, 0.0f, 0.0f);
+	entities[6]->GetTransform()->SetPosition(-6.0f, 0.0f, 0.0f);
+	entities[7]->GetTransform()->SetPosition(-3.0f, 0.0f, 0.0f);
+	entities[8]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
+	entities[9]->GetTransform()->SetPosition(3.0f, 0.0f, 0.0f);
+	entities[10]->GetTransform()->SetPosition(6.0f, -1.0f, 0.0f);
+	entities[11]->GetTransform()->SetPosition(9.0f, -1.0f, 0.0f);
+
+
+
+
 	// Create cameras
 	float aspect = (Window::Width() + 0.0f) / Window::Height();
-	
+	// CAMERAS 0-3
 	cameras.push_back(std::make_shared<Camera>(
 		"C_Main",
 		make_shared<Transform>(),
@@ -292,7 +320,7 @@ void Game::CreateGeometry()
 	cameras[1]->SetLookSpeed(1.0f);
 	
 	cameras[2]->GetTransform()->SetPosition(0.0f, 100.0f, 0.0f);
-	cameras[2]->GetTransform()->SetRotation(XM_PIDIV2, 0.0f, 0.0f);
+	cameras[2]->GetTransform()->SetRotation(XM_PIDIV2 - 0.001f, 0.0f, 0.0f);
 	cameras[2]->SetLookSpeed(1.0f);
 	
 	cameras[3]->GetTransform()->SetPosition(0.0f, 0.0f, -100.0f);
@@ -324,9 +352,10 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update current camera
 	cameras[pCameraCurrent]->Update(deltaTime);
 
-	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f), 0.0f);
+	// Update test meshes
+	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f) - 3.0f, 0.0f);
 
-	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, 0.5f, 0.5f);
+	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, -2.5f, 0.5f);
 	entities[1]->GetTransform()->SetScale(sin(totalTime * XM_PI) + 1.5f, 1.0f, 1.0f);
 
 	entities[2]->GetTransform()->Rotate(0.0f, 0.0f, 25.0f * deltaTime);
@@ -556,10 +585,11 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Meshes")) {					// Info about each mesh
 		ImGui::Spacing();
 
+		ImGui::PushID("MESH");
 		for (int i = 0; i < meshes.size(); i++) {
 
 			// Each mesh gets its own Tree Node
-			ImGui::PushID("MESH" + i);
+			ImGui::PushID(i);
 			if (ImGui::TreeNode("", "(%06d) %s", i, meshes[i]->GetName())) {
 				ImGui::Spacing();
 
@@ -572,6 +602,7 @@ void Game::ImGuiBuild() {
 			}
 			ImGui::PopID();
 		}
+		ImGui::PopID();
 
 		ImGui::Spacing();
 	}
@@ -582,6 +613,7 @@ void Game::ImGuiBuild() {
 		// Store the position, rotation, scale, and tint of each entity as they're read in
 		
 
+		ImGui::PushID("ENTITY");
 		for (int i = 0; i < entities.size(); i++) {
 			// Get position, rotation, scale, and tint
 			XMFLOAT3 entityPos = entities[i]->GetTransform()->GetPosition();
@@ -589,7 +621,7 @@ void Game::ImGuiBuild() {
 			XMFLOAT3 entitySca = entities[i]->GetTransform()->GetScale();
 
 			// Each entity gets its own Tree Node
-			ImGui::PushID("ENTITY" + i);
+			ImGui::PushID(i);
 			if (ImGui::TreeNode("", "(%06d) %s", i, entities[i]->GetName())) {
 				ImGui::Spacing();
 
@@ -616,6 +648,7 @@ void Game::ImGuiBuild() {
 			}
 			ImGui::PopID();
 		}
+		ImGui::PopID();
 
 		ImGui::Spacing();
 	}
@@ -623,6 +656,7 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Cameras")) {				// Info about each camera
 		ImGui::Spacing();
 
+		ImGui::PushID("CAMERA");
 		for (int i = 0; i < cameras.size(); i++) {
 			// Get position, rotation, scale, and tint
 			XMFLOAT3 cameraPos = cameras[i]->GetTransform()->GetPosition();
@@ -637,7 +671,7 @@ void Game::ImGuiBuild() {
 			float cameraFar = cameras[i]->GetFarClip();
 
 			// Each entity gets its own Tree Node
-			ImGui::PushID("CAMERA" + i);
+			ImGui::PushID(i);
 			ImGui::AlignTextToFramePadding();
 			ImGui::RadioButton("", &pCameraCurrent, i);
 			ImGui::SetItemTooltip("Set as active camera");
@@ -700,6 +734,7 @@ void Game::ImGuiBuild() {
 			ImGui::PopID();
 
 		}
+		ImGui::PopID();
 
 		ImGui::Spacing();
 	}

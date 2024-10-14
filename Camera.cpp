@@ -364,10 +364,10 @@ void Camera::Update(float dt)
 
 		// Clamp the final rotation within pi/2 to -pi/2
 		XMFLOAT3 finalRot = transform->GetRotation();
-		if (finalRot.x > XM_PIDIV2) {
-			transform->SetRotation(XM_PIDIV2, finalRot.y, finalRot.z);
-		} else if (finalRot.x < -XM_PIDIV2) {
-			transform->SetRotation(-XM_PIDIV2, finalRot.y, finalRot.z);
+		if (finalRot.x > XM_PIDIV2 - 0.001f) {
+			transform->SetRotation(XM_PIDIV2 - 0.001f, finalRot.y, finalRot.z);
+		} else if (finalRot.x < -XM_PIDIV2 + 0.001f) {
+			transform->SetRotation(-XM_PIDIV2 + 0.001f, finalRot.y, finalRot.z);
 		}
 	}
 

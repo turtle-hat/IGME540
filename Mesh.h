@@ -11,7 +11,7 @@ class Mesh
 public:
 	// Constructors/Destructor
 	Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount);
-	Mesh(const char* _name, const char* _path);
+	Mesh(const char* _name, const wchar_t* _path);
 	~Mesh();
 	// Draws Mesh to screen
 	void Draw();
@@ -33,6 +33,6 @@ private:
 	const char* name;
 
 	// Code for creating vertex and index buffers
-	void InitializeBuffers(Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount);
+	void InitializeBuffers(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount);
 };
 

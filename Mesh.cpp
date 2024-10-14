@@ -15,7 +15,7 @@ Mesh::Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t 
 	InitializeBuffers(_vertices, _indices, _vertexCount, _indexCount);
 }
 
-Mesh::Mesh(const char* _name, const char* _path)
+Mesh::Mesh(const char* _name, const wchar_t* _path)
 {
 	name = _name;
 
@@ -329,7 +329,7 @@ const char* Mesh::GetName()
 /// <param name="_indices">An array of indices</param>
 /// <param name="_vertexCount">The number of vertices in the array</param>
 /// <param name="_indexCount">The number of indices in the array</param>
-void Mesh::InitializeBuffers(Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount)
+void Mesh::InitializeBuffers(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount)
 {
 	// Create a VERTEX BUFFER
 	// - This holds the vertex data of triangles for a single object
@@ -337,7 +337,7 @@ void Mesh::InitializeBuffers(Vertex* _vertices, unsigned int* _indices, size_t _
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
 
 	// Record number of vertices in this mesh
-	vertexCount = (unsigned int)_vertexCount;
+	vertexCount = _vertexCount;
 
 	// First, we need to describe the buffer we want Direct3D to make on the GPU
 	//  - Note that this variable is created on the stack since we only need it once
@@ -369,7 +369,7 @@ void Mesh::InitializeBuffers(Vertex* _vertices, unsigned int* _indices, size_t _
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
 
 	// Record number of indices
-	indexCount = (unsigned int)_indexCount;
+	indexCount = _indexCount;
 
 	// Describe the buffer, as we did above, with two major differences
 	//  - Byte Width (3 unsigned integers vs. 3 whole vertices)
