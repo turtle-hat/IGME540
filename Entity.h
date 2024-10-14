@@ -22,8 +22,6 @@ public:
 	// Setters
 	void SetMaterial(std::shared_ptr<Material> _material);
 
-	void Draw(std::shared_ptr<Camera> _camera);
-
 private:
 	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<Material> material;

@@ -471,7 +471,37 @@ void Game::Draw(float deltaTime, float totalTime)
 	
 	// Loop through every entity and draw it
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(cameras[pCameraCurrent]);
+		//entities[i]->Draw(cameras[pCameraCurrent]);
+
+		// Get entity material
+		std::shared_ptr<Material> material = entities[i]->GetMaterial();
+
+		// Get entity's shaders
+		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
+		std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
+
+		// Set vertex and pixel shaders
+		vs->SetShader();
+		ps->SetShader();
+
+		// Fill constant buffers with entity's data
+		// VERTEX
+		vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
+		vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
+		vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
+		// PIXEL
+		ps->SetFloat4("colorTint", material->GetColorTint());
+		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
+		if (material->GetName() == "Mat_Custom") {
+			ps->SetFloat("totalTime", totalTime);
+		}
+
+		// COPY DATA TO CONSTANT BUFFERS
+		vs->CopyAllBufferData();
+		ps->CopyAllBufferData();
+
+		// Draw the entity's mesh
+		entities[i]->GetMesh()->Draw();
 	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
@@ -832,10 +862,20 @@ void Game::ImGuiBuild() {
 				ImGui::Spacing();
 
 				if (ImGui::DragFloat("Near Clip", &cameraNear, 0.01f, 0.001f, 10.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
-					cameras[i]->SetNearClip(cameraNear);
+					if (cameraFar > cameraNear) {
+						cameras[i]->SetNearClip(cameraNear);
+					}
+					else {
+						cameras[i]->SetNearClip(cameraFar - 0.001f);
+					}
 				}
-				if (ImGui::DragFloat("Far Clip", &cameraFar, 1.0f, 10.0f, 10000.0f, "%.0f", ImGuiSliderFlags_Logarithmic)) {
-					cameras[i]->SetFarClip(cameraFar);
+				if (ImGui::DragFloat("Far Clip", &cameraFar, 1.0f, 11.0f, 10000.0f, "%.0f", ImGuiSliderFlags_Logarithmic)) {
+					if (cameraFar > cameraNear) {
+						cameras[i]->SetFarClip(cameraFar);
+					}
+					else {
+						cameras[i]->SetFarClip(floor(cameraNear) + 1.0f);
+					}
 				}
 
 				ImGui::TreePop();
