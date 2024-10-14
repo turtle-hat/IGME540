@@ -234,6 +234,9 @@ Mesh::Mesh(const char* _name, const char* _path)
 	//    and detect duplicate vertices, but at that point it would be better to use a more
 	//    sophisticated model loading library like TinyOBJLoader or The Open Asset Importer Library
 
+	vertexCount = 0;
+	indexCount = 0;
+
 	InitializeBuffers(&verts[0], &indices[0], vertCounter, indexCounter);
 }
 
