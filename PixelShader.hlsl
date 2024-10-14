@@ -11,9 +11,16 @@ struct VertexToPixel
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float4 screenPosition	: SV_POSITION;
-	float4 color			: COLOR;
+	float4 screenPosition	: SV_POSITION;	// XY position in screen space
+	float3 normal			: NORMAL;		// Normal vector
+	float2 uv				: TEXCOORD;		// UV coordinate
 };
+
+// Data from our primary constant buffer
+cbuffer PrimaryBuffer : register(b0)
+{
+	float4 colorTint;
+}
 
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
@@ -30,5 +37,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
-	return input.color;
+	return colorTint;
 }

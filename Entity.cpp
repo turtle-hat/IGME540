@@ -84,19 +84,23 @@ void Entity::Draw(std::shared_ptr<Camera> _camera)
 {
     // Get vertex shader
     std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
+    std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 
     // Set vertex and pixel shaders
     vs->SetShader();
-    material->GetPixelShader()->SetShader();
+    ps->SetShader();
 
-    // FILL CONSTANT BUFFER WITH ENTITY'S DATA
+    // FILL CONSTANT BUFFERS WITH ENTITY'S DATA
+    // VERTEX
     vs->SetMatrix4x4("tfWorld", transform->GetWorld());
     vs->SetMatrix4x4("tfView", _camera->GetViewMatrix());
     vs->SetMatrix4x4("tfProjection", _camera->GetProjectionMatrix());
-    vs->SetFloat4("colorTint", material->GetColorTint());
+    // PIXEL
+    ps->SetFloat4("colorTint", material->GetColorTint());
 
-    // COPY DATA TO CONSTANT BUFFER
+    // COPY DATA TO CONSTANT BUFFERS
     vs->CopyAllBufferData();
+    ps->CopyAllBufferData();
 
     // Draw the entity's mesh
     mesh->Draw();

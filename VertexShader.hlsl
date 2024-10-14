@@ -29,7 +29,8 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float4 color			: COLOR;        // RGBA color
+	float3 normal			: NORMAL;		// Normal vector
+	float2 uv				: TEXCOORD;		// UV coordinate
 };
 
 // Data from our primary constant buffer
@@ -38,7 +39,6 @@ cbuffer PrimaryBuffer : register(b0)
 	float4x4 tfWorld;
 	float4x4 tfView;
 	float4x4 tfProjection;
-	float4 colorTint;
 }
 
 // --------------------------------------------------------
@@ -62,14 +62,12 @@ VertexToPixel main( VertexShaderInput input )
 	//   which we're leaving at 1.0 for now (this is more useful when dealing with 
 	//   a perspective projection matrix, which we'll get to in the future).
 	
-	// Build wvp matrix and 
+	// Build wvp matrix and find the screen position
     matrix wvp = mul(tfProjection, mul(tfView, tfWorld));
-	output.screenPosition = mul(wvp, float4(input.localPosition , 1.0f));
-
-	// Pass the color through 
-	// - The values will be interpolated per-pixel by the rasterizer
-	// - We don't need to alter it here, but we do need to send it to the pixel shader
-	output.color = colorTint;
+	output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
+	// Send other data through the pipeline
+	output.normal = input.normal;
+	output.uv = input.uv;
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
