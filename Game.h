@@ -53,6 +53,9 @@ private:
 	float pBackgroundColor[4];
 	// How many iterations the custom material should go through
 	int pMatCustomIterations;
+	// Where to center the image and the zoom-in on it
+	DirectX::XMFLOAT2 pMatCustomImage;
+	DirectX::XMFLOAT2 pMatCustomZoom;
 
 
 	// MESHES

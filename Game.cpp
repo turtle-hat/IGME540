@@ -495,6 +495,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		if (material->GetName() == "Mat_Custom") {
 			ps->SetFloat("totalTime", totalTime);
 			ps->SetInt("maxIterations", pMatCustomIterations);
+			ps->SetFloat2("imageCenter", pMatCustomImage);
+			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 		}
 
 		// COPY DATA TO CONSTANT BUFFERS
@@ -549,7 +551,9 @@ void Game::InitializeSimulationParameters() {
 	for (int i = 0; i < 4; i++) {
 		pBackgroundColor[i] = color[i];
 	}
-	pMatCustomIterations = 20;
+	pMatCustomIterations = 100;
+	pMatCustomImage = XMFLOAT2(-1.77f, -0.02f);
+	pMatCustomZoom = XMFLOAT2(-0.2f, -0.61f);
 
 	pCameraCurrent = 0;
 
@@ -740,7 +744,16 @@ void Game::ImGuiBuild() {
 				}
 
 				if (materials[i]->GetName() == "Mat_Custom") {
+					float image[2] = { pMatCustomImage.x, pMatCustomImage.y };
+					float zoom[2] = { pMatCustomZoom.x, pMatCustomZoom.y };
+
 					ImGui::DragInt("Iterations", &pMatCustomIterations, 1, 0, 100);
+					if (ImGui::DragFloat2("Image Center", image, 0.01f, -4.0f, 4.0f)) {
+						pMatCustomImage = XMFLOAT2(image);
+					}
+					if (ImGui::DragFloat2("Zoom Center", zoom, 0.01f, -4.0f, 4.0f)) {
+						pMatCustomZoom = XMFLOAT2(zoom);
+					}
 				}
 
 				ImGui::TreePop();
