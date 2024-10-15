@@ -21,7 +21,9 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Renders Burning Ship fractal
 	// Based on pseudocode from Wikipedia https://en.wikipedia.org/wiki/Burning_Ship_fractal
 	// and shader code by sixstring982 on ShaderToy https://www.shadertoy.com/view/ltG3Wm
-	float scale = pow((sin(totalTime * 0.3f - 4.5f) + 1.0f) * 0.15f, 2);
+
+	// Scale by time
+	float scale = pow((sin(totalTime * 0.3f - 4.5f) + 1.05f) * 0.15f, 2);
 	//float scale = pow((totalTime * 0.1f) % 0.51f + 0.35f, 5) * 1.5f;
 	//float scale = pow((0.43) % 1.0f + 0.32f, 5) * 1.5f;
 

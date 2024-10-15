@@ -10,14 +10,19 @@ using namespace DirectX;
 Mesh::Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount) {
 	// Thankfully I don't think name needs to be deleted? I might be wrong though
 	name = _name;
-	
 
-	InitializeBuffers(_vertices, _indices, _vertexCount, _indexCount);
+	vertexCount = 0;
+	indexCount = 0;
+
+	InitializeBuffers(_vertices, _indices, (unsigned int)_vertexCount, (unsigned int)_indexCount);
 }
 
 Mesh::Mesh(const char* _name, const wchar_t* _path)
 {
 	name = _name;
+
+	vertexCount = 0;
+	indexCount = 0;
 
 	// Author: Chris Cascioli
 	// Purpose: Basic .OBJ 3D model loading, supporting positions, uvs and normals
@@ -233,9 +238,6 @@ Mesh::Mesh(const char* _name, const wchar_t* _path)
 	//    an index buffer isn't doing much for us.  We could try to optimize the mesh ourselves
 	//    and detect duplicate vertices, but at that point it would be better to use a more
 	//    sophisticated model loading library like TinyOBJLoader or The Open Asset Importer Library
-
-	vertexCount = 0;
-	indexCount = 0;
 
 	InitializeBuffers(&verts[0], &indices[0], vertCounter, indexCounter);
 }
