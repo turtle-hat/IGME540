@@ -146,19 +146,19 @@ void Game::CreateGeometry()
 		"Mat_Normals",
 		vertexShaders[0],
 		pixelShaders[1],
-		XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_UVs",
 		vertexShaders[0],
 		pixelShaders[2],
-		XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Custom",
 		vertexShaders[0],
 		pixelShaders[3],
-		XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
 	));
 
 	// Set up the vertices of the triangle we would like to draw
@@ -354,7 +354,7 @@ void Game::CreateGeometry()
 	entities[25]->GetTransform()->SetPosition(9.0f,  -4.0f, 0.0f);
 
 	// ENTITY 26
-	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[5]));
 	entities[26]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
 	entities[26]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
 
@@ -494,6 +494,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
 		if (material->GetName() == "Mat_Custom") {
 			ps->SetFloat("totalTime", totalTime);
+			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
 
 		// COPY DATA TO CONSTANT BUFFERS
@@ -548,6 +549,7 @@ void Game::InitializeSimulationParameters() {
 	for (int i = 0; i < 4; i++) {
 		pBackgroundColor[i] = color[i];
 	}
+	pMatCustomIterations = 20;
 
 	pCameraCurrent = 0;
 
@@ -737,6 +739,10 @@ void Game::ImGuiBuild() {
 					materials[i]->SetColorTint(XMFLOAT4(tint_f));
 				}
 
+				if (materials[i]->GetName() == "Mat_Custom") {
+					ImGui::DragInt("Iterations", &pMatCustomIterations, 1, 0, 100);
+				}
+
 				ImGui::TreePop();
 				ImGui::Spacing();
 			}
@@ -766,6 +772,7 @@ void Game::ImGuiBuild() {
 				ImGui::Spacing();
 
 				ImGui::Text("Mesh:      %s", (entities[i]->GetMesh()->GetName()));
+				ImGui::Text("Material:  %s", (entities[i]->GetMaterial()->GetName()));
 				ImGui::Spacing();
 
 				if (ImGui::DragFloat3("Position", &entityPos.x, 0.01f)) {

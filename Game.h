@@ -51,7 +51,8 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
-
+	// How many iterations the custom material should go through
+	int pMatCustomIterations;
 
 
 	// MESHES
