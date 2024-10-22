@@ -1,25 +1,12 @@
-
-// Struct representing the data we expect to receive from earlier pipeline stages
-// - Should match the output of our corresponding vertex shader
-// - The name of the struct itself is unimportant
-// - The variable names don't have to match other shaders (just the semantics)
-// - Each variable must have a semantic, which defines its usage
-struct VertexToPixel
-{
-	// Data type
-	//  |
-	//  |   Name          Semantic
-	//  |    |                |
-	//  v    v                v
-	float4 screenPosition	: SV_POSITION;	// XY position in screen space
-	float3 normal			: NORMAL;		// Normal vector
-	float2 uv				: TEXCOORD;		// UV coordinate
-};
+#include "ShaderStructs.hlsli"
 
 // Data from our primary constant buffer
 cbuffer PrimaryBuffer : register(b0)
 {
 	float4 colorTint;
+	float roughness;
+	float3 cameraPosition;
+	float3 ambientLight;
 }
 
 // --------------------------------------------------------
@@ -33,9 +20,7 @@ cbuffer PrimaryBuffer : register(b0)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	// Just return the input color
-	// - This color (like most values passing through the rasterizer) is 
-	//   interpolated for each pixel between the corresponding vertices 
-	//   of the triangle we're rendering
-	return colorTint;
+	input.normal = normalize(input.normal);
+
+	return float4(ambientLight, 1.0f);
 }

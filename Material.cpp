@@ -1,5 +1,7 @@
 #include "Material.h"
 
+#include <algorithm>
+
 /// <summary>
 /// Constructs a Material with the given shaders and tint
 /// </summary>
@@ -7,16 +9,17 @@
 /// <param name="_vertexShader">The vertex shader to draw the Material with</param>
 /// <param name="_pixelShader">The pixel shader to draw the Material with</param>
 /// <param name="_colorTint">An RGBA color to multiply to the Material</param>
-Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint)
+Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness)
 {
 	name = _name;
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
+	roughness = std::clamp(_roughness, 0.0f, 1.0f);
 }
 
 /// <summary>
-/// Gets the Vertex Shader the Material is currently using
+/// Gets the Vertex Shader the Material is using
 /// </summary>
 /// <returns>The Material's Vertex Shader</returns>
 std::shared_ptr<SimpleVertexShader> Material::GetVertexShader()
@@ -25,7 +28,7 @@ std::shared_ptr<SimpleVertexShader> Material::GetVertexShader()
 }
 
 /// <summary>
-/// Gets the Pixel Shader the Material is currently using
+/// Gets the Pixel Shader the Material is using
 /// </summary>
 /// <returns>The Material's Pixel Shader</returns>
 std::shared_ptr<SimplePixelShader> Material::GetPixelShader()
@@ -34,12 +37,21 @@ std::shared_ptr<SimplePixelShader> Material::GetPixelShader()
 }
 
 /// <summary>
-/// Gets the Material's current color tint
+/// Gets the Material's color tint
 /// </summary>
 /// <returns>The Material's RGBA color tint</returns>
 DirectX::XMFLOAT4 Material::GetColorTint()
 {
 	return colorTint;
+}
+
+/// <summary>
+/// Gets the Material's roughness
+/// </summary>
+/// <returns>The Material's roughness value</returns>
+float Material::GetRoughness()
+{
+	return roughness;
 }
 
 /// <summary>
@@ -76,4 +88,13 @@ void Material::SetPixelShader(std::shared_ptr<SimplePixelShader> _pixelShader)
 void Material::SetColorTint(DirectX::XMFLOAT4 _colorTint)
 {
 	colorTint = _colorTint;
+}
+
+/// <summary>
+/// Sets the Material's roughness
+/// </summary>
+/// <param name="_roughness">A new roughness for the Material in the range 0-1</param>
+void Material::SetRoughness(float _roughness)
+{
+	roughness = std::clamp(_roughness, 0.0f, 1.0f);
 }

@@ -127,38 +127,44 @@ void Game::CreateGeometry()
 		"Mat_SolidGreen",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(0.0f, 1.0f, 0.1f, 1.0f)
+		XMFLOAT4(0.0f, 1.0f, 0.1f, 1.0f),
+		0.5f
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_SolidMauve",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(0.8f, 0.6f, 0.9f, 1.0f)
+		XMFLOAT4(0.8f, 0.6f, 0.9f, 1.0f),
+		1.0f
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_SolidYellow",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f),
+		0.0f
 	));
 	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Normals",
 		vertexShaders[0],
 		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		1.0f
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_UVs",
 		vertexShaders[0],
 		pixelShaders[2],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		1.0f
 	));
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Custom",
 		vertexShaders[0],
 		pixelShaders[3],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		1.0f
 	));
 
 	// Set up the vertices of the triangle we would like to draw
@@ -353,11 +359,12 @@ void Game::CreateGeometry()
 	entities[24]->GetTransform()->SetPosition(6.0f,  -4.0f, 0.0f);
 	entities[25]->GetTransform()->SetPosition(9.0f,  -4.0f, 0.0f);
 
+	/*
 	// ENTITY 26
 	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[5]));
 	entities[26]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
 	entities[26]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
-
+	*/
 
 
 
@@ -489,14 +496,18 @@ void Game::Draw(float deltaTime, float totalTime)
 		vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
 		vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
 		vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
+		vs->SetMatrix4x4("tfWorldIT", entities[i]->GetTransform()->GetWorldInverseTranspose());
 		// PIXEL
 		ps->SetFloat4("colorTint", material->GetColorTint());
+		ps->SetFloat("roughness", material->GetRoughness());
+		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
+		ps->SetFloat3("ambientLight", pAmbientColor);
 		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
 		if (material->GetName() == "Mat_Custom") {
 			ps->SetFloat("totalTime", totalTime);
-			ps->SetInt("maxIterations", pMatCustomIterations);
 			ps->SetFloat2("imageCenter", pMatCustomImage);
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
+			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
 
 		// COPY DATA TO CONSTANT BUFFERS
@@ -547,10 +558,10 @@ void Game::InitializeSimulationParameters() {
 	// IMGUI PARAMETERS
 
 	igShowDemo = false;
-	float color[4] = {0.4f, 0.6f, 0.75f, 1.0f};
-	for (int i = 0; i < 4; i++) {
-		pBackgroundColor[i] = color[i];
-	}
+	float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f };
+	memcpy(pBackgroundColor, bgColor, sizeof(float) * 4);
+	pAmbientColor = XMFLOAT3(0.1f, 0.1f, 0.25f);
+
 	pMatCustomIterations = 100;
 	pMatCustomImage = XMFLOAT2(-1.77f, -0.02f);
 	pMatCustomZoom = XMFLOAT2(-0.2f, -0.61f);
@@ -690,10 +701,7 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Basics")) {					// Basic parameters (e.g. colors and positions)
 		ImGui::Spacing();
 		
-		ImGui::ColorEdit4("Background Color", pBackgroundColor);
-		
-		ImGui::Spacing();
-		ImGui::Text("NOTE: Tint is now applied per Entity!\nIt can be found in the Entities section.");
+		ImGui::ColorEdit3("Background Color", pBackgroundColor);
 		
 		ImGui::Spacing();
 	}
@@ -737,10 +745,15 @@ void Game::ImGuiBuild() {
 				// Get material's tint as a float array
 				XMFLOAT4 tint_xm = materials[i]->GetColorTint();
 				float tint_f[4] = {tint_xm.x, tint_xm.y, tint_xm.z, tint_xm.w};
+				float roughness = materials[i]->GetRoughness();
 
 				// If the user has edited the tint this frame, change the material's tint
 				if (ImGui::ColorEdit4("Tint", tint_f)) {
 					materials[i]->SetColorTint(XMFLOAT4(tint_f));
+				}
+				// If the user has edited the material's roughness this frame, change the material's roughness
+				if (ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f, "%.2f")) {
+					materials[i]->SetRoughness(roughness);
 				}
 
 				if (materials[i]->GetName() == "Mat_Custom") {
@@ -810,6 +823,16 @@ void Game::ImGuiBuild() {
 		}
 		ImGui::PopID();
 
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Lights")) {					// Info about each light
+		ImGui::Spacing();
+
+		float ambientColor[3] = { pAmbientColor.x, pAmbientColor.y, pAmbientColor.z };
+		if (ImGui::ColorEdit3("Ambient Light", ambientColor)) {
+			pAmbientColor = XMFLOAT3(ambientColor);
+		}
 		ImGui::Spacing();
 	}
 

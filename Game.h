@@ -51,6 +51,8 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
+	// Ambient light color
+	DirectX::XMFLOAT3 pAmbientColor;
 	// How many iterations the custom material should go through
 	int pMatCustomIterations;
 	// Where to center the image and the zoom-in on it

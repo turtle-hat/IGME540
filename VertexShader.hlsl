@@ -1,37 +1,4 @@
-
-// Struct representing a single vertex worth of data
-// - This should match the vertex definition in our C++ code
-// - By "match", I mean the size, order and number of members
-// - The name of the struct itself is unimportant, but should be descriptive
-// - Each variable must have a semantic, which defines its usage
-struct VertexShaderInput
-{ 
-	// Data type
-	//  |
-	//  |   Name          Semantic
-	//  |    |                |
-	//  v    v                v
-	float3 localPosition	: POSITION;     // XYZ position
-	float3 normal			: NORMAL;		// Normal vector
-	float2 uv				: TEXCOORD;		// UV coordinate
-};
-
-// Struct representing the data we're sending down the pipeline
-// - Should match our pixel shader's input (hence the name: Vertex to Pixel)
-// - At a minimum, we need a piece of data defined tagged as SV_POSITION
-// - The name of the struct itself is unimportant, but should be descriptive
-// - Each variable must have a semantic, which defines its usage
-struct VertexToPixel
-{
-	// Data type
-	//  |
-	//  |   Name          Semantic
-	//  |    |                |
-	//  v    v                v
-	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float3 normal			: NORMAL;		// Normal vector
-	float2 uv				: TEXCOORD;		// UV coordinate
-};
+#include "ShaderStructs.hlsli"
 
 // Data from our primary constant buffer
 cbuffer PrimaryBuffer : register(b0)
@@ -39,6 +6,7 @@ cbuffer PrimaryBuffer : register(b0)
 	float4x4 tfWorld;
 	float4x4 tfView;
 	float4x4 tfProjection;
+	float4x4 tfWorldIT;
 }
 
 // --------------------------------------------------------
@@ -66,8 +34,9 @@ VertexToPixel main( VertexShaderInput input )
     matrix wvp = mul(tfProjection, mul(tfView, tfWorld));
 	output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
 	// Send other data through the pipeline
-	output.normal = input.normal;
+	output.normal = mul((float3x3)tfWorldIT, input.normal);
 	output.uv = input.uv;
+	output.worldPosition = mul(tfWorld, float4(input.localPosition, 1)).xyz;
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
