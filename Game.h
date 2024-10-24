@@ -10,6 +10,7 @@
 #include "Material.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "Lights.h"
 #include "SimpleShader.h"
 
 class Game
@@ -59,6 +60,8 @@ private:
 	DirectX::XMFLOAT2 pMatCustomImage;
 	DirectX::XMFLOAT2 pMatCustomZoom;
 
+	const char LIGHT_TYPE_STRINGS[3][12] = { "Directional", "Point", "Spot" };
+
 
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
@@ -68,6 +71,9 @@ private:
 
 	// ENTITIES
 	std::vector<std::shared_ptr<Entity>> entities;
+
+	// LIGHTS
+	std::vector<Light> lights;
 
 	// CAMERAS
 	std::vector<std::shared_ptr<Camera>> cameras;

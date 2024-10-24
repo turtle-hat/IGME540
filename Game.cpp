@@ -368,6 +368,18 @@ void Game::CreateGeometry()
 
 
 
+	// Create lights
+	// LIGHT 0
+	Light lightDir0 = {};
+	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
+	lightDir0.Direction = XMFLOAT3(0.5f, -1, 0.5);
+	lightDir0.Color = XMFLOAT3(1.0f, 0.5f, 0.5f);
+	lightDir0.Intensity = 10.0f;
+	lightDir0.Active = 1;
+	lights.push_back(lightDir0);
+
+
+
 	// Create cameras
 	float aspect = (Window::Width() + 0.0f) / Window::Height();
 	// CAMERAS 0-3
@@ -487,6 +499,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
 		std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 
+
 		// Set vertex and pixel shaders
 		vs->SetShader();
 		ps->SetShader();
@@ -501,7 +514,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->SetFloat4("colorTint", material->GetColorTint());
 		ps->SetFloat("roughness", material->GetRoughness());
 		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
-		ps->SetFloat3("ambientLight", pAmbientColor);
+		// Set lights on pixel shader
+		ps->SetData("lightDirectional0", &lights[0], sizeof(Light));
+		ps->SetFloat3("lightAmbient", pAmbientColor);
 		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
 		if (material->GetName() == "Mat_Custom") {
 			ps->SetFloat("totalTime", totalTime);
@@ -834,6 +849,68 @@ void Game::ImGuiBuild() {
 			pAmbientColor = XMFLOAT3(ambientColor);
 		}
 		ImGui::Spacing();
+
+		ImGui::PushID("LIGHT");
+		for (int i = 0; i < lights.size(); i++) {					// List of lights in the scene
+
+			// Each light gets its own Tree Node
+			ImGui::PushID(i);
+
+			bool active = lights[i].Active == 1;
+			ImGui::AlignTextToFramePadding();
+			if (ImGui::Checkbox("", &active)) {
+				lights[i].Active = active;
+			}
+			ImGui::SetItemTooltip("Toggle whether light is active");
+
+			ImGui::SameLine();
+			if (ImGui::TreeNode("", "(%06d) %s", i, LIGHT_TYPE_STRINGS[lights[i].Type])) {
+				ImGui::Spacing();
+
+				ImGui::ColorEdit3("Color", &lights[i].Color.x);
+				if (ImGui::DragFloat("Intensity", &lights[i].Intensity, 0.1f, 0.0f, NULL, "%.1f")) {
+					lights[i].Intensity = max(lights[i].Intensity, 0.0f);
+				}
+				
+				ImGui::Spacing();
+				ImGui::Text("Type:");
+				ImGui::RadioButton("Directional", &lights[i].Type, LIGHT_TYPE_DIRECTIONAL);
+				ImGui::SameLine();
+				ImGui::RadioButton("Point", &lights[i].Type, LIGHT_TYPE_POINT);
+				ImGui::SameLine();
+				ImGui::RadioButton("Spot", &lights[i].Type, LIGHT_TYPE_SPOT);
+
+				ImGui::Spacing();
+				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) {
+					ImGui::DragFloat3("Position", &lights[i].Position.x, 0.01f);
+				}
+				if (lights[i].Type != LIGHT_TYPE_POINT) {
+					ImGui::DragFloat3("Direction", &lights[i].Direction.x, 0.01f);
+				}
+				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) {
+					if (ImGui::DragFloat("Range", &lights[i].Range, 0.1f, 0.0f, NULL, "%.1f")) {
+						lights[i].Range = max(lights[i].Range, 0.0f);
+					}
+				}
+				if (lights[i].Type == LIGHT_TYPE_SPOT) {
+					if (ImGui::DragFloat("Spot Inner Angle", &lights[i].SpotInnerAngle, 0.01f, 0.0f, XM_PIDIV2, "%.2f")) {
+						if (lights[i].SpotOuterAngle < lights[i].SpotInnerAngle) {
+							lights[i].SpotOuterAngle = lights[i].SpotInnerAngle;
+						}
+					}
+					if (ImGui::DragFloat("Spot Outer Angle", &lights[i].SpotOuterAngle, 0.01f, 0.0f, XM_PIDIV2, "%.2f")) {
+						if (lights[i].SpotOuterAngle < lights[i].SpotInnerAngle) {
+							lights[i].SpotInnerAngle = lights[i].SpotOuterAngle;
+						}
+					}
+				}
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			ImGui::PopID();
+		}
+		ImGui::PopID();
 	}
 
 	if (ImGui::CollapsingHeader("Cameras")) {					// Info about each camera

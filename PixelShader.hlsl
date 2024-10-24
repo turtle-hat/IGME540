@@ -6,7 +6,8 @@ cbuffer PrimaryBuffer : register(b0)
 	float4 colorTint;
 	float roughness;
 	float3 cameraPosition;
-	float3 ambientLight;
+	Light lightDirectional0;
+	float3 lightAmbient;
 }
 
 // --------------------------------------------------------
@@ -22,5 +23,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	return float4(ambientLight, 1.0f);
+	return float4(lightDirectional0.Active * lightDirectional0.Color, 1.0f);
 }
