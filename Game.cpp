@@ -374,7 +374,7 @@ void Game::CreateGeometry()
 	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
 	lightDir0.Direction = XMFLOAT3(0.5f, -1, 0.5);
 	lightDir0.Color = XMFLOAT3(1.0f, 0.5f, 0.5f);
-	lightDir0.Intensity = 10.0f;
+	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
 	lights.push_back(lightDir0);
 

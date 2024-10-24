@@ -1,4 +1,5 @@
 #include "ShaderStructs.hlsli"
+#include "ShaderLighting.hlsli"
 
 // Data from our primary constant buffer
 cbuffer PrimaryBuffer : register(b0)
@@ -23,5 +24,9 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	return float4(lightDirectional0.Active * lightDirectional0.Color, 1.0f);
+	float3 directionToLight = -normalize(lightDirectional0.Direction);
+
+	float4 diffuseTerm = DiffuseLambert(input.normal, colorTint, directionToLight, lightDirectional0.Color, lightDirectional0.Intensity);
+
+	return float4(diffuseTerm.xyz + lightAmbient, 1.0f);
 }
