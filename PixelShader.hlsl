@@ -1,14 +1,17 @@
 #include "ShaderStructs.hlsli"
 #include "ShaderLighting.hlsli"
 
+#define LIGHT_COUNT	5
+
 // Data from our primary constant buffer
 cbuffer PrimaryBuffer : register(b0)
 {
 	float4 colorTint;
 	float roughness;
 	float3 cameraPosition;
-	Light lightDirectional0;
 	float3 lightAmbient;
+
+	Light lights[LIGHT_COUNT];
 }
 
 // --------------------------------------------------------
@@ -24,12 +27,21 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	float3 lightDirectionIn = normalize(lightDirectional0.Direction);
+	// Start accumulator with ambient light value
+	float3 lightsFinal = lightAmbient;
 
-	float diffuse = DiffuseLambert(-lightDirectionIn, input.normal);
-	float specular = SpecularPhong(lightDirectionIn, input.normal, roughness, input.worldPosition, cameraPosition);
+	// For each light in the scene
+	for (int i = 0; i < LIGHT_COUNT; i++) {
+		switch (lights[i].Type) {
+			case LIGHT_TYPE_DIRECTIONAL:
+				lightsFinal += LightDirectional(normalize(lights[i].Direction), lights[i].Color, input.normal, colorTint, roughness, input.worldPosition, cameraPosition);
+				break;
+			case LIGHT_TYPE_POINT:
+				lightsFinal += LightDirectional(normalize(lights[i].Direction), lights[i].Color, input.normal, colorTint, roughness, input.worldPosition, cameraPosition);
+				break;
 
-	float3 light = lightDirectional0.Color * (colorTint.xyz * diffuse + specular) + lightAmbient;
+		}
+	}
 
-	return float4(light, 1.0f);
+	return float4(lightsFinal, 1.0f);
 }

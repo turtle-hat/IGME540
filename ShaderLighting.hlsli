@@ -20,4 +20,12 @@ float SpecularPhong(float3 lightDirectionIn, float3 surfaceNormal, float surface
     );
 }
 
+float3 LightDirectional(float3 lightDirectionIn, float3 lightColor, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+{
+    float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
+    float specular = SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition);
+
+    return lightColor * (surfaceColor * diffuse + specular);
+}
+
 #endif

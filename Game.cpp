@@ -346,7 +346,7 @@ void Game::CreateGeometry()
 	entities.push_back(std::make_shared<Entity>("E_Tint_Cube",				meshes[3], materials[0]));
 	entities.push_back(std::make_shared<Entity>("E_Tint_Cylinder",			meshes[4], materials[1]));
 	entities.push_back(std::make_shared<Entity>("E_Tint_Helix",				meshes[5], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Custom_Sphere",			meshes[8], materials[5]));
+	entities.push_back(std::make_shared<Entity>("E_Custom_Sphere",			meshes[8], materials[2]));
 	entities.push_back(std::make_shared<Entity>("E_Tint_Torus",				meshes[9], materials[2]));
 	entities.push_back(std::make_shared<Entity>("E_Tint_Quad-SingleSided",	meshes[6], materials[1]));
 	entities.push_back(std::make_shared<Entity>("E_Tint_Quad-DoubleSided",	meshes[7], materials[0]));
@@ -372,23 +372,23 @@ void Game::CreateGeometry()
 	// LIGHT 0
 	Light lightDir0 = {};
 	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir0.Direction = XMFLOAT3(1.0f, -0.5f, 0.0f);
-	lightDir0.Color = XMFLOAT3(1.0f, 0.5f, 0.5f);
+	lightDir0.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	lightDir0.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
 	lights.push_back(lightDir0);
 	// LIGHTS 1-2
 	Light lightDir1 = {};
 	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir1.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	lightDir1.Color = XMFLOAT3(0.0f, 1.0f, 0.3f);
+	lightDir1.Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	lightDir1.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	lightDir1.Intensity = 1.0f;
 	lightDir1.Active = 1;
 	lights.push_back(lightDir1);
 	Light lightDir2 = {};
 	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir2.Direction = XMFLOAT3(-1.0f, 0.5f, 0.0f);
-	lightDir2.Color = XMFLOAT3(0.0f, 0.0f, 0.5f);
+	lightDir2.Direction = XMFLOAT3(1.0f, 0.0f, 1.0f);
+	lightDir2.Color = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	lightDir2.Intensity = 1.0f;
 	lightDir2.Active = 1;
 	lights.push_back(lightDir2);
@@ -529,9 +529,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->SetFloat4("colorTint", material->GetColorTint());
 		ps->SetFloat("roughness", material->GetRoughness());
 		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
-		// Set lights on pixel shader
-		ps->SetData("lightDirectional0", &lights[0], sizeof(Light));
 		ps->SetFloat3("lightAmbient", pAmbientColor);
+
+		// Set lights on pixel shader
+		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
 		if (material->GetName() == "Mat_Custom") {
 			ps->SetFloat("totalTime", totalTime);
