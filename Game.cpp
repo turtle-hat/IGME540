@@ -138,10 +138,10 @@ void Game::CreateGeometry()
 		1.0f
 	));
 	materials.push_back(std::make_shared<Material>(
-		"Mat_SolidYellow",
+		"Mat_SolidWhite",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		0.0f
 	));
 	// MATERIALS 3-5
@@ -392,6 +392,35 @@ void Game::CreateGeometry()
 	lightDir2.Intensity = 1.0f;
 	lightDir2.Active = 1;
 	lights.push_back(lightDir2);
+	// LIGHTS 3-4
+	Light lightPt0 = {};
+	lightPt0.Type = LIGHT_TYPE_POINT;
+	lightPt0.Position = XMFLOAT3(-7.0f, -2.0f, 1.0f);
+	lightPt0.Color = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	lightPt0.Intensity = 1.0f;
+	lightPt0.Range = 10.0f;
+	lightPt0.Active = 1;
+	lights.push_back(lightPt0);
+	Light lightPt1 = {};
+	lightPt1.Type = LIGHT_TYPE_POINT;
+	lightPt1.Position = XMFLOAT3(1.0f, -4.0f, 0.0f);
+	lightPt1.Color = XMFLOAT3(1.0f, 0.8f, 1.0f);
+	lightPt1.Intensity = 2.0f;
+	lightPt1.Range = 4.0f;
+	lightPt1.Active = 1;
+	lights.push_back(lightPt1);
+	// LIGHT 5
+	Light lightSpt0 = {};
+	lightSpt0.Type = LIGHT_TYPE_SPOT;
+	lightSpt0.Position = XMFLOAT3(4.5f, 0.0f, 0.25f);
+	lightSpt0.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	lightSpt0.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	lightSpt0.Intensity = 1.0f;
+	lightSpt0.Range = 30.0f;
+	lightSpt0.SpotInnerAngle = 0.05f;
+	lightSpt0.SpotOuterAngle = 0.5f;
+	lightSpt0.Active = 1;
+	lights.push_back(lightSpt0);
 
 
 
@@ -910,15 +939,17 @@ void Game::ImGuiBuild() {
 				}
 				if (lights[i].Type == LIGHT_TYPE_SPOT) {
 					if (ImGui::DragFloat("Spot Inner Angle", &lights[i].SpotInnerAngle, 0.01f, 0.0f, XM_PIDIV2, "%.2f")) {
-						if (lights[i].SpotOuterAngle < lights[i].SpotInnerAngle) {
-							lights[i].SpotOuterAngle = lights[i].SpotInnerAngle;
+						if (lights[i].SpotOuterAngle <= lights[i].SpotInnerAngle) {
+							lights[i].SpotOuterAngle = lights[i].SpotInnerAngle + 0.01f;
 						}
 					}
-					if (ImGui::DragFloat("Spot Outer Angle", &lights[i].SpotOuterAngle, 0.01f, 0.0f, XM_PIDIV2, "%.2f")) {
-						if (lights[i].SpotOuterAngle < lights[i].SpotInnerAngle) {
-							lights[i].SpotInnerAngle = lights[i].SpotOuterAngle;
+					ImGui::SetItemTooltip("In radians");
+					if (ImGui::DragFloat("Spot Outer Angle", &lights[i].SpotOuterAngle, 0.01f, 0.01f, XM_PIDIV2, "%.2f")) {
+						if (lights[i].SpotOuterAngle <= lights[i].SpotInnerAngle) {
+							lights[i].SpotInnerAngle = lights[i].SpotOuterAngle - 0.01f;
 						}
 					}
+					ImGui::SetItemTooltip("In radians");
 				}
 
 				ImGui::TreePop();
