@@ -58,6 +58,6 @@ struct Light
 };  
 
 // For HLSL
-#define MAX_SPECULAR_EXPONENT 256.0f;
+#define MAX_SPECULAR_EXPONENT 256.0f
 
 #endif

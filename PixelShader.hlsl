@@ -24,9 +24,12 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	float3 directionToLight = -normalize(lightDirectional0.Direction);
+	float3 lightDirectionIn = normalize(lightDirectional0.Direction);
 
-	float4 diffuseTerm = DiffuseLambert(input.normal, colorTint, directionToLight, lightDirectional0.Color, lightDirectional0.Intensity);
+	float diffuse = DiffuseLambert(-lightDirectionIn, input.normal);
+	float specular = SpecularPhong(lightDirectionIn, input.normal, roughness, input.worldPosition, cameraPosition);
 
-	return float4(diffuseTerm.xyz + lightAmbient, 1.0f);
+	float3 light = lightDirectional0.Color * (colorTint.xyz * diffuse + specular) + lightAmbient;
+
+	return float4(light, 1.0f);
 }

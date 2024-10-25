@@ -1,10 +1,23 @@
 #ifndef __GGP_SHADER_LIGHTING__
 #define __GGP_SHADER_LIGHTING__
 
-float4 DiffuseLambert(float3 surfaceNormal, float3 surfaceColor, float3 directionToLight, float3 lightColor, float lightIntensity)
+#include "ShaderStructs.hlsli"
+
+float DiffuseLambert(float3 lightDirectionOut, float3 surfaceNormal)
 {
     // Get dot product of normal and light direction, scale by intensity and the color of the light and surface 
-    return float4(saturate(dot(surfaceNormal, directionToLight)) * lightColor * lightIntensity * surfaceColor, 1.0f);
+    return saturate(dot(surfaceNormal, lightDirectionOut));
+}
+
+float SpecularPhong(float3 lightDirectionIn, float3 surfaceNormal, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+{
+    return pow(
+        saturate(dot(
+            reflect(lightDirectionIn, surfaceNormal), // R
+            normalize(cameraPosition - surfaceWorldPos) // V
+        )),
+        (1.0f - min(surfaceRoughness, 0.99f)) * MAX_SPECULAR_EXPONENT // Specular Exponent
+    );
 }
 
 #endif

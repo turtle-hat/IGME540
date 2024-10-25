@@ -372,11 +372,26 @@ void Game::CreateGeometry()
 	// LIGHT 0
 	Light lightDir0 = {};
 	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir0.Direction = XMFLOAT3(0.5f, -1, 0.5);
+	lightDir0.Direction = XMFLOAT3(1.0f, -0.5f, 0.0f);
 	lightDir0.Color = XMFLOAT3(1.0f, 0.5f, 0.5f);
 	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
 	lights.push_back(lightDir0);
+	// LIGHTS 1-2
+	Light lightDir1 = {};
+	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
+	lightDir1.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	lightDir1.Color = XMFLOAT3(0.0f, 1.0f, 0.3f);
+	lightDir1.Intensity = 1.0f;
+	lightDir1.Active = 1;
+	lights.push_back(lightDir1);
+	Light lightDir2 = {};
+	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
+	lightDir2.Direction = XMFLOAT3(-1.0f, 0.5f, 0.0f);
+	lightDir2.Color = XMFLOAT3(0.0f, 0.0f, 0.5f);
+	lightDir2.Intensity = 1.0f;
+	lightDir2.Active = 1;
+	lights.push_back(lightDir2);
 
 
 
