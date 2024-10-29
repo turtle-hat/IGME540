@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
+#include "WICTextureLoader.h"
 
 #include <cmath>
 
@@ -76,15 +77,56 @@ Game::~Game()
 
 
 // --------------------------------------------------------
-// Loads shaders from compiled shader object (.cso) files
-// and also created the Input Layout that describes our 
-// vertex data to the rendering pipeline. 
+// Loads textures, describes sampler state, and loads
+// shaders from compiled shader object (.cso) files. Also
+// creates the Input Layout that describes our vertex data
+// to the rendering pipeline. 
 // - Input Layout creation is done here because it must 
 //    be verified against vertex shader byte code
 // - We'll have that byte code already loaded below
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
+	// Declare SRV
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+
+	// Load textures
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_brokentiles_DS.png").c_str(),
+		nullptr,
+		srv.GetAddressOf()
+	);
+	// For some reason creating more than one texture spits out a ton of warnings when the app closes:
+	// D3D11 WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: UNKNOWN]
+	// D3D11 WARNING : Live Producer at 0x0000029023D63430, Refcount : 2.[STATE_CREATION WARNING #0: UNKNOWN]
+	// D3D11 WARNING : Live Object at 0x0000029023D67390, Refcount : 0.[STATE_CREATION WARNING #0: UNKNOWN]
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_rustymetal_DS.png").c_str(),
+		nullptr,
+		srv.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_tiles_DS.png").c_str(),
+		nullptr,
+		srv.GetAddressOf()
+	);
+
+	// Set default sampler state values
+	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDescription.MaxAnisotropy = 16;
+	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+
+	Graphics::Device->CreateSamplerState(&samplerDescription, &samplerState);
+
 	// Load shaders in with SimpleShader
 	// VERTEX SHADER 0
 	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(

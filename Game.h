@@ -66,6 +66,14 @@ private:
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
+	// TEXTURES
+	// Pointer to the sampler state itself
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+	// Sampler state description for changing sampler state with UI
+	D3D11_SAMPLER_DESC samplerDescription = {};
+	// Whether or not the sampler state needs to be rebuilt from the description
+	bool isSamplerStateDirty;
+
 	// MATERIALS
 	std::vector<std::shared_ptr<Material>> materials;
 
