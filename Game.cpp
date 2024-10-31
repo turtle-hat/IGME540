@@ -178,7 +178,7 @@ void Game::CreateMaterials()
 		vertexShaders[0],
 		pixelShaders[0],
 		XMFLOAT4(1.0f, 1.0f, 0.1f, 1.0f),
-		1.0f
+		0.2f
 	));
 	materials[0]->AddTextureSRV("SurfaceTexture", srv0);
 	materials[0]->AddSampler("BasicSampler", samplerState);
@@ -187,15 +187,19 @@ void Game::CreateMaterials()
 		vertexShaders[0],
 		pixelShaders[0],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
+		0.8f
 	));
+	materials[1]->AddTextureSRV("SurfaceTexture", srv1);
+	materials[1]->AddSampler("BasicSampler", samplerState);
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Tiles",
 		vertexShaders[0],
 		pixelShaders[0],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
+		0.0f
 	));
+	materials[2]->AddTextureSRV("SurfaceTexture", srv2);
+	materials[2]->AddSampler("BasicSampler", samplerState);
 	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Normals",
@@ -434,7 +438,7 @@ void Game::CreateLights() {
 	// LIGHT 0
 	Light lightDir0 = {};
 	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir0.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	lightDir0.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	lightDir0.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
@@ -443,7 +447,7 @@ void Game::CreateLights() {
 	// LIGHTS 1-2
 	Light lightDir1 = {};
 	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir1.Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	lightDir1.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	lightDir1.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	lightDir1.Intensity = 1.0f;
 	lightDir1.Active = 1;
@@ -451,7 +455,7 @@ void Game::CreateLights() {
 
 	Light lightDir2 = {};
 	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir2.Direction = XMFLOAT3(1.0f, 0.0f, 1.0f);
+	lightDir2.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	lightDir2.Color = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	lightDir2.Intensity = 1.0f;
 	lightDir2.Active = 1;
@@ -605,6 +609,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		// Get entity material
 		std::shared_ptr<Material> material = entities[i]->GetMaterial();
+		// Prepare the material for drawing
+		material->PrepareMaterial();
 
 		// Get entity's shaders
 		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();

@@ -118,3 +118,16 @@ void Material::AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11Sampler
 {
 	samplers.insert({ name, sampler });
 }
+
+/// <summary>
+/// Prepares the Material's texture SRVs and samplers for drawing
+/// </summary>
+void Material::PrepareMaterial()
+{
+	for (auto& t : textureSRVs) {
+		pixelShader->SetShaderResourceView(t.first.c_str(), t.second);
+	}
+	for (auto& s : samplers) {
+		pixelShader->SetSamplerState(s.first.c_str(), s.second);
+	}
+}

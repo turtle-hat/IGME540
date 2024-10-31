@@ -137,6 +137,9 @@
     <ClInclude Include="Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Lights.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -154,5 +157,17 @@
     <Filter Include="Source Files\ImGui">
       <UniqueIdentifier>{81b25404-7f75-4f37-ada4-f7fb36533c8d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\ShaderIncludes">
+      <UniqueIdentifier>{9a97a34f-3e1a-4ce4-82ff-21626f82df89}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="ShaderLighting.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
+    <None Include="ShaderStructs.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
   </ItemGroup>
 </Project>

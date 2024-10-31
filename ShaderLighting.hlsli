@@ -41,31 +41,31 @@ float SpotTerm(Light light, float3 lightDirectionIn)
 
 }
 
-float3 LightDirectional(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+float3 LightDirectional(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float surfaceSpecular, float3 surfaceWorldPos, float3 cameraPosition)
 {
     float3 lightDirectionIn = normalize(light.Direction);
     
     float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition);
+    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition);
 
     return light.Color * light.Intensity * (surfaceColor * diffuse + specular);
 }
 
-float3 LightPoint(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+float3 LightPoint(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float surfaceSpecular, float3 surfaceWorldPos, float3 cameraPosition)
 {
     float3 lightDirectionIn = normalize(surfaceWorldPos - light.Position);
     
     float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition);
+    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition);
 
     return light.Color * light.Intensity * (surfaceColor * diffuse + specular) * Attenuate(light, surfaceWorldPos);
 }
 
-float3 LightSpot(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+float3 LightSpot(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float surfaceSpecular, float3 surfaceWorldPos, float3 cameraPosition)
 {
     float3 lightDirectionIn = normalize(surfaceWorldPos - light.Position);
     
-    return LightPoint(light, surfaceNormal, surfaceColor, surfaceRoughness, surfaceWorldPos, cameraPosition) * SpotTerm(light, lightDirectionIn);
+    return LightPoint(light, surfaceNormal, surfaceColor, surfaceRoughness, surfaceSpecular, surfaceWorldPos, cameraPosition) * SpotTerm(light, lightDirectionIn);
 }
 
 #endif

@@ -23,6 +23,7 @@ public:
 
 	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+	void PrepareMaterial();
 
 private:
 	std::shared_ptr<SimpleVertexShader> vertexShader;

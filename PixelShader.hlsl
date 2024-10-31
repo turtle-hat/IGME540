@@ -14,6 +14,10 @@ cbuffer PrimaryBuffer : register(b0)
 	Light lights[LIGHT_COUNT];
 }
 
+Texture2D SurfaceTexture : register(t0); // "t" registers for textures
+
+SamplerState BasicSampler : register(s0); // "s" registers for samplers
+
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
 // 
@@ -25,7 +29,19 @@ cbuffer PrimaryBuffer : register(b0)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
+	// Renormalize the normal
 	input.normal = normalize(input.normal);
+
+	// Sample the texture at this pixel
+	float4 sampleDS = SurfaceTexture.Sample(BasicSampler, input.uv);
+	float3 sampleDiffuse = sampleDS.rgb;
+	float sampleSpecular = sampleDS.a;
+
+	float3 surfaceColor = float3(
+		sampleDiffuse.x * colorTint.x,
+		sampleDiffuse.y * colorTint.y,
+		sampleDiffuse.z * colorTint.z
+	);
 
 	// Start accumulator with ambient light value
 	float3 lightsFinal = lightAmbient;
@@ -37,13 +53,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 			// Run a different lighting equation on it depending on the type of light
 			switch (lights[i].Type) {
 				case LIGHT_TYPE_DIRECTIONAL:
-					lightsFinal += LightDirectional(lights[i], input.normal, colorTint.xyz, roughness, input.worldPosition, cameraPosition);
+					lightsFinal += LightDirectional(lights[i], input.normal, surfaceColor, roughness, sampleSpecular, input.worldPosition, cameraPosition);
 					break;
 				case LIGHT_TYPE_POINT:
-					lightsFinal += LightPoint(lights[i], input.normal, colorTint.xyz, roughness, input.worldPosition, cameraPosition);
+					lightsFinal += LightPoint(lights[i], input.normal, surfaceColor, roughness, sampleSpecular, input.worldPosition, cameraPosition);
 					break;
 				case LIGHT_TYPE_SPOT:
-					lightsFinal += LightSpot(lights[i], input.normal, colorTint.xyz, roughness, input.worldPosition, cameraPosition);
+					lightsFinal += LightSpot(lights[i], input.normal, surfaceColor, roughness, sampleSpecular, input.worldPosition, cameraPosition);
 					break;
 				default:
 					break;
@@ -51,5 +67,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 		}
 	}
 
+	// Return the result of our lighting equations
 	return float4(lightsFinal, 1.0f);
 }
