@@ -32,7 +32,10 @@ void Game::Initialize()
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
+	CreateMaterials();
 	CreateGeometry();
+	CreateLights();
+	CreateCameras();
 	InitializeSimulationParameters();
 
 	// Set initial graphics API state
@@ -77,56 +80,15 @@ Game::~Game()
 
 
 // --------------------------------------------------------
-// Loads textures, describes sampler state, and loads
-// shaders from compiled shader object (.cso) files. Also
-// creates the Input Layout that describes our vertex data
-// to the rendering pipeline. 
+// Loads shaders from compiled shader object (.cso) files
+// and creates the Input Layout that describes our vertex
+// data to the rendering pipeline. 
 // - Input Layout creation is done here because it must 
 //    be verified against vertex shader byte code
 // - We'll have that byte code already loaded below
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
-	// Declare SRV
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-
-	// Load textures
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_brokentiles_DS.png").c_str(),
-		nullptr,
-		srv.GetAddressOf()
-	);
-	// For some reason creating more than one texture spits out a ton of warnings when the app closes:
-	// D3D11 WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: UNKNOWN]
-	// D3D11 WARNING : Live Producer at 0x0000029023D63430, Refcount : 2.[STATE_CREATION WARNING #0: UNKNOWN]
-	// D3D11 WARNING : Live Object at 0x0000029023D67390, Refcount : 0.[STATE_CREATION WARNING #0: UNKNOWN]
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_rustymetal_DS.png").c_str(),
-		nullptr,
-		srv.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_tiles_DS.png").c_str(),
-		nullptr,
-		srv.GetAddressOf()
-	);
-
-	// Set default sampler state values
-	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDescription.MaxAnisotropy = 16;
-	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
-
-	Graphics::Device->CreateSamplerState(&samplerDescription, &samplerState);
-
 	// Load shaders in with SimpleShader
 	// VERTEX SHADER 0
 	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
@@ -157,34 +119,82 @@ void Game::LoadShaders()
 	));
 }
 
-
 // --------------------------------------------------------
-// Creates the geometry we're going to draw
+// Loads textures and creates materials
 // --------------------------------------------------------
-void Game::CreateGeometry()
+void Game::CreateMaterials()
 {
+	// Declare SRVs 0-2
+	// I didn't wanna put these in a vector since I
+	// didn't know how to push_back a new ComPtr for each SRV
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv0;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv1;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv2;
+
+	// Load textures
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_brokentiles_DS.png").c_str(),
+		nullptr,
+		srv0.GetAddressOf()
+	);
+	// For some reason creating more than one texture spits out a ton of warnings when the app closes:
+	// D3D11 WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: UNKNOWN]
+	// D3D11 WARNING : Live Producer at 0x0000029023D63430, Refcount : 2.[STATE_CREATION WARNING #0: UNKNOWN]
+	// D3D11 WARNING : Live Object at 0x0000029023D67390, Refcount : 0.[STATE_CREATION WARNING #0: UNKNOWN]
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_rustymetal_DS.png").c_str(),
+		nullptr,
+		srv1.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_tiles_DS.png").c_str(),
+		nullptr,
+		srv2.GetAddressOf()
+	);
+
+	// Sampler state description for changing sampler state with UI
+	D3D11_SAMPLER_DESC samplerDescription = {};
+	// Set default sampler state values
+	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDescription.MaxAnisotropy = 16;
+	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create sampler state
+	Graphics::Device->CreateSamplerState(&samplerDescription, &samplerState);
+
 	// Create materials
 	// MATERIALS 0-2
 	materials.push_back(std::make_shared<Material>(
-		"Mat_SolidGreen",
+		"Mat_BrokenTiles",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(0.0f, 1.0f, 0.1f, 1.0f),
-		0.5f
-	));
-	materials.push_back(std::make_shared<Material>(
-		"Mat_SolidMauve",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(0.8f, 0.6f, 0.9f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 0.1f, 1.0f),
 		1.0f
 	));
+	materials[0]->AddTextureSRV("SurfaceTexture", srv0);
+	materials[0]->AddSampler("BasicSampler", samplerState);
 	materials.push_back(std::make_shared<Material>(
-		"Mat_SolidWhite",
+		"Mat_RustyMetal",
 		vertexShaders[0],
 		pixelShaders[0],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
+		1.0f
+	));
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Tiles",
+		vertexShaders[0],
+		pixelShaders[0],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		1.0f
 	));
 	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
@@ -208,7 +218,14 @@ void Game::CreateGeometry()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		1.0f
 	));
+}
 
+// --------------------------------------------------------
+// Creates the geometry we're going to draw and all
+// entities in the scene
+// --------------------------------------------------------
+void Game::CreateGeometry()
+{
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
 	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
@@ -407,9 +424,12 @@ void Game::CreateGeometry()
 	entities[26]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
 	entities[26]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
 	*/
+}
 
-
-
+// --------------------------------------------------------
+// Creates the lights to be rendered in the scene
+// --------------------------------------------------------
+void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
 	Light lightDir0 = {};
@@ -419,6 +439,7 @@ void Game::CreateGeometry()
 	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
 	lights.push_back(lightDir0);
+
 	// LIGHTS 1-2
 	Light lightDir1 = {};
 	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
@@ -427,6 +448,7 @@ void Game::CreateGeometry()
 	lightDir1.Intensity = 1.0f;
 	lightDir1.Active = 1;
 	lights.push_back(lightDir1);
+
 	Light lightDir2 = {};
 	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
 	lightDir2.Direction = XMFLOAT3(1.0f, 0.0f, 1.0f);
@@ -434,6 +456,7 @@ void Game::CreateGeometry()
 	lightDir2.Intensity = 1.0f;
 	lightDir2.Active = 1;
 	lights.push_back(lightDir2);
+
 	// LIGHTS 3-4
 	Light lightPt0 = {};
 	lightPt0.Type = LIGHT_TYPE_POINT;
@@ -443,6 +466,7 @@ void Game::CreateGeometry()
 	lightPt0.Range = 10.0f;
 	lightPt0.Active = 1;
 	lights.push_back(lightPt0);
+
 	Light lightPt1 = {};
 	lightPt1.Type = LIGHT_TYPE_POINT;
 	lightPt1.Position = XMFLOAT3(1.0f, -4.0f, 0.0f);
@@ -451,6 +475,7 @@ void Game::CreateGeometry()
 	lightPt1.Range = 4.0f;
 	lightPt1.Active = 1;
 	lights.push_back(lightPt1);
+
 	// LIGHT 5
 	Light lightSpt0 = {};
 	lightSpt0.Type = LIGHT_TYPE_SPOT;
@@ -463,9 +488,12 @@ void Game::CreateGeometry()
 	lightSpt0.SpotOuterAngle = 0.5f;
 	lightSpt0.Active = 1;
 	lights.push_back(lightSpt0);
+}
 
-
-
+// --------------------------------------------------------
+// Creates the cameras we'll need in the scene
+// --------------------------------------------------------
+void Game::CreateCameras() {
 	// Create cameras
 	float aspect = (Window::Width() + 0.0f) / Window::Height();
 	// CAMERAS 0-3
@@ -498,16 +526,13 @@ void Game::CreateGeometry()
 	cameras[1]->GetTransform()->SetPosition(100.0f, 0.0f, 0.0f);
 	cameras[1]->GetTransform()->SetRotation(0.0f, -XM_PIDIV2, 0.0f);
 	cameras[1]->SetLookSpeed(1.0f);
-	
+
 	cameras[2]->GetTransform()->SetPosition(0.0f, 100.0f, 0.0f);
 	cameras[2]->GetTransform()->SetRotation(XM_PIDIV2 - 0.001f, 0.0f, 0.0f);
 	cameras[2]->SetLookSpeed(1.0f);
-	
+
 	cameras[3]->GetTransform()->SetPosition(0.0f, 0.0f, -100.0f);
 	cameras[3]->SetLookSpeed(1.0f);
-
-
-
 }
 
 

@@ -21,11 +21,17 @@ public:
 	void SetColorTint(DirectX::XMFLOAT4 _colorTint);
 	void SetRoughness(float _roughness);
 
+	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
+	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+
 private:
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	DirectX::XMFLOAT4 colorTint;
 	float roughness;
+
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureSRVs;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>> samplers;
 
 	const char* name;
 };

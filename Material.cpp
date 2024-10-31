@@ -98,3 +98,23 @@ void Material::SetRoughness(float _roughness)
 {
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
 }
+
+/// <summary>
+/// Adds the SRV for a texture to this material
+/// </summary>
+/// <param name="name">The name of the texture</param>
+/// <param name="srv">The texture's SRV</param>
+void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+{
+	textureSRVs.insert({ name, srv });
+}
+
+/// <summary>
+/// Adds a sampler state to this material
+/// </summary>
+/// <param name="name">The name of the sampler</param>
+/// <param name="sampler">The sampler state itself</param>
+void Material::AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+{
+	samplers.insert({ name, sampler });
+}

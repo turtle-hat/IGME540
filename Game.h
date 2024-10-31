@@ -32,7 +32,10 @@ private:
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
+	void CreateMaterials();
 	void CreateGeometry();
+	void CreateLights();
+	void CreateCameras();
 	void InitializeSimulationParameters();
 	void ImGuiUpdate(float deltaTime);
 
@@ -67,12 +70,8 @@ private:
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
 	// TEXTURES
-	// Pointer to the sampler state itself
+	// Pointer to the general sampler state
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
-	// Sampler state description for changing sampler state with UI
-	D3D11_SAMPLER_DESC samplerDescription = {};
-	// Whether or not the sampler state needs to be rebuilt from the description
-	bool isSamplerStateDirty;
 
 	// MATERIALS
 	std::vector<std::shared_ptr<Material>> materials;
