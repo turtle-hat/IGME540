@@ -879,6 +879,9 @@ void Game::ImGuiBuild() {
 				XMFLOAT4 tint_xm = materials[i]->GetColorTint();
 				float tint_f[4] = {tint_xm.x, tint_xm.y, tint_xm.z, tint_xm.w};
 				float roughness = materials[i]->GetRoughness();
+				vector<ID3D11ShaderResourceView*> textures = materials[i]->GetTextures();
+				XMFLOAT2 uv_pos = materials[i]->GetUVPosition();
+				XMFLOAT2 uv_sca = materials[i]->GetUVScale();
 
 				// If the user has edited the tint this frame, change the material's tint
 				if (ImGui::ColorEdit4("Tint", tint_f)) {
@@ -889,6 +892,27 @@ void Game::ImGuiBuild() {
 					materials[i]->SetRoughness(roughness);
 				}
 
+				// If any textures exist, include texture settings
+				if (textures.size() > 0) {
+					if (ImGui::DragFloat2("UV Position", (float*)&uv_pos, 0.01f, -1.0f, 1.0f, "%.2f")) {
+						materials[i]->SetUVPosition(uv_pos);
+					}
+					if (ImGui::DragFloat2("UV Scale", (float*)&uv_sca, 0.01f, 0.001f, 10.0f, "%.2f")) {
+						materials[i]->SetUVScale(uv_sca);
+					}
+
+					ImGui::Text("Textures:");
+					for (ID3D11ShaderResourceView* texture : textures) {
+						ImGui::Image(
+							(void*)texture,
+							ImVec2(240, 240),
+							ImVec2(uv_pos.x, uv_pos.y),
+							ImVec2(uv_pos.x + uv_sca.x, uv_pos.y + uv_sca.y)
+						);
+					}
+				}
+
+				// Custom settings for specific materials
 				if (materials[i]->GetName() == "Mat_Custom") {
 					float image[2] = { pMatCustomImage.x, pMatCustomImage.y };
 					float zoom[2] = { pMatCustomZoom.x, pMatCustomZoom.y };

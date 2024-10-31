@@ -16,6 +16,8 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
+	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 }
 
 /// <summary>
@@ -64,6 +66,30 @@ const char* Material::GetName()
 }
 
 /// <summary>
+/// Sets the Material's UV position
+/// </summary>
+/// <returns>The current UV position for the Material's textures</returns>
+DirectX::XMFLOAT2 Material::GetUVPosition()
+{
+	return uvPosition;
+}
+
+/// <summary>
+/// Gets the Material's UV scale
+/// </summary>
+/// <returns>The current UV scale for the Material's textures</returns>
+DirectX::XMFLOAT2 Material::GetUVScale()
+{
+	return uvScale;
+}
+
+
+std::vector<ID3D11ShaderResourceView*> Material::GetTextures()
+{
+	return textureList;
+}
+
+/// <summary>
 /// Sets the Vertex Shader for the Material to use
 /// </summary>
 /// <param name="_vertexShader">A pointer to the Material's new Vertex Shader</param>
@@ -100,6 +126,24 @@ void Material::SetRoughness(float _roughness)
 }
 
 /// <summary>
+/// Sets the Material's UV scale
+/// </summary>
+/// <param name="_position">The new UV position for the Material's textures</param>
+void Material::SetUVPosition(DirectX::XMFLOAT2 _position)
+{
+	uvPosition = _position;
+}
+
+/// <summary>
+/// Sets the Material's UV scale
+/// </summary>
+/// <param name="_scale">The new UV scale for the Material's textures</param>
+void Material::SetUVScale(DirectX::XMFLOAT2 _scale)
+{
+	uvScale = _scale;
+}
+
+/// <summary>
 /// Adds the SRV for a texture to this material
 /// </summary>
 /// <param name="name">The name of the texture</param>
@@ -107,6 +151,7 @@ void Material::SetRoughness(float _roughness)
 void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
 {
 	textureSRVs.insert({ name, srv });
+	textureList.push_back(srv.Get());
 }
 
 /// <summary>
