@@ -18,6 +18,7 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
+	isSamplerStateLocked = false;
 }
 
 /// <summary>
@@ -144,24 +145,52 @@ void Material::SetUVScale(DirectX::XMFLOAT2 _scale)
 }
 
 /// <summary>
-/// Adds the SRV for a texture to this material
+/// Locks the Sampler State, preventing it from changing with the global sampler state
+/// </summary>
+void Material::LockSamplerState()
+{
+	isSamplerStateLocked = true;
+}
+
+/// <summary>
+/// Unlocks the Sampler State, allowing it to change with the global sampler state
+/// </summary>
+void Material::UnlockSamplerState()
+{
+	isSamplerStateLocked = false;
+}
+
+/// <summary>
+/// Adds the SRV for a texture to this material, or replaces it if one of the same name already exists
 /// </summary>
 /// <param name="name">The name of the texture</param>
 /// <param name="srv">The texture's SRV</param>
 void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
 {
+	// If SRV with same name was found, release it
+	if (textureSRVs.find(name) != textureSRVs.end()) {
+		textureSRVs[name] = nullptr;
+		samplers.erase(name);
+	}
 	textureSRVs.insert({ name, srv });
 	textureList.push_back(srv.Get());
 }
 
 /// <summary>
-/// Adds a sampler state to this material
+/// Adds a sampler state to this material, or replaces it if one of the same name already exists
 /// </summary>
 /// <param name="name">The name of the sampler</param>
 /// <param name="sampler">The sampler state itself</param>
 void Material::AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
 {
-	samplers.insert({ name, sampler });
+	if (!isSamplerStateLocked) {
+		// If sampler with same name was found, release it first
+		if (samplers.find(name) != samplers.end()) {
+			samplers[name] = nullptr;
+			samplers.erase(name);
+		}
+		samplers.insert({ name, sampler });
+	}
 }
 
 /// <summary>

@@ -89,6 +89,8 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
+
+
 	// Load shaders in with SimpleShader
 	// VERTEX SHADER 0
 	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
@@ -158,18 +160,12 @@ void Game::CreateMaterials()
 		srv2.GetAddressOf()
 	);
 
-	// Sampler state description for changing sampler state with UI
-	D3D11_SAMPLER_DESC samplerDescription = {};
-	// Set default sampler state values
-	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDescription.MaxAnisotropy = 16;
-	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+	// Set default sampler state settings
+	pSamplerFilter = D3D11_FILTER_ANISOTROPIC;
+	pAnisotropyPower = 4;
 
-	// Create sampler state
-	Graphics::Device->CreateSamplerState(&samplerDescription, &samplerState);
+	// Create the sampler state
+	SetGlobalSamplerState(pSamplerFilter, (int)pow(2, pAnisotropyPower));
 
 	// Create materials
 	// MATERIALS 0-2
@@ -177,7 +173,7 @@ void Game::CreateMaterials()
 		"Mat_BrokenTiles",
 		vertexShaders[0],
 		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 0.1f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		0.2f
 	));
 	materials[0]->AddTextureSRV("SurfaceTexture", srv0);
@@ -438,8 +434,8 @@ void Game::CreateLights() {
 	// LIGHT 0
 	Light lightDir0 = {};
 	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir0.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	lightDir0.Color = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	lightDir0.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
+	lightDir0.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	lightDir0.Intensity = 1.0f;
 	lightDir0.Active = 1;
 	lights.push_back(lightDir0);
@@ -448,15 +444,15 @@ void Game::CreateLights() {
 	Light lightDir1 = {};
 	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
 	lightDir1.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	lightDir1.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	lightDir1.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	lightDir1.Intensity = 1.0f;
 	lightDir1.Active = 1;
 	lights.push_back(lightDir1);
 
 	Light lightDir2 = {};
 	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir2.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	lightDir2.Color = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	lightDir2.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	lightDir2.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	lightDir2.Intensity = 1.0f;
 	lightDir2.Active = 1;
 	lights.push_back(lightDir2);
@@ -474,7 +470,7 @@ void Game::CreateLights() {
 	Light lightPt1 = {};
 	lightPt1.Type = LIGHT_TYPE_POINT;
 	lightPt1.Position = XMFLOAT3(1.0f, -4.0f, 0.0f);
-	lightPt1.Color = XMFLOAT3(1.0f, 0.8f, 1.0f);
+	lightPt1.Color = XMFLOAT3(1.0f, 0.2f, 1.0f);
 	lightPt1.Intensity = 2.0f;
 	lightPt1.Range = 4.0f;
 	lightPt1.Active = 1;
@@ -485,11 +481,11 @@ void Game::CreateLights() {
 	lightSpt0.Type = LIGHT_TYPE_SPOT;
 	lightSpt0.Position = XMFLOAT3(4.5f, 0.0f, 0.25f);
 	lightSpt0.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	lightSpt0.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	lightSpt0.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	lightSpt0.Intensity = 1.0f;
 	lightSpt0.Range = 30.0f;
-	lightSpt0.SpotInnerAngle = 0.05f;
-	lightSpt0.SpotOuterAngle = 0.5f;
+	lightSpt0.SpotInnerAngle = 0.35f;
+	lightSpt0.SpotOuterAngle = 0.4f;
 	lightSpt0.Active = 1;
 	lights.push_back(lightSpt0);
 }
@@ -631,7 +627,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->SetFloat4("colorTint", material->GetColorTint());
 		ps->SetFloat("roughness", material->GetRoughness());
 		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
-		ps->SetFloat3("lightAmbient", pAmbientColor);
+
+		ps->SetFloat2("uvPosition", material->GetUVPosition());
+		ps->SetFloat2("uvScale", material->GetUVScale());
 
 		// Set lights on pixel shader
 		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
@@ -642,6 +640,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
+		ps->SetFloat3("lightAmbient", pAmbientColor);
 
 		// COPY DATA TO CONSTANT BUFFERS
 		vs->CopyAllBufferData();
@@ -713,6 +712,37 @@ void Game::InitializeSimulationParameters() {
 	igFrameGraphSampleOffset = 0;
 	igFrameGraphHighest = 0.0f;
 	igFrameGraphDoAnimate = true;
+}
+
+// --------------------------------------------------------
+// Sets the sampler state in the samplerState variable
+// based on the given graphics settings
+// --------------------------------------------------------
+void Game::SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel) {
+	// Reset sampler state if one exists
+	samplerState = nullptr;
+
+	// Sampler state description for changing sampler state with UI
+	D3D11_SAMPLER_DESC samplerDescription = {};
+	// Set default sampler state values
+	samplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDescription.Filter = _filter;
+	samplerDescription.MaxAnisotropy = _anisotropyLevel;
+	samplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create sampler state
+	Graphics::Device->CreateSamplerState(&samplerDescription, &samplerState);
+}
+
+// --------------------------------------------------------
+// Sets the sampler states of each Material
+// --------------------------------------------------------
+void Game::SetMaterialSamplerStates() {
+	for (int i = 0; i < materials.size(); i++) {
+		materials[i]->AddSampler("BasicSampler", samplerState);
+	}
 }
 
 // --------------------------------------------------------
@@ -831,10 +861,15 @@ void Game::ImGuiBuild() {
 		}
 	}
 	
-	if (ImGui::CollapsingHeader("Basics")) {					// Basic parameters (e.g. colors and positions)
+	if (ImGui::CollapsingHeader("Graphics")) {					// General graphics parameters (e.g. colors and )
 		ImGui::Spacing();
 		
 		ImGui::ColorEdit3("Background Color", pBackgroundColor);
+		if (ImGui::SliderInt("Anisotropy", &pAnisotropyPower, 0, 4)) {
+			SetGlobalSamplerState(pSamplerFilter, (int)pow(2, pAnisotropyPower));
+			SetMaterialSamplerStates();
+		}
+		ImGui::SetItemTooltip("Sets anisotropy level to 2^n");
 		
 		ImGui::Spacing();
 	}

@@ -36,6 +36,8 @@ private:
 	void CreateGeometry();
 	void CreateLights();
 	void CreateCameras();
+	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
+	void SetMaterialSamplerStates();
 	void InitializeSimulationParameters();
 	void ImGuiUpdate(float deltaTime);
 
@@ -55,6 +57,12 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
+
+	// Filtering mode
+	D3D11_FILTER pSamplerFilter;
+	// Level of anisotropy (2 to this power)
+	int pAnisotropyPower;
+
 	// Ambient light color
 	DirectX::XMFLOAT3 pAmbientColor;
 	// How many iterations the custom material should go through
@@ -64,7 +72,6 @@ private:
 	DirectX::XMFLOAT2 pMatCustomZoom;
 
 	const char LIGHT_TYPE_STRINGS[3][12] = { "Directional", "Point", "Spot" };
-
 
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;

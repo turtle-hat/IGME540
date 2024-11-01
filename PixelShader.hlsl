@@ -9,9 +9,12 @@ cbuffer PrimaryBuffer : register(b0)
 	float4 colorTint;
 	float roughness;
 	float3 cameraPosition;
-	float3 lightAmbient;
+
+	float2 uvPosition;
+	float2 uvScale;
 
 	Light lights[LIGHT_COUNT];
+	float3 lightAmbient;
 }
 
 Texture2D SurfaceTexture : register(t0); // "t" registers for textures
@@ -33,7 +36,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	input.normal = normalize(input.normal);
 
 	// Sample the texture at this pixel
-	float4 sampleDS = SurfaceTexture.Sample(BasicSampler, input.uv);
+	float4 sampleDS = SurfaceTexture.Sample(BasicSampler, input.uv * uvScale + uvPosition);
 	float3 sampleDiffuse = sampleDS.rgb;
 	float sampleSpecular = sampleDS.a;
 
