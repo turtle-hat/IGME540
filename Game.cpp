@@ -178,6 +178,7 @@ void Game::CreateMaterials()
 	));
 	materials[0]->AddTextureSRV("SurfaceTexture", srv0);
 	materials[0]->AddSampler("BasicSampler", samplerState);
+
 	materials.push_back(std::make_shared<Material>(
 		"Mat_RustyMetal",
 		vertexShaders[0],
@@ -187,6 +188,7 @@ void Game::CreateMaterials()
 	));
 	materials[1]->AddTextureSRV("SurfaceTexture", srv1);
 	materials[1]->AddSampler("BasicSampler", samplerState);
+
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Tiles",
 		vertexShaders[0],
@@ -196,6 +198,7 @@ void Game::CreateMaterials()
 	));
 	materials[2]->AddTextureSRV("SurfaceTexture", srv2);
 	materials[2]->AddSampler("BasicSampler", samplerState);
+
 	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Normals",
@@ -204,6 +207,7 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		1.0f
 	));
+
 	materials.push_back(std::make_shared<Material>(
 		"Mat_UVs",
 		vertexShaders[0],
@@ -211,6 +215,7 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		1.0f
 	));
+
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Custom",
 		vertexShaders[0],
@@ -402,13 +407,13 @@ void Game::CreateGeometry()
 	entities[18]->GetTransform()->SetPosition(9.0f, -1.0f, 0.0f);
 
 	// ENTITIES 19-25
-	entities.push_back(std::make_shared<Entity>("E_Tint_Cube",				meshes[3], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Tint_Cylinder",			meshes[4], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Tint_Helix",				meshes[5], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Custom_Sphere",			meshes[8], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Tint_Torus",				meshes[9], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Tint_Quad-SingleSided",	meshes[6], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Tint_Quad-DoubleSided",	meshes[7], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[3], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[4], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[5], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[8], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[9], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[6], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[7], materials[0]));
 
 	entities[19]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
 	entities[20]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);
@@ -573,8 +578,12 @@ void Game::Update(float deltaTime, float totalTime)
 
 	// Rotate OBJ-imported meshes
 	for (int i = 5; i <= 25; i++) {
-		entities[i]->GetTransform()->Rotate(0.0f, deltaTime, 0.0f);
+		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
+
+	// Scroll and scale UV of rusty metal texture
+	materials[1]->SetUVPosition(XMFLOAT2(sin(totalTime), cos(totalTime)));
+	materials[1]->SetUVScale(XMFLOAT2(sin(totalTime * 0.5f) * 0.5f + 1.0f, cos(totalTime * 0.5f) * 0.5f + 1.0f));
 
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
@@ -692,6 +701,9 @@ void Game::InitializeSimulationParameters() {
 	igShowDemo = false;
 	float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f };
 	memcpy(pBackgroundColor, bgColor, sizeof(float) * 4);
+	pObjectRotationSpeed = 1.0f;
+
+	pSelectedSamplerFilter = 5;
 	pAmbientColor = XMFLOAT3(0.1f, 0.1f, 0.25f);
 
 	pMatCustomIterations = 100;
@@ -861,13 +873,47 @@ void Game::ImGuiBuild() {
 		}
 	}
 	
-	if (ImGui::CollapsingHeader("Graphics")) {					// General graphics parameters (e.g. colors and )
+	if (ImGui::CollapsingHeader("Settings")) {					// General settings parameters for graphics and simulation
 		ImGui::Spacing();
 		
 		ImGui::ColorEdit3("Background Color", pBackgroundColor);
-		if (ImGui::SliderInt("Anisotropy", &pAnisotropyPower, 0, 4)) {
-			SetGlobalSamplerState(pSamplerFilter, (int)pow(2, pAnisotropyPower));
-			SetMaterialSamplerStates();
+		ImGui::Spacing();
+
+		ImGui::SliderFloat("Object Rotation", &pObjectRotationSpeed, -2.0f, 2.0f, "%.1f");
+		ImGui::Spacing();
+		
+		// Pass in the preview value visible before opening the combo
+		const char* currentFilterName = SAMPLER_FILTER_STRINGS[pSelectedSamplerFilter];
+
+		if (ImGui::BeginCombo("Filter", currentFilterName))
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(SAMPLER_FILTER_STRINGS); i++)
+			{
+				const bool isSelected = (pSelectedSamplerFilter == i);
+				// If option clicked,
+				if (ImGui::Selectable(SAMPLER_FILTER_STRINGS[i], isSelected)) {
+					// Set its index as the currently selected array item
+					pSelectedSamplerFilter = i;
+					// Set the filter itself
+					pSamplerFilter = SAMPLER_FILTERS[i];
+					// Set the sampler state of all materials
+					SetGlobalSamplerState(pSamplerFilter, (int)pow(2, pAnisotropyPower));
+					SetMaterialSamplerStates();
+				}
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		// If anisotropic filtering is selecter, reveal anisotropy level slider
+		if (pSamplerFilter == D3D11_FILTER_ANISOTROPIC) {
+			if (ImGui::SliderInt("Anisotropy", &pAnisotropyPower, 0, 4)) {
+				SetGlobalSamplerState(pSamplerFilter, (int)pow(2, pAnisotropyPower));
+				SetMaterialSamplerStates();
+			}
 		}
 		ImGui::SetItemTooltip("Sets anisotropy level to 2^n");
 		
@@ -929,10 +975,10 @@ void Game::ImGuiBuild() {
 
 				// If any textures exist, include texture settings
 				if (textures.size() > 0) {
-					if (ImGui::DragFloat2("UV Position", (float*)&uv_pos, 0.01f, -1.0f, 1.0f, "%.2f")) {
+					if (ImGui::DragFloat2("UV Position", (float*)&uv_pos, 0.01f, NULL, NULL, "%.2f")) {
 						materials[i]->SetUVPosition(uv_pos);
 					}
-					if (ImGui::DragFloat2("UV Scale", (float*)&uv_sca, 0.01f, 0.001f, 10.0f, "%.2f")) {
+					if (ImGui::DragFloat2("UV Scale", (float*)&uv_sca, 0.01f, NULL, NULL, "%.2f")) {
 						materials[i]->SetUVScale(uv_sca);
 					}
 

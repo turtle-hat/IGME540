@@ -57,10 +57,25 @@ private:
 	
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
+	// How fast to rotate the objects
+	float pObjectRotationSpeed;
 
 	// Filtering mode
 	D3D11_FILTER pSamplerFilter;
-	// Level of anisotropy (2 to this power)
+	// Names for each filtering mode
+	const char* SAMPLER_FILTER_STRINGS[6] = { "Point", "Linear Magnification", "Linear Minification", "Bilinear", "Trilinear", "Anisotropic" };
+	// Corresponding filtering modes
+	const D3D11_FILTER SAMPLER_FILTERS[6] = {
+		D3D11_FILTER_MIN_MAG_MIP_POINT,
+		D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT,
+		D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT,
+		D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT,
+		D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D11_FILTER_ANISOTROPIC
+	};
+	// Selected array item
+	int pSelectedSamplerFilter;
+	// Level of anisotropy is 2 to this power
 	int pAnisotropyPower;
 
 	// Ambient light color
@@ -71,7 +86,7 @@ private:
 	DirectX::XMFLOAT2 pMatCustomImage;
 	DirectX::XMFLOAT2 pMatCustomZoom;
 
-	const char LIGHT_TYPE_STRINGS[3][12] = { "Directional", "Point", "Spot" };
+	const char* LIGHT_TYPE_STRINGS[3] = { "Directional", "Point", "Spot" };
 
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
