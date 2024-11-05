@@ -141,6 +141,13 @@ void Game::CreateMaterials()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBrokenTilesDS;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRustyMetalDS;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvTilesDS;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCobblestoneD;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCobblestoneN;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCushionD;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCushionN;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvFlatN;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRockD;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRockN;
 
 	// Load textures
 	CreateWICTextureFromFile(
@@ -164,6 +171,55 @@ void Game::CreateMaterials()
 		nullptr,
 		srvTilesDS.GetAddressOf()
 	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_cobblestone_D.png").c_str(),
+		nullptr,
+		srvCobblestoneD.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_cobblestone_N.png").c_str(),
+		nullptr,
+		srvCobblestoneN.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_cushion_D.png").c_str(),
+		nullptr,
+		srvCushionD.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_cushion_N.png").c_str(),
+		nullptr,
+		srvCushionN.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_flat_N.png").c_str(),
+		nullptr,
+		srvFlatN.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_rock_D.png").c_str(),
+		nullptr,
+		srvRockD.GetAddressOf()
+	);
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(L"../../Assets/Textures/T_rock_N.png").c_str(),
+		nullptr,
+		srvRockN.GetAddressOf()
+	);
 
 	// Set default sampler state settings
 	pSamplerFilter = D3D11_FILTER_ANISOTROPIC;
@@ -174,37 +230,6 @@ void Game::CreateMaterials()
 
 	// Create materials
 	// MATERIALS 0-2
-	materials.push_back(std::make_shared<Material>(
-		"Mat_BrokenTiles",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.2f
-	));
-	materials[0]->AddTextureSRV("MapDiffuseSpecular", srvBrokenTilesDS);
-	materials[0]->AddSampler("BasicSampler", samplerState);
-
-	materials.push_back(std::make_shared<Material>(
-		"Mat_RustyMetal",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.8f
-	));
-	materials[1]->AddTextureSRV("MapDiffuseSpecular", srvRustyMetalDS);
-	materials[1]->AddSampler("BasicSampler", samplerState);
-
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Tiles",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
-	));
-	materials[2]->AddTextureSRV("MapDiffuseSpecular", srvTilesDS);
-	materials[2]->AddSampler("BasicSampler", samplerState);
-
-	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Normals",
 		vertexShaders[0],
@@ -228,6 +253,82 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		1.0f
 	));
+
+	// MATERIALS 3-5
+	materials.push_back(std::make_shared<Material>(
+		"Mat_BrokenTiles",
+		vertexShaders[0],
+		pixelShaders[0],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.2f
+	));
+	materials[3]->AddTextureSRV("MapDiffuseSpecular", srvBrokenTilesDS);
+	materials[3]->AddSampler("BasicSampler", samplerState);
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_RustyMetal",
+		vertexShaders[0],
+		pixelShaders[0],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.8f
+	));
+	materials[4]->AddTextureSRV("MapDiffuseSpecular", srvRustyMetalDS);
+	materials[4]->AddSampler("BasicSampler", samplerState);
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Tiles",
+		vertexShaders[0],
+		pixelShaders[0],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.0f
+	));
+	materials[5]->AddTextureSRV("MapDiffuseSpecular", srvTilesDS);
+	materials[5]->AddSampler("BasicSampler", samplerState);
+
+	// MATERIALS 6-9
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Cobblestone",
+		vertexShaders[1],
+		pixelShaders[1],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.0f
+	));
+	materials[6]->AddTextureSRV("MapDiffuse", srvCobblestoneD);
+	materials[6]->AddTextureSRV("MapNormal", srvCobblestoneN);
+	materials[6]->AddSampler("BasicSampler", samplerState);
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Cushion",
+		vertexShaders[1],
+		pixelShaders[1],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.0f
+	));
+	materials[7]->AddTextureSRV("MapDiffuse", srvCushionD);
+	materials[7]->AddTextureSRV("MapNormal", srvCushionN);
+	materials[7]->AddSampler("BasicSampler", samplerState);
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Rock",
+		vertexShaders[1],
+		pixelShaders[1],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.0f
+	));
+	materials[8]->AddTextureSRV("MapDiffuse", srvRockD);
+	materials[8]->AddTextureSRV("MapNormal", srvRockN);
+	materials[8]->AddSampler("BasicSampler", samplerState);
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Flat",
+		vertexShaders[1],
+		pixelShaders[1],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		0.0f
+	));
+	materials[9]->AddTextureSRV("MapDiffuse", srvFlatN);	// Normal map used for diffuse
+	materials[9]->AddTextureSRV("MapNormal", srvFlatN);
+	materials[9]->AddSampler("BasicSampler", samplerState);
 }
 
 // --------------------------------------------------------
@@ -247,59 +348,59 @@ void Game::CreateGeometry()
 	meshes.push_back(std::make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 5-11
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cube",				meshes[0], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cylinder",			meshes[1], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Helix",				meshes[2], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Sphere",				meshes[5], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Torus",				meshes[6], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-SingleSided",	meshes[3], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-DoubleSided",	meshes[4], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Cube",				meshes[0], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Cylinder",			meshes[1], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Helix",				meshes[2], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Sphere",				meshes[5], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Torus",				meshes[6], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-SingleSided",	meshes[3], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-DoubleSided",	meshes[4], materials[0]));
 
 	entities[0]->GetTransform()->SetPosition(-9.0f, 3.0f, 0.0f);
 	entities[1]->GetTransform()->SetPosition(-6.0f, 3.0f, 0.0f);
 	entities[2]->GetTransform()->SetPosition(-3.0f, 3.0f, 0.0f);
-	entities[3]->GetTransform()->SetPosition(0.0f,  3.0f, 0.0f);
-	entities[4]->GetTransform()->SetPosition(3.0f,  3.0f, 0.0f);
-	entities[5]->GetTransform()->SetPosition(6.0f, 3.0f, 0.0f);
-	entities[6]->GetTransform()->SetPosition(9.0f, 2.0f, 0.0f);
+	entities[3]->GetTransform()->SetPosition( 0.0f, 3.0f, 0.0f);
+	entities[4]->GetTransform()->SetPosition( 3.0f, 3.0f, 0.0f);
+	entities[5]->GetTransform()->SetPosition( 6.0f, 3.0f, 0.0f);
+	entities[6]->GetTransform()->SetPosition( 9.0f, 2.0f, 0.0f);
 
 	// ENTITIES 12-18
-	entities.push_back(std::make_shared<Entity>("E_UV_Cube",				meshes[0], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Cylinder",			meshes[1], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Helix",				meshes[2], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Sphere",				meshes[5], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Torus",				meshes[6], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-SingleSided",	meshes[3], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-DoubleSided",	meshes[4], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Cube",				meshes[0], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Cylinder",			meshes[1], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Helix",				meshes[2], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Sphere",				meshes[5], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Torus",				meshes[6], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Quad-SingleSided",	meshes[3], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Quad-DoubleSided",	meshes[4], materials[1]));
 
-	entities[7]->GetTransform()->SetPosition(-9.0f, 0.0f, 0.0f);
-	entities[8]->GetTransform()->SetPosition(-6.0f, 0.0f, 0.0f);
-	entities[9]->GetTransform()->SetPosition(-3.0f, 0.0f, 0.0f);
-	entities[10]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
-	entities[11]->GetTransform()->SetPosition(3.0f, 0.0f, 0.0f);
-	entities[12]->GetTransform()->SetPosition(6.0f, -1.0f, 0.0f);
-	entities[13]->GetTransform()->SetPosition(9.0f, -1.0f, 0.0f);
+	entities[7]->GetTransform()->SetPosition( -9.0f,  0.0f, 0.0f);
+	entities[8]->GetTransform()->SetPosition( -6.0f,  0.0f, 0.0f);
+	entities[9]->GetTransform()->SetPosition( -3.0f,  0.0f, 0.0f);
+	entities[10]->GetTransform()->SetPosition( 0.0f,  0.0f, 0.0f);
+	entities[11]->GetTransform()->SetPosition( 3.0f,  0.0f, 0.0f);
+	entities[12]->GetTransform()->SetPosition( 6.0f, -1.0f, 0.0f);
+	entities[13]->GetTransform()->SetPosition( 9.0f, -1.0f, 0.0f);
 
 	// ENTITIES 19-25
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[5]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[5]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[5]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[3]));
 
 	entities[14]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
 	entities[15]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);
 	entities[16]->GetTransform()->SetPosition(-3.0f, -3.0f, 0.0f);
-	entities[17]->GetTransform()->SetPosition(0.0f,  -3.0f, 0.0f);
-	entities[18]->GetTransform()->SetPosition(3.0f,  -3.0f, 0.0f);
-	entities[19]->GetTransform()->SetPosition(6.0f,  -4.0f, 0.0f);
-	entities[20]->GetTransform()->SetPosition(9.0f,  -4.0f, 0.0f);
+	entities[17]->GetTransform()->SetPosition( 0.0f, -3.0f, 0.0f);
+	entities[18]->GetTransform()->SetPosition( 3.0f, -3.0f, 0.0f);
+	entities[19]->GetTransform()->SetPosition( 6.0f, -4.0f, 0.0f);
+	entities[20]->GetTransform()->SetPosition( 9.0f, -4.0f, 0.0f);
 
 	/*
 	// ENTITY 21
-	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[5]));
+	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[2]));
 	entities[21]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
 	entities[21]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
 	*/
@@ -441,9 +542,9 @@ void Game::Update(float deltaTime, float totalTime)
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 
-	// Scroll and scale UV of rusty metal texture
-	materials[1]->SetUVPosition(XMFLOAT2(sin(totalTime), cos(totalTime)));
-	materials[1]->SetUVScale(XMFLOAT2(sin(totalTime * 0.5f) * 0.5f + 1.0f, cos(totalTime * 0.5f) * 0.5f + 1.0f));
+	// Scroll and scale UV of Mat_RustyMetal
+	materials[4]->SetUVPosition(XMFLOAT2(sin(totalTime), cos(totalTime)));
+	materials[4]->SetUVScale(XMFLOAT2(sin(totalTime * 0.5f) * 0.5f + 1.0f, cos(totalTime * 0.5f) * 0.5f + 1.0f));
 
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
