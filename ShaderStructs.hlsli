@@ -49,6 +49,13 @@ struct VertexToPixel_Normal
     float3 worldPosition    : POSITION; // World position of the pixel
 };
 
+// For skybox shader
+struct VertexToPixel_Sky
+{
+    float4 screenPosition   : SV_POSITION; // XYZW position (System Value Position)
+    float3 sampleDirection  : DIRECTION; // Direction to sample in
+};
+
 // Light structs
 
 // From C++

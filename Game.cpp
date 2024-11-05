@@ -90,7 +90,7 @@ Game::~Game()
 void Game::LoadShaders()
 {
 	// Load shaders in with SimpleShader
-	// VERTEX SHADERS 0-1
+	// VERTEX SHADERS 0-2
 	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
 		Graphics::Device,
 		Graphics::Context,
@@ -100,6 +100,11 @@ void Game::LoadShaders()
 		Graphics::Device,
 		Graphics::Context,
 		FixPath(L"VS_DiffuseNormal.cso").c_str()
+	));
+	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"VS_Skybox.cso").c_str()
 	));
 	// PIXEL SHADERS 0-1
 	pixelShaders.push_back(std::make_shared<SimplePixelShader>(

@@ -53,7 +53,7 @@ float3 LightDirectionalLambertPhong(Light light, float3 surfaceNormal, float3 su
     float3 lightDirectionIn = normalize(light.Direction);
     
     float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse);
+    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
 
     return light.Color * light.Intensity * (surfaceColor * diffuse + specular);
 }
@@ -64,7 +64,7 @@ float3 LightPointLambertPhong(Light light, float3 surfaceNormal, float3 surfaceC
     float3 lightDirectionIn = normalize(surfaceWorldPos - light.Position);
     
     float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse);
+    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
 
     return light.Color * light.Intensity * (surfaceColor * diffuse + specular) * Attenuate(light, surfaceWorldPos);
 }
