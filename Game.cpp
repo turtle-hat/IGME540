@@ -291,7 +291,7 @@ void Game::CreateMaterials()
 		vertexShaders[1],
 		pixelShaders[1],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
+		0.3f
 	));
 	materials[6]->AddTextureSRV("MapDiffuse", srvCobblestoneD);
 	materials[6]->AddTextureSRV("MapNormal", srvCobblestoneN);
@@ -307,13 +307,14 @@ void Game::CreateMaterials()
 	materials[7]->AddTextureSRV("MapDiffuse", srvCushionD);
 	materials[7]->AddTextureSRV("MapNormal", srvCushionN);
 	materials[7]->AddSampler("BasicSampler", samplerState);
+	materials[7]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Rock",
 		vertexShaders[1],
 		pixelShaders[1],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
+		0.5f
 	));
 	materials[8]->AddTextureSRV("MapDiffuse", srvRockD);
 	materials[8]->AddTextureSRV("MapNormal", srvRockN);
@@ -382,13 +383,13 @@ void Game::CreateGeometry()
 	entities[13]->GetTransform()->SetPosition( 9.0f, -1.0f, 0.0f);
 
 	// ENTITIES 19-25
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[5]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[5]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[5]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[6]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[7]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[8]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[8]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[7]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[6]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[9]));
 
 	entities[14]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
 	entities[15]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);

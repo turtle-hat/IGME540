@@ -254,6 +254,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="ShaderLighting.hlsli" />
+    <None Include="ShaderNormals.hlsli" />
     <None Include="ShaderStructs.hlsli" />
   </ItemGroup>
   <ItemGroup>
