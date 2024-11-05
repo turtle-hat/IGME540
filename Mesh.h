@@ -10,7 +10,7 @@ class Mesh
 {
 public:
 	// Constructors/Destructor
-	Mesh(const char* _name, Vertex* _vertices, unsigned int* _indices, size_t _vertexCount, size_t _indexCount);
+	Mesh(const char* _name, Vertex* _vertices, size_t _vertexCount, unsigned int* _indices, size_t _indexCount);
 	Mesh(const char* _name, const wchar_t* _path);
 	~Mesh();
 	// Draws Mesh to screen
@@ -32,7 +32,9 @@ private:
 	// Name for UI
 	const char* name;
 
+	// Code for calculating tangents
+	void CalculateTangents(Vertex* verts, int numVerts, unsigned int* indices, int numIndices);
 	// Code for creating vertex and index buffers
-	void InitializeBuffers(Vertex* _vertices, unsigned int* _indices, unsigned int _vertexCount, unsigned int _indexCount);
+	void InitializeBuffers(Vertex* _vertices, unsigned int _vertexCount, unsigned int* _indices, unsigned int _indexCount);
 };
 

@@ -15,6 +15,7 @@ struct VertexShaderInput
 	//  v    v                v
     float3 localPosition	: POSITION; // XYZ position
     float3 normal			: NORMAL; // Normal vector
+    float3 tangent			: TANGENT; // Tangent vector
     float2 uv				: TEXCOORD; // UV coordinate
 };
 

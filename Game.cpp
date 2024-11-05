@@ -231,139 +231,8 @@ void Game::CreateMaterials()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex vStarterTriangle[] =
-	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-	};
-
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int iStarterTriangle[] = { 0, 1, 2 };
-
-	// MESH 0
-	meshes.push_back(std::make_shared<Mesh>(
-		"M_StarterTriangle",
-		vStarterTriangle,
-		iStarterTriangle,
-		ARRAYSIZE(vStarterTriangle),
-		ARRAYSIZE(iStarterTriangle)
-	));
-
-
-
-	// Gradient Rectangle
-	Vertex vGradientRectangle[] = {
-		{ XMFLOAT3(-0.2f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.2f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.1f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.1f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.0f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.0f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.1f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.1f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.2f, +0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.2f, -0.05f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-	};
-
-	unsigned int iGradientRectangle[] = {
-		0, 2, 1,
-		1, 2, 3,
-		2, 4, 5,
-		2, 5, 3,
-		4, 6, 7,
-		4, 7, 5,
-		6, 8, 9,
-		6, 9, 7
-	};
-
-	// MESH 1
-	meshes.push_back(std::make_shared<Mesh>(
-		"M_GradientRectangle",
-		vGradientRectangle,
-		iGradientRectangle,
-		ARRAYSIZE(vGradientRectangle),
-		ARRAYSIZE(iGradientRectangle)
-	));
-	
-
-	// Mirror's Edge Logo
-	// (I think it looks cool)
-	Vertex vMirrorsEdge[] = {
-		{ XMFLOAT3(-0.05f, +0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.01f, +0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.03f, +0.04f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.01f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.03f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.05f, +0.02f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.04f, +0.00f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+0.01f, -0.06f, +0.0f), XMFLOAT3(+0.0f, +0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-	};
-
-	unsigned int iMirrorsEdge[] = {
-		0, 1, 2,
-		2, 1, 3,
-		3, 1, 4,
-		4, 1, 5,
-		2, 3, 6,
-		3, 4, 7
-	};
-
-	// MESH 2
-	meshes.push_back(std::make_shared<Mesh>(
-		"M_MELogo",
-		vMirrorsEdge,
-		iMirrorsEdge,
-		ARRAYSIZE(vMirrorsEdge),
-		ARRAYSIZE(iMirrorsEdge)
-	));
-
-
-
-
-
-	// Create entities for these meshes
-	// ENTITIES 0-4
-	entities.push_back(std::make_shared<Entity>("E_StarterTriangle", meshes[0], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_GradientRectangle", meshes[1], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_MELogo", meshes[2], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_BigTriangle", meshes[0], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UpsideDownTriangle", meshes[0], materials[2]));
-
-	// Set special parameters for each mesh
-	entities[1]->GetTransform()->SetPosition(XMFLOAT3(-0.5f, -9.5f, 0.0f));
-	
-	entities[2]->GetTransform()->SetPosition(XMFLOAT3(0.5f, -9.5f, 0.0f));
-	
-	entities[3]->GetTransform()->SetPosition(XMFLOAT3(0.0f, -9.2f, 0.0f));
-	entities[3]->GetTransform()->SetScale(XMFLOAT3(2.0f, 0.5f, 1.0f));
-	
-	entities[4]->GetTransform()->SetPosition(XMFLOAT3(0.7f, -10.5f, 0.0f));
-	entities[4]->GetTransform()->SetRotation(XMFLOAT3(0.0f, 0.0f, XM_PI));
-	entities[4]->GetTransform()->SetScale(XMFLOAT3(0.5f, 0.5f, 0.5f));
-
-
-
-
-
 	// Create meshes from OBJ models
-	// MESHES 3-9
+	// MESHES 0-6
 	meshes.push_back(std::make_shared<Mesh>("M_Cube", FixPath(L"../../Assets/Models/cube.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("M_Cylinder", FixPath(L"../../Assets/Models/cylinder.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("M_Helix", FixPath(L"../../Assets/Models/helix.obj").c_str()));
@@ -373,61 +242,61 @@ void Game::CreateGeometry()
 	meshes.push_back(std::make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 5-11
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cube",				meshes[3], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cylinder",			meshes[4], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Helix",				meshes[5], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Sphere",				meshes[8], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Torus",				meshes[9], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-SingleSided",	meshes[6], materials[3]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-DoubleSided",	meshes[7], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Cube",				meshes[0], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Cylinder",			meshes[1], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Helix",				meshes[2], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Sphere",				meshes[5], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Torus",				meshes[6], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-SingleSided",	meshes[3], materials[3]));
+	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-DoubleSided",	meshes[4], materials[3]));
 
-	entities[5]->GetTransform()->SetPosition(-9.0f, 3.0f, 0.0f);
-	entities[6]->GetTransform()->SetPosition(-6.0f, 3.0f, 0.0f);
-	entities[7]->GetTransform()->SetPosition(-3.0f, 3.0f, 0.0f);
-	entities[8]->GetTransform()->SetPosition(0.0f,  3.0f, 0.0f);
-	entities[9]->GetTransform()->SetPosition(3.0f,  3.0f, 0.0f);
-	entities[10]->GetTransform()->SetPosition(6.0f, 3.0f, 0.0f);
-	entities[11]->GetTransform()->SetPosition(9.0f, 2.0f, 0.0f);
+	entities[0]->GetTransform()->SetPosition(-9.0f, 3.0f, 0.0f);
+	entities[1]->GetTransform()->SetPosition(-6.0f, 3.0f, 0.0f);
+	entities[2]->GetTransform()->SetPosition(-3.0f, 3.0f, 0.0f);
+	entities[3]->GetTransform()->SetPosition(0.0f,  3.0f, 0.0f);
+	entities[4]->GetTransform()->SetPosition(3.0f,  3.0f, 0.0f);
+	entities[5]->GetTransform()->SetPosition(6.0f, 3.0f, 0.0f);
+	entities[6]->GetTransform()->SetPosition(9.0f, 2.0f, 0.0f);
 
 	// ENTITIES 12-18
-	entities.push_back(std::make_shared<Entity>("E_UV_Cube",				meshes[3], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Cylinder",			meshes[4], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Helix",				meshes[5], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Sphere",				meshes[8], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Torus",				meshes[9], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-SingleSided",	meshes[6], materials[4]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-DoubleSided",	meshes[7], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Cube",				meshes[0], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Cylinder",			meshes[1], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Helix",				meshes[2], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Sphere",				meshes[5], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Torus",				meshes[6], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Quad-SingleSided",	meshes[3], materials[4]));
+	entities.push_back(std::make_shared<Entity>("E_UV_Quad-DoubleSided",	meshes[4], materials[4]));
 
-	entities[12]->GetTransform()->SetPosition(-9.0f, 0.0f, 0.0f);
-	entities[13]->GetTransform()->SetPosition(-6.0f, 0.0f, 0.0f);
-	entities[14]->GetTransform()->SetPosition(-3.0f, 0.0f, 0.0f);
-	entities[15]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
-	entities[16]->GetTransform()->SetPosition(3.0f, 0.0f, 0.0f);
-	entities[17]->GetTransform()->SetPosition(6.0f, -1.0f, 0.0f);
-	entities[18]->GetTransform()->SetPosition(9.0f, -1.0f, 0.0f);
+	entities[7]->GetTransform()->SetPosition(-9.0f, 0.0f, 0.0f);
+	entities[8]->GetTransform()->SetPosition(-6.0f, 0.0f, 0.0f);
+	entities[9]->GetTransform()->SetPosition(-3.0f, 0.0f, 0.0f);
+	entities[10]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
+	entities[11]->GetTransform()->SetPosition(3.0f, 0.0f, 0.0f);
+	entities[12]->GetTransform()->SetPosition(6.0f, -1.0f, 0.0f);
+	entities[13]->GetTransform()->SetPosition(9.0f, -1.0f, 0.0f);
 
 	// ENTITIES 19-25
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[3], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[4], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[5], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[8], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[9], materials[2]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[6], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[7], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[0]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[2]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[1]));
+	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[0]));
 
-	entities[19]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
-	entities[20]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);
-	entities[21]->GetTransform()->SetPosition(-3.0f, -3.0f, 0.0f);
-	entities[22]->GetTransform()->SetPosition(0.0f,  -3.0f, 0.0f);
-	entities[23]->GetTransform()->SetPosition(3.0f,  -3.0f, 0.0f);
-	entities[24]->GetTransform()->SetPosition(6.0f,  -4.0f, 0.0f);
-	entities[25]->GetTransform()->SetPosition(9.0f,  -4.0f, 0.0f);
+	entities[14]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
+	entities[15]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);
+	entities[16]->GetTransform()->SetPosition(-3.0f, -3.0f, 0.0f);
+	entities[17]->GetTransform()->SetPosition(0.0f,  -3.0f, 0.0f);
+	entities[18]->GetTransform()->SetPosition(3.0f,  -3.0f, 0.0f);
+	entities[19]->GetTransform()->SetPosition(6.0f,  -4.0f, 0.0f);
+	entities[20]->GetTransform()->SetPosition(9.0f,  -4.0f, 0.0f);
 
 	/*
-	// ENTITY 26
+	// ENTITY 21
 	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[5]));
-	entities[26]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
-	entities[26]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
+	entities[21]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
+	entities[21]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
 	*/
 }
 
@@ -562,22 +431,8 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update current camera
 	cameras[pCameraCurrent]->Update(deltaTime);
 
-	// Update test meshes
-	entities[0]->GetTransform()->SetPosition(sin(totalTime * 0.5f), cos(totalTime * 0.5f) - 10.0f, 0.0f);
-
-	entities[1]->GetTransform()->SetPosition(fmod(totalTime * 0.5f, 3.0f) - 1.5f, -9.5f, 0.5f);
-	entities[1]->GetTransform()->SetScale(sin(totalTime * XM_PI) + 1.5f, 1.0f, 1.0f);
-
-	entities[2]->GetTransform()->Rotate(0.0f, 0.0f, 25.0f * deltaTime);
-	entities[2]->GetTransform()->SetScale(1.0f, (sin(totalTime * 0.5f) + 1) * 2, 1.0f);
-	entities[2]->GetTransform()->SetScale(1.0f, (sin(totalTime * 0.5f) + 1) * 2, 1.0f);
-
-	entities[3]->GetTransform()->Rotate(deltaTime * -5.0f, deltaTime * -5.0f, 0.0f);
-
-	entities[4]->GetTransform()->SetScale(sin(totalTime) * 0.5f + 1.1f, cos(totalTime) * 0.5f + 1.1f, 1.0f);
-
 	// Rotate OBJ-imported meshes
-	for (int i = 5; i <= 25; i++) {
+	for (int i = 0; i <= 20; i++) {
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 
