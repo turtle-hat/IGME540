@@ -1,19 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
+    <FxCompile Include="VS_DiffuseSpecular.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
+    <FxCompile Include="PS_DiffuseSpecular.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="uvPS.hlsl">
+    <FxCompile Include="PS_UVs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="normalPS.hlsl">
+    <FxCompile Include="PS_Normals.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="customPS.hlsl">
+    <FxCompile Include="PS_Custom.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_DiffuseNormal.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VS_DiffuseNormal.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

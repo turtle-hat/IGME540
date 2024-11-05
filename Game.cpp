@@ -89,35 +89,44 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
-
-
 	// Load shaders in with SimpleShader
-	// VERTEX SHADER 0
+	// VERTEX SHADERS 0-1
 	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
 		Graphics::Device,
 		Graphics::Context,
-		FixPath(L"VertexShader.cso").c_str()
+		FixPath(L"VS_DiffuseSpecular.cso").c_str()
 	));
-	// PIXEL SHADERS 0-3
+	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"VS_DiffuseNormal.cso").c_str()
+	));
+	// PIXEL SHADERS 0-1
 	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
 		Graphics::Device,
 		Graphics::Context,
-		FixPath(L"PixelShader.cso").c_str()
-	));
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"normalPS.cso").c_str()
-	));
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"uvPS.cso").c_str()
+		FixPath(L"PS_DiffuseSpecular.cso").c_str()
 	));
 	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
 		Graphics::Device,
 		Graphics::Context,
-		FixPath(L"customPS.cso").c_str()
+		FixPath(L"PS_DiffuseNormal.cso").c_str()
+	));
+	// PIXEL SHADERS 2-4
+	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"PS_Normals.cso").c_str()
+	));
+	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"PS_UVs.cso").c_str()
+	));
+	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"PS_Custom.cso").c_str()
 	));
 }
 
@@ -129,9 +138,9 @@ void Game::CreateMaterials()
 	// Declare SRVs 0-2
 	// I didn't wanna put these in a vector since I
 	// didn't know how to push_back a new ComPtr for each SRV
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv0;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv1;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv2;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBrokenTilesDS;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRustyMetalDS;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvTilesDS;
 
 	// Load textures
 	CreateWICTextureFromFile(
@@ -139,25 +148,21 @@ void Game::CreateMaterials()
 		Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/T_brokentiles_DS.png").c_str(),
 		nullptr,
-		srv0.GetAddressOf()
+		srvBrokenTilesDS.GetAddressOf()
 	);
-	// For some reason creating more than one texture spits out a ton of warnings when the app closes:
-	// D3D11 WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: UNKNOWN]
-	// D3D11 WARNING : Live Producer at 0x0000029023D63430, Refcount : 2.[STATE_CREATION WARNING #0: UNKNOWN]
-	// D3D11 WARNING : Live Object at 0x0000029023D67390, Refcount : 0.[STATE_CREATION WARNING #0: UNKNOWN]
 	CreateWICTextureFromFile(
 		Graphics::Device.Get(),
 		Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/T_rustymetal_DS.png").c_str(),
 		nullptr,
-		srv1.GetAddressOf()
+		srvRustyMetalDS.GetAddressOf()
 	);
 	CreateWICTextureFromFile(
 		Graphics::Device.Get(),
 		Graphics::Context.Get(),
 		FixPath(L"../../Assets/Textures/T_tiles_DS.png").c_str(),
 		nullptr,
-		srv2.GetAddressOf()
+		srvTilesDS.GetAddressOf()
 	);
 
 	// Set default sampler state settings
@@ -176,7 +181,7 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		0.2f
 	));
-	materials[0]->AddTextureSRV("SurfaceTexture", srv0);
+	materials[0]->AddTextureSRV("MapDiffuseSpecular", srvBrokenTilesDS);
 	materials[0]->AddSampler("BasicSampler", samplerState);
 
 	materials.push_back(std::make_shared<Material>(
@@ -186,7 +191,7 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		0.8f
 	));
-	materials[1]->AddTextureSRV("SurfaceTexture", srv1);
+	materials[1]->AddTextureSRV("MapDiffuseSpecular", srvRustyMetalDS);
 	materials[1]->AddSampler("BasicSampler", samplerState);
 
 	materials.push_back(std::make_shared<Material>(
@@ -196,20 +201,12 @@ void Game::CreateMaterials()
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		0.0f
 	));
-	materials[2]->AddTextureSRV("SurfaceTexture", srv2);
+	materials[2]->AddTextureSRV("MapDiffuseSpecular", srvTilesDS);
 	materials[2]->AddSampler("BasicSampler", samplerState);
 
 	// MATERIALS 3-5
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Normals",
-		vertexShaders[0],
-		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
-	));
-
-	materials.push_back(std::make_shared<Material>(
-		"Mat_UVs",
 		vertexShaders[0],
 		pixelShaders[2],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
@@ -217,9 +214,17 @@ void Game::CreateMaterials()
 	));
 
 	materials.push_back(std::make_shared<Material>(
-		"Mat_Custom",
+		"Mat_UVs",
 		vertexShaders[0],
 		pixelShaders[3],
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		1.0f
+	));
+
+	materials.push_back(std::make_shared<Material>(
+		"Mat_Custom",
+		vertexShaders[0],
+		pixelShaders[4],
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 		1.0f
 	));

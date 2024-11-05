@@ -24,6 +24,8 @@ struct VertexShaderInput
 // - At a minimum, we need a piece of data defined tagged as SV_POSITION
 // - The name of the struct itself is unimportant, but should be descriptive
 // - Each variable must have a semantic, which defines its usage
+
+// For shaders that take basic information
 struct VertexToPixel
 {
 	// Data type
@@ -32,9 +34,19 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
     float4 screenPosition	: SV_POSITION; // XYZW position (System Value Position)
-    float3 normal			: NORMAL; // Normal vector
+    float3 normal           : NORMAL; // Normal vector
     float2 uv				: TEXCOORD; // UV coordinate
-    float3 worldPosition	: POSITION;
+    float3 worldPosition	: POSITION; // World position of the pixel
+};
+
+// For shaders that take normal maps
+struct VertexToPixel_Normal
+{
+    float4 screenPosition   : SV_POSITION; // XYZW position (System Value Position)
+    float3 normal           : NORMAL; // Normal vector
+    float3 tangent          : TANGENT; // Tangent vector
+    float2 uv               : TEXCOORD; // UV coordinate
+    float3 worldPosition    : POSITION; // World position of the pixel
 };
 
 // Light structs
