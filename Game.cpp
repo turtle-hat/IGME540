@@ -117,7 +117,13 @@ void Game::LoadShaders()
 		Graphics::Context,
 		FixPath(L"PS_DiffuseNormal.cso").c_str()
 	));
-	// PIXEL SHADERS 2-4
+	// PIXEL SHADER 2
+	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(L"PS_Skybox.cso").c_str()
+	));
+	// PIXEL SHADERS 3-5
 	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
 		Graphics::Device,
 		Graphics::Context,
@@ -140,91 +146,17 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateMaterials()
 {
-	// Declare SRVs 0-2
-	// I didn't wanna put these in a vector since I
-	// didn't know how to push_back a new ComPtr for each SRV
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBrokenTilesDS;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRustyMetalDS;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvTilesDS;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCobblestoneD;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCobblestoneN;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCushionD;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvCushionN;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvFlatN;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRockD;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvRockN;
-
 	// Load textures
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_brokentiles_DS.png").c_str(),
-		nullptr,
-		srvBrokenTilesDS.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_rustymetal_DS.png").c_str(),
-		nullptr,
-		srvRustyMetalDS.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_tiles_DS.png").c_str(),
-		nullptr,
-		srvTilesDS.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_cobblestone_D.png").c_str(),
-		nullptr,
-		srvCobblestoneD.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_cobblestone_N.png").c_str(),
-		nullptr,
-		srvCobblestoneN.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_cushion_D.png").c_str(),
-		nullptr,
-		srvCushionD.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_cushion_N.png").c_str(),
-		nullptr,
-		srvCushionN.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_flat_N.png").c_str(),
-		nullptr,
-		srvFlatN.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_rock_D.png").c_str(),
-		nullptr,
-		srvRockD.GetAddressOf()
-	);
-	CreateWICTextureFromFile(
-		Graphics::Device.Get(),
-		Graphics::Context.Get(),
-		FixPath(L"../../Assets/Textures/T_rock_N.png").c_str(),
-		nullptr,
-		srvRockN.GetAddressOf()
-	);
+	AddTexture(L"../../Assets/Textures/T_brokentiles_DS.png");
+	AddTexture(L"../../Assets/Textures/T_rustymetal_DS.png");
+	AddTexture(L"../../Assets/Textures/T_tiles_DS.png");
+	AddTexture(L"../../Assets/Textures/T_cobblestone_D.png");
+	AddTexture(L"../../Assets/Textures/T_cobblestone_N.png");
+	AddTexture(L"../../Assets/Textures/T_cushion_D.png");
+	AddTexture(L"../../Assets/Textures/T_cushion_N.png");
+	AddTexture(L"../../Assets/Textures/T_flat_N.png");
+	AddTexture(L"../../Assets/Textures/T_rock_D.png");
+	AddTexture(L"../../Assets/Textures/T_rock_N.png");
 
 	// Set default sampler state settings
 	pSamplerFilter = D3D11_FILTER_ANISOTROPIC;
@@ -235,62 +167,25 @@ void Game::CreateMaterials()
 
 	// Create materials
 	// MATERIALS 0-2
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Normals",
-		vertexShaders[0],
-		pixelShaders[2],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
-	));
-
-	materials.push_back(std::make_shared<Material>(
-		"Mat_UVs",
-		vertexShaders[0],
-		pixelShaders[3],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
-	));
-
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Custom",
-		vertexShaders[0],
-		pixelShaders[4],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		1.0f
-	));
+	AddMaterial("Mat_Normals",		0, 3);
+	AddMaterial("Mat_UVs",			0, 4);
+	AddMaterial("Mat_Custom",		0, 5);
 
 	// MATERIALS 3-5
-	materials.push_back(std::make_shared<Material>(
-		"Mat_BrokenTiles",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.2f
-	));
-	materials[3]->AddTextureSRV("MapDiffuseSpecular", srvBrokenTilesDS);
+	AddMaterial("Mat_BrokenTiles",	0, 0, 0.2f);
+	materials[3]->AddTextureSRV("MapDiffuseSpecular", textures[0]);
 	materials[3]->AddSampler("BasicSampler", samplerState);
 
-	materials.push_back(std::make_shared<Material>(
-		"Mat_RustyMetal",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.8f
-	));
-	materials[4]->AddTextureSRV("MapDiffuseSpecular", srvRustyMetalDS);
+	AddMaterial("Mat_RustyMetal",	0, 0, 0.8f);
+	materials[4]->AddTextureSRV("MapDiffuseSpecular", textures[1]);
 	materials[4]->AddSampler("BasicSampler", samplerState);
 
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Tiles",
-		vertexShaders[0],
-		pixelShaders[0],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
-	));
-	materials[5]->AddTextureSRV("MapDiffuseSpecular", srvTilesDS);
+	AddMaterial("Mat_Tiles",		0, 0, 0.0f);
+	materials[5]->AddTextureSRV("MapDiffuseSpecular", textures[2]);
 	materials[5]->AddSampler("BasicSampler", samplerState);
 
 	// MATERIALS 6-9
+	AddMaterial("Mat_Cobblestone",	1, 1, 0.3f);
 	materials.push_back(std::make_shared<Material>(
 		"Mat_Cobblestone",
 		vertexShaders[1],
@@ -521,7 +416,6 @@ void Game::CreateCameras() {
 	cameras[3]->SetLookSpeed(1.0f);
 }
 
-
 // --------------------------------------------------------
 // Handle resizing to match the new window size
 //  - Eventually, we'll want to update our 3D camera
@@ -691,6 +585,52 @@ void Game::InitializeSimulationParameters() {
 	igFrameGraphSampleOffset = 0;
 	igFrameGraphHighest = 0.0f;
 	igFrameGraphDoAnimate = true;
+}
+
+// --------------------------------------------------------
+// Adds a texture to the list of textures
+// --------------------------------------------------------
+void Game::AddTexture(const wchar_t* _path)
+{
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+
+	CreateWICTextureFromFile(
+		Graphics::Device.Get(),
+		Graphics::Context.Get(),
+		FixPath(_path).c_str(),
+		nullptr,
+		srv.GetAddressOf()
+	);
+}
+
+// --------------------------------------------------------
+// Adds a Material to the list of Materials
+// --------------------------------------------------------
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
+{
+	materials.push_back(std::make_shared<Material>(
+		_name,
+		vertexShaders[_vertexShaderIndex],
+		pixelShaders[_pixelShaderIndex],
+		_colorTint,
+		_roughness
+	));
+}
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint)
+{
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 1.0f);
+}
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness)
+{
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness);
+}
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex)
+{
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
 }
 
 // --------------------------------------------------------

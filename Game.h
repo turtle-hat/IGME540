@@ -36,6 +36,11 @@ private:
 	void CreateGeometry();
 	void CreateLights();
 	void CreateCameras();
+	void AddTexture(const wchar_t* _path);
+	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness);
+	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint);
+	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness);
+	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex);
 	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
 	void SetMaterialSamplerStates();
 	void InitializeSimulationParameters();
@@ -92,6 +97,7 @@ private:
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
 	// TEXTURES
+	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textures;
 	// Pointer to the general sampler state
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 

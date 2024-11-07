@@ -22,6 +22,12 @@
     <FxCompile Include="VS_DiffuseNormal.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="VS_Skybox.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_Skybox.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -173,6 +179,9 @@
       <Filter>Shaders\ShaderIncludes</Filter>
     </None>
     <None Include="ShaderStructs.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
+    <None Include="ShaderNormals.hlsli">
       <Filter>Shaders\ShaderIncludes</Filter>
     </None>
   </ItemGroup>
