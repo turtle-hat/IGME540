@@ -836,6 +836,29 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 	}
 
+	if (ImGui::CollapsingHeader("Textures")) {					// Info about each texture
+		ImGui::Spacing();
+
+		ImGui::PushID("TEXTURE");
+		for (int i = 0; i < textures.size(); i++) {
+
+			// Each mesh gets its own Tree Node
+			ImGui::PushID(i);
+			if (ImGui::TreeNode("", "(%06d)", i)) {
+				ImGui::Spacing();
+
+				ImGui::Image((void*)textures[i].Get(), ImVec2(240, 240));
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			ImGui::PopID();
+		}
+		ImGui::PopID();
+
+		ImGui::Spacing();
+	}
+
 	if (ImGui::CollapsingHeader("Materials")) {					// Info about each material
 		ImGui::Spacing();
 
