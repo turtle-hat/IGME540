@@ -91,54 +91,18 @@ void Game::LoadShaders()
 {
 	// Load shaders in with SimpleShader
 	// VERTEX SHADERS 0-2
-	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"VS_DiffuseSpecular.cso").c_str()
-	));
-	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"VS_DiffuseNormal.cso").c_str()
-	));
-	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"VS_Skybox.cso").c_str()
-	));
+	AddVertexShader(L"VS_DiffuseSpecular.cso");
+	AddVertexShader(L"VS_DiffuseNormal.cso");
+	AddVertexShader(L"VS_Skybox.cso");
 	// PIXEL SHADERS 0-1
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_DiffuseSpecular.cso").c_str()
-	));
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_DiffuseNormal.cso").c_str()
-	));
+	AddPixelShader(L"PS_DiffuseSpecular.cso");
+	AddPixelShader(L"PS_DiffuseNormal.cso");
 	// PIXEL SHADER 2
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_Skybox.cso").c_str()
-	));
+	AddPixelShader(L"PS_Skybox.cso");
 	// PIXEL SHADERS 3-5
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_Normals.cso").c_str()
-	));
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_UVs.cso").c_str()
-	));
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
-		Graphics::Device,
-		Graphics::Context,
-		FixPath(L"PS_Custom.cso").c_str()
-	));
+	AddPixelShader(L"PS_Normals.cso");
+	AddPixelShader(L"PS_UVs.cso");
+	AddPixelShader(L"PS_Custom.cso");
 }
 
 // --------------------------------------------------------
@@ -147,9 +111,11 @@ void Game::LoadShaders()
 void Game::CreateMaterials()
 {
 	// Load textures
+	// TEXTURES 0-2
 	AddTexture(L"../../Assets/Textures/T_brokentiles_DS.png");
 	AddTexture(L"../../Assets/Textures/T_rustymetal_DS.png");
 	AddTexture(L"../../Assets/Textures/T_tiles_DS.png");
+	// TEXTURES 3-9
 	AddTexture(L"../../Assets/Textures/T_cobblestone_D.png");
 	AddTexture(L"../../Assets/Textures/T_cobblestone_N.png");
 	AddTexture(L"../../Assets/Textures/T_cushion_D.png");
@@ -186,49 +152,24 @@ void Game::CreateMaterials()
 
 	// MATERIALS 6-9
 	AddMaterial("Mat_Cobblestone",	1, 1, 0.3f);
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Cobblestone",
-		vertexShaders[1],
-		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.3f
-	));
-	materials[6]->AddTextureSRV("MapDiffuse", srvCobblestoneD);
-	materials[6]->AddTextureSRV("MapNormal", srvCobblestoneN);
+	materials[6]->AddTextureSRV("MapDiffuse", textures[3]);
+	materials[6]->AddTextureSRV("MapNormal", textures[4]);
 	materials[6]->AddSampler("BasicSampler", samplerState);
 
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Cushion",
-		vertexShaders[1],
-		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
-	));
-	materials[7]->AddTextureSRV("MapDiffuse", srvCushionD);
-	materials[7]->AddTextureSRV("MapNormal", srvCushionN);
+	AddMaterial("Mat_Cushion",		1, 1, 0.0f);
+	materials[7]->AddTextureSRV("MapDiffuse", textures[5]);
+	materials[7]->AddTextureSRV("MapNormal", textures[6]);
 	materials[7]->AddSampler("BasicSampler", samplerState);
 	materials[7]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Rock",
-		vertexShaders[1],
-		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.5f
-	));
-	materials[8]->AddTextureSRV("MapDiffuse", srvRockD);
-	materials[8]->AddTextureSRV("MapNormal", srvRockN);
+	AddMaterial("Mat_Rock",			1, 1, 0.5f);
+	materials[8]->AddTextureSRV("MapDiffuse", textures[8]);
+	materials[8]->AddTextureSRV("MapNormal", textures[9]);
 	materials[8]->AddSampler("BasicSampler", samplerState);
 
-	materials.push_back(std::make_shared<Material>(
-		"Mat_Flat",
-		vertexShaders[1],
-		pixelShaders[1],
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		0.0f
-	));
-	materials[9]->AddTextureSRV("MapDiffuse", srvFlatN);	// Normal map used for diffuse
-	materials[9]->AddTextureSRV("MapNormal", srvFlatN);
+	AddMaterial("Mat_Flat",			1, 1, 0.0f);
+	materials[9]->AddTextureSRV("MapDiffuse", textures[7]);	// Normal map used for diffuse
+	materials[9]->AddTextureSRV("MapNormal", textures[7]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
 }
 
@@ -248,61 +189,36 @@ void Game::CreateGeometry()
 	meshes.push_back(std::make_shared<Mesh>("M_Sphere", FixPath(L"../../Assets/Models/sphere.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
-	// ENTITIES 5-11
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cube",				meshes[0], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Cylinder",			meshes[1], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Helix",				meshes[2], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Sphere",				meshes[5], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Torus",				meshes[6], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-SingleSided",	meshes[3], materials[0]));
-	entities.push_back(std::make_shared<Entity>("E_Normal_Quad-DoubleSided",	meshes[4], materials[0]));
+	// ENTITIES 0-6
+	AddEntity("E_Normal_Cube",				0, 0, XMFLOAT3(-9.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Cylinder",			1, 0, XMFLOAT3(-6.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Helix",				2, 0, XMFLOAT3(-3.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Sphere",			5, 0, XMFLOAT3( 0.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Torus",				6, 0, XMFLOAT3( 3.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Quad-SingleSided",	3, 0, XMFLOAT3( 6.0f, 3.0f, 0.0f));
+	AddEntity("E_Normal_Quad-DoubleSided",	4, 0, XMFLOAT3( 9.0f, 2.0f, 0.0f));
 
-	entities[0]->GetTransform()->SetPosition(-9.0f, 3.0f, 0.0f);
-	entities[1]->GetTransform()->SetPosition(-6.0f, 3.0f, 0.0f);
-	entities[2]->GetTransform()->SetPosition(-3.0f, 3.0f, 0.0f);
-	entities[3]->GetTransform()->SetPosition( 0.0f, 3.0f, 0.0f);
-	entities[4]->GetTransform()->SetPosition( 3.0f, 3.0f, 0.0f);
-	entities[5]->GetTransform()->SetPosition( 6.0f, 3.0f, 0.0f);
-	entities[6]->GetTransform()->SetPosition( 9.0f, 2.0f, 0.0f);
+	// ENTITIES 7-13
+	AddEntity("E_UV_Cube",				0, 1, XMFLOAT3(-9.0f,  0.0f, 0.0f));
+	AddEntity("E_UV_Cylinder",			1, 1, XMFLOAT3(-6.0f,  0.0f, 0.0f));
+	AddEntity("E_UV_Helix",				2, 1, XMFLOAT3(-3.0f,  0.0f, 0.0f));
+	AddEntity("E_UV_Sphere",			5, 1, XMFLOAT3( 0.0f,  0.0f, 0.0f));
+	AddEntity("E_UV_Torus",				6, 1, XMFLOAT3( 3.0f,  0.0f, 0.0f));
+	AddEntity("E_UV_Quad-SingleSided",	3, 1, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	AddEntity("E_UV_Quad-DoubleSided",	4, 1, XMFLOAT3( 9.0f, -1.0f, 0.0f));
 
-	// ENTITIES 12-18
-	entities.push_back(std::make_shared<Entity>("E_UV_Cube",				meshes[0], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Cylinder",			meshes[1], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Helix",				meshes[2], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Sphere",				meshes[5], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Torus",				meshes[6], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-SingleSided",	meshes[3], materials[1]));
-	entities.push_back(std::make_shared<Entity>("E_UV_Quad-DoubleSided",	meshes[4], materials[1]));
-
-	entities[7]->GetTransform()->SetPosition( -9.0f,  0.0f, 0.0f);
-	entities[8]->GetTransform()->SetPosition( -6.0f,  0.0f, 0.0f);
-	entities[9]->GetTransform()->SetPosition( -3.0f,  0.0f, 0.0f);
-	entities[10]->GetTransform()->SetPosition( 0.0f,  0.0f, 0.0f);
-	entities[11]->GetTransform()->SetPosition( 3.0f,  0.0f, 0.0f);
-	entities[12]->GetTransform()->SetPosition( 6.0f, -1.0f, 0.0f);
-	entities[13]->GetTransform()->SetPosition( 9.0f, -1.0f, 0.0f);
-
-	// ENTITIES 19-25
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cube",				meshes[0], materials[6]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Cylinder",			meshes[1], materials[7]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Helix",				meshes[2], materials[8]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Sphere",				meshes[5], materials[8]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Torus",				meshes[6], materials[7]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-SingleSided",	meshes[3], materials[6]));
-	entities.push_back(std::make_shared<Entity>("E_Mat_Quad-DoubleSided",	meshes[4], materials[9]));
-
-	entities[14]->GetTransform()->SetPosition(-9.0f, -3.0f, 0.0f);
-	entities[15]->GetTransform()->SetPosition(-6.0f, -3.0f, 0.0f);
-	entities[16]->GetTransform()->SetPosition(-3.0f, -3.0f, 0.0f);
-	entities[17]->GetTransform()->SetPosition( 0.0f, -3.0f, 0.0f);
-	entities[18]->GetTransform()->SetPosition( 3.0f, -3.0f, 0.0f);
-	entities[19]->GetTransform()->SetPosition( 6.0f, -4.0f, 0.0f);
-	entities[20]->GetTransform()->SetPosition( 9.0f, -4.0f, 0.0f);
+	// ENTITIES 14-20
+	AddEntity("E_Mat_Cube",				0, 6, XMFLOAT3(-9.0f, -3.0f, 0.0f));
+	AddEntity("E_Mat_Cylinder",			1, 7, XMFLOAT3(-6.0f, -3.0f, 0.0f));
+	AddEntity("E_Mat_Helix",			2, 8, XMFLOAT3(-3.0f, -3.0f, 0.0f));
+	AddEntity("E_Mat_Sphere",			5, 8, XMFLOAT3( 0.0f, -3.0f, 0.0f));
+	AddEntity("E_Mat_Torus",			6, 7, XMFLOAT3( 3.0f, -3.0f, 0.0f));
+	AddEntity("E_Mat_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -4.0f, 0.0f));
+	AddEntity("E_Mat_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -4.0f, 0.0f));
 
 	/*
 	// ENTITY 21
-	entities.push_back(std::make_shared<Entity>("E_TestCanvas",	meshes[6], materials[2]));
-	entities[21]->GetTransform()->SetPosition(0.0f, 0.0f, -3.0f);
+	AddEntity("E_TestCanvas", 6, 2, XMFLOAT3(0.0f, 0.0f, -3.0f));
 	entities[21]->GetTransform()->SetRotation(-XM_PIDIV2, 0.0f, 0.0f);
 	*/
 }
@@ -313,62 +229,15 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	Light lightDir0 = {};
-	lightDir0.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir0.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
-	lightDir0.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	lightDir0.Intensity = 1.0f;
-	lightDir0.Active = 1;
-	lights.push_back(lightDir0);
-
+	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 1-2
-	Light lightDir1 = {};
-	lightDir1.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir1.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	lightDir1.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	lightDir1.Intensity = 1.0f;
-	lightDir1.Active = 1;
-	lights.push_back(lightDir1);
-
-	Light lightDir2 = {};
-	lightDir2.Type = LIGHT_TYPE_DIRECTIONAL;
-	lightDir2.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	lightDir2.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	lightDir2.Intensity = 1.0f;
-	lightDir2.Active = 1;
-	lights.push_back(lightDir2);
-
+	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 3-4
-	Light lightPt0 = {};
-	lightPt0.Type = LIGHT_TYPE_POINT;
-	lightPt0.Position = XMFLOAT3(-7.0f, -2.0f, 1.0f);
-	lightPt0.Color = XMFLOAT3(0.0f, 1.0f, 1.0f);
-	lightPt0.Intensity = 1.0f;
-	lightPt0.Range = 10.0f;
-	lightPt0.Active = 1;
-	lights.push_back(lightPt0);
-
-	Light lightPt1 = {};
-	lightPt1.Type = LIGHT_TYPE_POINT;
-	lightPt1.Position = XMFLOAT3(1.0f, -4.0f, 0.0f);
-	lightPt1.Color = XMFLOAT3(1.0f, 0.2f, 1.0f);
-	lightPt1.Intensity = 2.0f;
-	lightPt1.Range = 4.0f;
-	lightPt1.Active = 1;
-	lights.push_back(lightPt1);
-
+	AddLightPoint(XMFLOAT3(-7.0f, -2.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f), 1.0f, 10.0f, true);
+	AddLightPoint(XMFLOAT3(1.0f, -4.0f, 0.0f), XMFLOAT3(1.0f, 0.2f, 1.0f), 2.0f, 4.0f, true);
 	// LIGHT 5
-	Light lightSpt0 = {};
-	lightSpt0.Type = LIGHT_TYPE_SPOT;
-	lightSpt0.Position = XMFLOAT3(4.5f, 0.0f, 0.25f);
-	lightSpt0.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	lightSpt0.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	lightSpt0.Intensity = 1.0f;
-	lightSpt0.Range = 30.0f;
-	lightSpt0.SpotInnerAngle = 0.35f;
-	lightSpt0.SpotOuterAngle = 0.4f;
-	lightSpt0.Active = 1;
-	lights.push_back(lightSpt0);
+	AddLightSpot(XMFLOAT3(4.5f, 0.0f, 0.25f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), 1.0f, 30.0f, 0.35f, 0.4f, true);
 }
 
 // --------------------------------------------------------
@@ -378,41 +247,12 @@ void Game::CreateCameras() {
 	// Create cameras
 	float aspect = (Window::Width() + 0.0f) / Window::Height();
 	// CAMERAS 0-3
-	cameras.push_back(std::make_shared<Camera>(
-		"C_Main",
-		make_shared<Transform>(),
-		aspect
-	));
-	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoYZ",
-		make_shared<Transform>(),
-		aspect,
-		true
-	));
-	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoXZ",
-		make_shared<Transform>(),
-		aspect,
-		true
-	));
-	cameras.push_back(std::make_shared<Camera>(
-		"C_OrthoXY",
-		make_shared<Transform>(),
-		aspect,
-		true
-	));
-
-	cameras[0]->GetTransform()->SetPosition(0.0f, 0.0f, -5.0f);
-
-	cameras[1]->GetTransform()->SetPosition(100.0f, 0.0f, 0.0f);
-	cameras[1]->GetTransform()->SetRotation(0.0f, -XM_PIDIV2, 0.0f);
+	AddCamera("C_Main",		XMFLOAT3(0.0f, 0.0f, -5.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),					aspect, false);
+	AddCamera("C_OrthoYZ",	XMFLOAT3(100.0f, 0.0f, 0.0f),	XMFLOAT3(0.0f, -XM_PIDIV2, 0.0f),			aspect, true);
 	cameras[1]->SetLookSpeed(1.0f);
-
-	cameras[2]->GetTransform()->SetPosition(0.0f, 100.0f, 0.0f);
-	cameras[2]->GetTransform()->SetRotation(XM_PIDIV2 - 0.001f, 0.0f, 0.0f);
+	AddCamera("C_OrthoXZ",	XMFLOAT3(0.0f, 100.0f, 0.0f),	XMFLOAT3(XM_PIDIV2 - 0.001f, 0.0f, 0.0f),	aspect, true);
 	cameras[2]->SetLookSpeed(1.0f);
-
-	cameras[3]->GetTransform()->SetPosition(0.0f, 0.0f, -100.0f);
+	AddCamera("C_OrthoXY",	XMFLOAT3(0.0f, 0.0f, -100.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),					aspect, true);
 	cameras[3]->SetLookSpeed(1.0f);
 }
 
@@ -588,6 +428,30 @@ void Game::InitializeSimulationParameters() {
 }
 
 // --------------------------------------------------------
+// Adds a vertex shader to the list of vertex shaders
+// --------------------------------------------------------
+void Game::AddVertexShader(const wchar_t* _path)
+{
+	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(_path).c_str()
+	));
+}
+
+// --------------------------------------------------------
+// Adds a pixel shader to the list of pixel shaders
+// --------------------------------------------------------
+void Game::AddPixelShader(const wchar_t* _path)
+{
+	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+		Graphics::Device,
+		Graphics::Context,
+		FixPath(_path).c_str()
+	));
+}
+
+// --------------------------------------------------------
 // Adds a texture to the list of textures
 // --------------------------------------------------------
 void Game::AddTexture(const wchar_t* _path)
@@ -601,12 +465,13 @@ void Game::AddTexture(const wchar_t* _path)
 		nullptr,
 		srv.GetAddressOf()
 	);
+
+	textures.push_back(srv);
 }
 
 // --------------------------------------------------------
 // Adds a Material to the list of Materials
 // --------------------------------------------------------
-
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
 {
 	materials.push_back(std::make_shared<Material>(
@@ -620,7 +485,7 @@ void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsig
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 1.0f);
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 0.0f);
 }
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness)
@@ -630,7 +495,126 @@ void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsig
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f);
+}
+
+// --------------------------------------------------------
+// Adds an Entity to the list of Entities
+// --------------------------------------------------------
+void Game::AddEntity(const char* _name, unsigned int _meshIndex, unsigned int _materialIndex, DirectX::XMFLOAT3 _position)
+{
+	shared_ptr<Entity> entity = std::make_shared<Entity>(
+		_name,
+		meshes[_meshIndex],
+		materials[_materialIndex]
+	);
+
+	entity->GetTransform()->SetPosition(_position);
+	entities.push_back(entity);
+}
+
+// --------------------------------------------------------
+// Adds a Light of a given type to the list of Lights
+// --------------------------------------------------------
+void Game::AddLightDirectional(DirectX::XMFLOAT3 _direction, DirectX::XMFLOAT3 _color, float _intensity, bool _isActive)
+{
+	Light light = {};
+	light.Type = LIGHT_TYPE_DIRECTIONAL;
+	light.Direction = _direction;
+	light.Color = _color;
+	light.Intensity = _intensity;
+	light.Active = _isActive ? 1 : 0;
+	lights.push_back(light);
+}
+
+void Game::AddLightPoint(DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _color, float _intensity, float _range, bool _isActive)
+{
+	Light light = {};
+	light.Type = LIGHT_TYPE_POINT;
+	light.Position = _position;
+	light.Color = _color;
+	light.Intensity = _intensity;
+	light.Range = _range;
+	light.Active = _isActive ? 1 : 0;
+	lights.push_back(light);
+}
+
+void Game::AddLightSpot(DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _direction, DirectX::XMFLOAT3 _color, float _intensity, float _range, float _innerAngle, float _outerAngle, bool _isActive)
+{
+	Light light = {};
+	light.Type = LIGHT_TYPE_SPOT;
+	light.Position = _position;
+	light.Direction = _direction;
+	light.Color = _color;
+	light.Intensity = _intensity;
+	light.Range = _range;
+	light.SpotInnerAngle = _innerAngle;
+	light.SpotOuterAngle = _outerAngle;
+	light.Active = _isActive ? 1 : 0;
+	lights.push_back(light);
+}
+
+// --------------------------------------------------------
+// Adds a Camera to the list of Cameras
+// --------------------------------------------------------
+void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect)
+{
+	shared_ptr<Camera> camera = std::make_shared<Camera>(
+		_name,
+		make_shared<Transform>(),
+		_aspect
+	);
+
+	camera->GetTransform()->SetPosition(_position);
+	camera->GetTransform()->SetRotation(_rotation);
+
+	cameras.push_back(camera);
+}
+
+void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, float _fov)
+{
+	shared_ptr<Camera> camera = std::make_shared<Camera>(
+		_name,
+		make_shared<Transform>(),
+		_aspect,
+		_fov
+	);
+
+	camera->GetTransform()->SetPosition(_position);
+	camera->GetTransform()->SetRotation(_rotation);
+
+	cameras.push_back(camera);
+}
+
+void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic)
+{
+	shared_ptr<Camera> camera = std::make_shared<Camera>(
+		_name,
+		make_shared<Transform>(),
+		_aspect,
+		_isOrthographic
+	);
+
+	camera->GetTransform()->SetPosition(_position);
+	camera->GetTransform()->SetRotation(_rotation);
+
+	cameras.push_back(camera);
+}
+
+void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic, float _orthoWidth)
+{
+	shared_ptr<Camera> camera = std::make_shared<Camera>(
+		_name,
+		make_shared<Transform>(),
+		_aspect,
+		_isOrthographic,
+		_orthoWidth
+	);
+
+	camera->GetTransform()->SetPosition(_position);
+	camera->GetTransform()->SetRotation(_rotation);
+
+	cameras.push_back(camera);
 }
 
 // --------------------------------------------------------
