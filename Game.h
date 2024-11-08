@@ -9,8 +9,9 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Entity.h"
-#include "Camera.h"
 #include "Lights.h"
+#include "Camera.h"
+#include "Skybox.h"
 #include "SimpleShader.h"
 
 class Game
@@ -36,6 +37,7 @@ private:
 	void CreateGeometry();
 	void CreateLights();
 	void CreateCameras();
+	void CreateSkyboxes();
 	void InitializeSimulationParameters();
 	void AddVertexShader(const wchar_t* _path);
 	void AddPixelShader(const wchar_t* _path);
@@ -124,6 +126,10 @@ private:
 	std::vector<std::shared_ptr<Camera>> cameras;
 	// Index of the current camera
 	int pCameraCurrent;
+
+	// SKYBOXES
+	std::vector<std::shared_ptr<Skybox>> skyboxes;
+	int pSkyboxCurrent;
 
 
 

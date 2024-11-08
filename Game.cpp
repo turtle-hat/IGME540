@@ -36,6 +36,7 @@ void Game::Initialize()
 	CreateGeometry();
 	CreateLights();
 	CreateCameras();
+	CreateSkyboxes();
 	InitializeSimulationParameters();
 
 	// Set initial graphics API state
@@ -181,13 +182,13 @@ void Game::CreateGeometry()
 {
 	// Create meshes from OBJ models
 	// MESHES 0-6
-	meshes.push_back(std::make_shared<Mesh>("M_Cube", FixPath(L"../../Assets/Models/cube.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Cylinder", FixPath(L"../../Assets/Models/cylinder.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Helix", FixPath(L"../../Assets/Models/helix.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Quad-SingleSided", FixPath(L"../../Assets/Models/quad.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Quad-DoubleSided", FixPath(L"../../Assets/Models/quad_double_sided.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Sphere", FixPath(L"../../Assets/Models/sphere.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Cube", FixPath(L"../../Assets/Models/cube.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Cylinder", FixPath(L"../../Assets/Models/cylinder.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Helix", FixPath(L"../../Assets/Models/helix.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Quad-SingleSided", FixPath(L"../../Assets/Models/quad.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Quad-DoubleSided", FixPath(L"../../Assets/Models/quad_double_sided.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Sphere", FixPath(L"../../Assets/Models/sphere.obj").c_str()));
+	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
 	AddEntity("E_Normal_Cube",				0, 0, XMFLOAT3(-9.0f, 3.0f, 0.0f));
@@ -254,6 +255,47 @@ void Game::CreateCameras() {
 	cameras[2]->SetLookSpeed(1.0f);
 	AddCamera("C_OrthoXY",	XMFLOAT3(0.0f, 0.0f, -100.0f),	XMFLOAT3(0.0f, 0.0f, 0.0f),					aspect, true);
 	cameras[3]->SetLookSpeed(1.0f);
+}
+
+
+void Game::CreateSkyboxes() {
+	// SKYBOXES 0-3
+	skyboxes.push_back(make_shared<Skybox>(
+		"SB_CloudsBlue", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_R.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_L.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_U.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_D.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_F.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_B.png").c_str()
+	));
+	skyboxes.push_back(make_shared<Skybox>(
+		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_R.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_L.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_U.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_D.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_F.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_B.png").c_str()
+	));
+	skyboxes.push_back(make_shared<Skybox>(
+		"SB_ColdSunset", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_R.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_L.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_U.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_D.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_F.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_B.png").c_str()
+	));
+	skyboxes.push_back(make_shared<Skybox>(
+		"SB_Planet", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_R.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_L.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_U.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_D.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_F.png").c_str(),
+		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_B.png").c_str()
+	));
 }
 
 // --------------------------------------------------------
@@ -360,6 +402,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		entities[i]->GetMesh()->Draw();
 	}
 
+	// Draw the selected skybox
+	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
+
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
 
@@ -412,6 +457,7 @@ void Game::InitializeSimulationParameters() {
 	pMatCustomZoom = XMFLOAT2(-0.2f, -0.61f);
 
 	pCameraCurrent = 0;
+	pSkyboxCurrent = 0;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -432,7 +478,7 @@ void Game::InitializeSimulationParameters() {
 // --------------------------------------------------------
 void Game::AddVertexShader(const wchar_t* _path)
 {
-	vertexShaders.push_back(std::make_shared<SimpleVertexShader>(
+	vertexShaders.push_back(make_shared<SimpleVertexShader>(
 		Graphics::Device,
 		Graphics::Context,
 		FixPath(_path).c_str()
@@ -444,7 +490,7 @@ void Game::AddVertexShader(const wchar_t* _path)
 // --------------------------------------------------------
 void Game::AddPixelShader(const wchar_t* _path)
 {
-	pixelShaders.push_back(std::make_shared<SimplePixelShader>(
+	pixelShaders.push_back(make_shared<SimplePixelShader>(
 		Graphics::Device,
 		Graphics::Context,
 		FixPath(_path).c_str()
@@ -474,7 +520,7 @@ void Game::AddTexture(const wchar_t* _path)
 // --------------------------------------------------------
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
 {
-	materials.push_back(std::make_shared<Material>(
+	materials.push_back(make_shared<Material>(
 		_name,
 		vertexShaders[_vertexShaderIndex],
 		pixelShaders[_pixelShaderIndex],
@@ -503,7 +549,7 @@ void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsig
 // --------------------------------------------------------
 void Game::AddEntity(const char* _name, unsigned int _meshIndex, unsigned int _materialIndex, DirectX::XMFLOAT3 _position)
 {
-	shared_ptr<Entity> entity = std::make_shared<Entity>(
+	shared_ptr<Entity> entity = make_shared<Entity>(
 		_name,
 		meshes[_meshIndex],
 		materials[_materialIndex]
@@ -559,7 +605,7 @@ void Game::AddLightSpot(DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _directio
 // --------------------------------------------------------
 void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect)
 {
-	shared_ptr<Camera> camera = std::make_shared<Camera>(
+	shared_ptr<Camera> camera = make_shared<Camera>(
 		_name,
 		make_shared<Transform>(),
 		_aspect
@@ -573,7 +619,7 @@ void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XM
 
 void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, float _fov)
 {
-	shared_ptr<Camera> camera = std::make_shared<Camera>(
+	shared_ptr<Camera> camera = make_shared<Camera>(
 		_name,
 		make_shared<Transform>(),
 		_aspect,
@@ -588,7 +634,7 @@ void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XM
 
 void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic)
 {
-	shared_ptr<Camera> camera = std::make_shared<Camera>(
+	shared_ptr<Camera> camera = make_shared<Camera>(
 		_name,
 		make_shared<Transform>(),
 		_aspect,
@@ -603,7 +649,7 @@ void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XM
 
 void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic, float _orthoWidth)
 {
-	shared_ptr<Camera> camera = std::make_shared<Camera>(
+	shared_ptr<Camera> camera = make_shared<Camera>(
 		_name,
 		make_shared<Transform>(),
 		_aspect,
