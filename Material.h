@@ -9,6 +9,7 @@ class Material
 {
 public:
 	Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);
+	Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
 
 	std::shared_ptr<SimpleVertexShader> GetVertexShader();
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
@@ -50,6 +51,8 @@ private:
 	std::vector<ID3D11ShaderResourceView*> textureList;
 	// Locks the sampler state so it isn't affected by changes to the global sampler state
 	bool isSamplerStateLocked;
+	// Whether this material uses the global environment map. Allows a function in Game to change the shader's MapCube SRV to match the environment
+	bool useGlobalEnvironmentMap;
 
 	const char* name;
 };

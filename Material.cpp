@@ -18,6 +18,20 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
+	useGlobalEnvironmentMap = false;
+	isSamplerStateLocked = false;
+}
+
+Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap)
+{
+	name = _name;
+	vertexShader = _vertexShader;
+	pixelShader = _pixelShader;
+	colorTint = _colorTint;
+	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
+	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
+	useGlobalEnvironmentMap = _useGlobalEnvironmentMap;
 	isSamplerStateLocked = false;
 }
 

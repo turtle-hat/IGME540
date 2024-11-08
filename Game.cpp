@@ -152,23 +152,23 @@ void Game::CreateMaterials()
 	materials[5]->AddSampler("BasicSampler", samplerState);
 
 	// MATERIALS 6-9
-	AddMaterial("Mat_Cobblestone",	1, 1, 0.3f);
+	AddMaterial("Mat_Cobblestone",	1, 1, 0.3f, true);
 	materials[6]->AddTextureSRV("MapDiffuse", textures[3]);
 	materials[6]->AddTextureSRV("MapNormal", textures[4]);
 	materials[6]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Cushion",		1, 1, 0.0f);
+	AddMaterial("Mat_Cushion",		1, 1, 0.0f, true);
 	materials[7]->AddTextureSRV("MapDiffuse", textures[5]);
 	materials[7]->AddTextureSRV("MapNormal", textures[6]);
 	materials[7]->AddSampler("BasicSampler", samplerState);
 	materials[7]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 
-	AddMaterial("Mat_Rock",			1, 1, 0.5f);
+	AddMaterial("Mat_Rock",			1, 1, 0.5f, true);
 	materials[8]->AddTextureSRV("MapDiffuse", textures[8]);
 	materials[8]->AddTextureSRV("MapNormal", textures[9]);
 	materials[8]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Flat",			1, 1, 0.0f);
+	AddMaterial("Mat_Flat",			1, 1, 0.0f, true);
 	materials[9]->AddTextureSRV("MapDiffuse", textures[7]);	// Normal map used for diffuse
 	materials[9]->AddTextureSRV("MapNormal", textures[7]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
@@ -524,30 +524,41 @@ void Game::AddTexture(const wchar_t* _path)
 // --------------------------------------------------------
 // Adds a Material to the list of Materials
 // --------------------------------------------------------
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap)
 {
 	materials.push_back(make_shared<Material>(
 		_name,
 		vertexShaders[_vertexShaderIndex],
 		pixelShaders[_pixelShaderIndex],
 		_colorTint,
-		_roughness
+		_roughness,
+		_useGlobalEnvironmentMap
 	));
+}
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
+{
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, _roughness, false);
 }
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 0.0f);
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 0.0f, false);
+}
+
+void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, bool _useGlobalEnvironmentMap)
+{
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, _useGlobalEnvironmentMap);
 }
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness);
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, false);
 }
 
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f);
+	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f, false);
 }
 
 // --------------------------------------------------------
