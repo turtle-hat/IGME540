@@ -86,6 +86,19 @@ void Skybox::Draw(shared_ptr<Camera> camera)
 	Graphics::Context->OMSetDepthStencilState(0, 0);
 }
 
+/// <summary>
+/// Gets the Skybox's Shader Resource View
+/// </summary>
+/// <returns>The Skybox texture's SRV</returns>
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Skybox::GetSRV()
+{
+	return srv;
+}
+
+/// <summary>
+/// Gets the Skybox's name
+/// </summary>
+/// <returns>The internal name of the Skybox</returns>
 const char* Skybox::GetName()
 {
 	return name;

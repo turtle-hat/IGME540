@@ -32,6 +32,8 @@ public:
 	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
 	void PrepareMaterial();
+	// Whether this material uses the global environment map. Allows a function in Game to change the shader's MapCube SRV to match the environment
+	bool useGlobalEnvironmentMap;
 
 private:
 	std::shared_ptr<SimpleVertexShader> vertexShader;
@@ -51,8 +53,6 @@ private:
 	std::vector<ID3D11ShaderResourceView*> textureList;
 	// Locks the sampler state so it isn't affected by changes to the global sampler state
 	bool isSamplerStateLocked;
-	// Whether this material uses the global environment map. Allows a function in Game to change the shader's MapCube SRV to match the environment
-	bool useGlobalEnvironmentMap;
 
 	const char* name;
 };

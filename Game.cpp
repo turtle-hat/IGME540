@@ -270,6 +270,7 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_B.png").c_str()
 	));
 	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.15f));
+	SetMaterialEnvironmentMaps(skyboxes[0]);
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
@@ -708,6 +709,15 @@ void Game::SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel) {
 void Game::SetMaterialSamplerStates() {
 	for (int i = 0; i < materials.size(); i++) {
 		materials[i]->AddSampler("BasicSampler", samplerState);
+	}
+}
+
+void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> skybox)
+{
+	for (int i = 0; i < materials.size(); i++) {
+		if (materials[i]->useGlobalEnvironmentMap) {
+			materials[i]->AddTextureSRV("MapCube", skybox->GetSRV());
+		}
 	}
 }
 
@@ -1214,7 +1224,9 @@ void Game::ImGuiBuild() {
 			// Each skybox gets its own Tree Node
 			ImGui::PushID(i);
 			ImGui::AlignTextToFramePadding();
-			ImGui::RadioButton("", &pSkyboxCurrent, i);
+			if (ImGui::RadioButton("", &pSkyboxCurrent, i)) {
+				SetMaterialEnvironmentMaps(skyboxes[pSkyboxCurrent]);
+			}
 			ImGui::SetItemTooltip("Set as active skybox");
 
 			ImGui::SameLine();

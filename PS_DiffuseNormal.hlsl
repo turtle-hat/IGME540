@@ -18,6 +18,7 @@ cbuffer PrimaryBuffer : register(b0)
 
 Texture2D MapDiffuse : register(t0); // "t" registers for textures
 Texture2D MapNormal : register(t1);
+TextureCube MapCube : register(t2);
 
 SamplerState BasicSampler : register(s0); // "s" registers for samplers
 

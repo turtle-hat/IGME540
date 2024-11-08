@@ -26,6 +26,7 @@ public:
 		const wchar_t* back
 	);
 	void Draw(std::shared_ptr<Camera> camera);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV();
 	const char* GetName();
 
 private:
