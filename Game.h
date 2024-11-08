@@ -95,8 +95,6 @@ private:
 	// Level of anisotropy is 2 to this power
 	int pAnisotropyPower;
 
-	// Ambient light color
-	DirectX::XMFLOAT3 pAmbientColor;
 	// How many iterations the custom material should go through
 	int pMatCustomIterations;
 	// Where to center the image and the zoom-in on it
@@ -129,6 +127,8 @@ private:
 
 	// SKYBOXES
 	std::vector<std::shared_ptr<Skybox>> skyboxes;
+	// Ambient light colors for each skybox
+	std::vector<DirectX::XMFLOAT3> skyboxAmbientColors;
 	int pSkyboxCurrent;
 
 

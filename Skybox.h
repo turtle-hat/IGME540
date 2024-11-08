@@ -26,6 +26,7 @@ public:
 		const wchar_t* back
 	);
 	void Draw(std::shared_ptr<Camera> camera);
+	const char* GetName();
 
 private:
 	// Helper for creating a cubemap from 6 individual textures

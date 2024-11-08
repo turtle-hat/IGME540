@@ -86,6 +86,11 @@ void Skybox::Draw(shared_ptr<Camera> camera)
 	Graphics::Context->OMSetDepthStencilState(0, 0);
 }
 
+const char* Skybox::GetName()
+{
+	return name;
+}
+
 // --------------------------------------------------------
 // Author: Chris Cascioli
 // Purpose: Creates a cube map on the GPU from 6 individual textures

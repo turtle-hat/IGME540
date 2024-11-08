@@ -269,6 +269,8 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_F.png").c_str(),
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_B.png").c_str()
 	));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.15f));
+
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_R.png").c_str(),
@@ -278,6 +280,8 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_F.png").c_str(),
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_B.png").c_str()
 	));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.15f, 0.0f, 0.05f));
+
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_ColdSunset", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
 		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_R.png").c_str(),
@@ -287,6 +291,8 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_F.png").c_str(),
 		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_B.png").c_str()
 	));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.1f, 0.1f, 0.25f));
+
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_Planet", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
 		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_R.png").c_str(),
@@ -296,6 +302,7 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_F.png").c_str(),
 		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_B.png").c_str()
 	));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.05f));
 }
 
 // --------------------------------------------------------
@@ -392,7 +399,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
-		ps->SetFloat3("lightAmbient", pAmbientColor);
+		ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
 
 		// COPY DATA TO CONSTANT BUFFERS
 		vs->CopyAllBufferData();
@@ -450,7 +457,6 @@ void Game::InitializeSimulationParameters() {
 	pObjectRotationSpeed = 1.0f;
 
 	pSelectedSamplerFilter = 5;
-	pAmbientColor = XMFLOAT3(0.1f, 0.1f, 0.25f);
 
 	pMatCustomIterations = 100;
 	pMatCustomImage = XMFLOAT2(-1.77f, -0.02f);
@@ -1027,12 +1033,6 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Lights")) {					// Info about each light
 		ImGui::Spacing();
 
-		float ambientColor[3] = { pAmbientColor.x, pAmbientColor.y, pAmbientColor.z };
-		if (ImGui::ColorEdit3("Ambient Light", ambientColor)) {
-			pAmbientColor = XMFLOAT3(ambientColor);
-		}
-		ImGui::Spacing();
-
 		ImGui::PushID("LIGHT");
 		for (int i = 0; i < lights.size(); i++) {					// List of lights in the scene
 
@@ -1115,7 +1115,7 @@ void Game::ImGuiBuild() {
 			float cameraNear = cameras[i]->GetNearClip();
 			float cameraFar = cameras[i]->GetFarClip();
 
-			// Each entity gets its own Tree Node
+			// Each camera gets its own Tree Node
 			ImGui::PushID(i);
 			ImGui::AlignTextToFramePadding();
 			ImGui::RadioButton("", &pCameraCurrent, i);
@@ -1194,10 +1194,33 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 	}
 
-	if (ImGui::CollapsingHeader("Testing (Unused)")) {			// Miscellaneous UI inputs/elements for testing and debugging
+	if (ImGui::CollapsingHeader("Skyboxes")) {					// Info about each texture
 		ImGui::Spacing();
 
-		ImGui::Text("N/A");
+		ImGui::PushID("SKYBOX");
+
+		for (int i = 0; i < skyboxes.size(); i++) {
+			// Each skybox gets its own Tree Node
+			ImGui::PushID(i);
+			ImGui::AlignTextToFramePadding();
+			ImGui::RadioButton("", &pSkyboxCurrent, i);
+			ImGui::SetItemTooltip("Set as active skybox");
+
+			ImGui::SameLine();
+			if (ImGui::TreeNode("", "(%06d) %s", i, skyboxes[i]->GetName())) {
+				float ambientColor[3] = { skyboxAmbientColors[i].x, skyboxAmbientColors[i].y, skyboxAmbientColors[i].z};
+				if (ImGui::ColorEdit3("Ambient Light", ambientColor)) {
+					skyboxAmbientColors[i] = XMFLOAT3(ambientColor);
+				}
+
+				ImGui::TreePop();
+				ImGui::Spacing();
+			}
+			
+			ImGui::PopID();
+			ImGui::Spacing();
+		}
+		ImGui::PopID();
 
 		ImGui::Spacing();
 	}
