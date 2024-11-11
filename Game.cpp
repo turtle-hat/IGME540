@@ -190,32 +190,32 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Sphere", FixPath(L"../../Assets/Models/sphere.obj").c_str()));
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
+	//// ENTITIES 0-6
+	//AddEntity("E_Normal_Cube",				0, 0, XMFLOAT3(-9.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Cylinder",			1, 0, XMFLOAT3(-6.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Helix",				2, 0, XMFLOAT3(-3.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Sphere",			5, 0, XMFLOAT3( 0.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Torus",				6, 0, XMFLOAT3( 3.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Quad-SingleSided",	3, 0, XMFLOAT3( 6.0f, 3.0f, 0.0f));
+	//AddEntity("E_Normal_Quad-DoubleSided",	4, 0, XMFLOAT3( 9.0f, 2.0f, 0.0f));
+
+	//// ENTITIES 7-13
+	//AddEntity("E_UV_Cube",				0, 1, XMFLOAT3(-9.0f,  0.0f, 0.0f));
+	//AddEntity("E_UV_Cylinder",			1, 1, XMFLOAT3(-6.0f,  0.0f, 0.0f));
+	//AddEntity("E_UV_Helix",				2, 1, XMFLOAT3(-3.0f,  0.0f, 0.0f));
+	//AddEntity("E_UV_Sphere",			5, 1, XMFLOAT3( 0.0f,  0.0f, 0.0f));
+	//AddEntity("E_UV_Torus",				6, 1, XMFLOAT3( 3.0f,  0.0f, 0.0f));
+	//AddEntity("E_UV_Quad-SingleSided",	3, 1, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	//AddEntity("E_UV_Quad-DoubleSided",	4, 1, XMFLOAT3( 9.0f, -1.0f, 0.0f));
+
 	// ENTITIES 0-6
-	AddEntity("E_Normal_Cube",				0, 0, XMFLOAT3(-9.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Cylinder",			1, 0, XMFLOAT3(-6.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Helix",				2, 0, XMFLOAT3(-3.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Sphere",			5, 0, XMFLOAT3( 0.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Torus",				6, 0, XMFLOAT3( 3.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Quad-SingleSided",	3, 0, XMFLOAT3( 6.0f, 3.0f, 0.0f));
-	AddEntity("E_Normal_Quad-DoubleSided",	4, 0, XMFLOAT3( 9.0f, 2.0f, 0.0f));
-
-	// ENTITIES 7-13
-	AddEntity("E_UV_Cube",				0, 1, XMFLOAT3(-9.0f,  0.0f, 0.0f));
-	AddEntity("E_UV_Cylinder",			1, 1, XMFLOAT3(-6.0f,  0.0f, 0.0f));
-	AddEntity("E_UV_Helix",				2, 1, XMFLOAT3(-3.0f,  0.0f, 0.0f));
-	AddEntity("E_UV_Sphere",			5, 1, XMFLOAT3( 0.0f,  0.0f, 0.0f));
-	AddEntity("E_UV_Torus",				6, 1, XMFLOAT3( 3.0f,  0.0f, 0.0f));
-	AddEntity("E_UV_Quad-SingleSided",	3, 1, XMFLOAT3( 6.0f, -1.0f, 0.0f));
-	AddEntity("E_UV_Quad-DoubleSided",	4, 1, XMFLOAT3( 9.0f, -1.0f, 0.0f));
-
-	// ENTITIES 14-20
-	AddEntity("E_Mat_Cube",				0, 6, XMFLOAT3(-9.0f, -3.0f, 0.0f));
-	AddEntity("E_Mat_Cylinder",			1, 7, XMFLOAT3(-6.0f, -3.0f, 0.0f));
-	AddEntity("E_Mat_Helix",			2, 8, XMFLOAT3(-3.0f, -3.0f, 0.0f));
-	AddEntity("E_Mat_Sphere",			5, 8, XMFLOAT3( 0.0f, -3.0f, 0.0f));
-	AddEntity("E_Mat_Torus",			6, 7, XMFLOAT3( 3.0f, -3.0f, 0.0f));
-	AddEntity("E_Mat_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -4.0f, 0.0f));
-	AddEntity("E_Mat_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -4.0f, 0.0f));
+	AddEntity("E_Mat_Cube",				0, 6, XMFLOAT3(-9.0f,  0.0f, 0.0f));
+	AddEntity("E_Mat_Cylinder",			1, 7, XMFLOAT3(-6.0f,  0.0f, 0.0f));
+	AddEntity("E_Mat_Helix",			2, 8, XMFLOAT3(-3.0f,  0.0f, 0.0f));
+	AddEntity("E_Mat_Sphere",			5, 8, XMFLOAT3( 0.0f,  0.0f, 0.0f));
+	AddEntity("E_Mat_Torus",			6, 7, XMFLOAT3( 3.0f,  0.0f, 0.0f));
+	AddEntity("E_Mat_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	AddEntity("E_Mat_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
 
 	/*
 	// ENTITY 21
@@ -235,10 +235,10 @@ void Game::CreateLights() {
 	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 3-4
-	AddLightPoint(XMFLOAT3(-7.0f, -2.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f), 1.0f, 10.0f, true);
-	AddLightPoint(XMFLOAT3(1.0f, -4.0f, 0.0f), XMFLOAT3(1.0f, 0.2f, 1.0f), 2.0f, 4.0f, true);
+	AddLightPoint(XMFLOAT3(-7.0f, -2.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f), 3.0f, 10.0f, true);
+	AddLightPoint(XMFLOAT3(1.0f, -4.0f, 0.0f), XMFLOAT3(1.0f, 0.2f, 1.0f), 4.0f, 4.0f, true);
 	// LIGHT 5
-	AddLightSpot(XMFLOAT3(4.5f, 0.0f, 0.25f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), 1.0f, 30.0f, 0.35f, 0.4f, true);
+	AddLightSpot(XMFLOAT3(4.5f, 0.0f, 0.25f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), 1.0f, 30.0f, 0.9f, 1.0f, true);
 }
 
 // --------------------------------------------------------
@@ -270,6 +270,7 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_B.png").c_str()
 	));
 	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.15f));
+	// Set this as the environment map used by each material with normal map calculations
 	SetMaterialEnvironmentMaps(skyboxes[0]);
 
 	skyboxes.push_back(make_shared<Skybox>(
@@ -281,7 +282,7 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_F.png").c_str(),
 		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_B.png").c_str()
 	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.15f, 0.0f, 0.05f));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.05f, 0.0f, 0.10f));
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_ColdSunset", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
@@ -330,7 +331,7 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[pCameraCurrent]->Update(deltaTime);
 
 	// Rotate OBJ-imported meshes
-	for (int i = 0; i <= 20; i++) {
+	for (int i = 0; i <= 6; i++) {
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 
