@@ -304,6 +304,8 @@ void Game::CreateSkyboxes() {
 		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_B.png").c_str()
 	));
 	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.05f));
+
+
 }
 
 // --------------------------------------------------------
@@ -716,6 +718,7 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> skybox)
 {
 	for (int i = 0; i < materials.size(); i++) {
 		if (materials[i]->useGlobalEnvironmentMap) {
+			printf("Setting environment map of material %d to %s\n", i, skybox->GetName());
 			materials[i]->AddTextureSRV("MapCube", skybox->GetSRV());
 		}
 	}

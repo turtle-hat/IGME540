@@ -24,14 +24,17 @@ SamplerState BasicSampler : register(s0); // "s" registers for samplers
 
 float4 main(VertexToPixel_Normal input) : SV_TARGET
 {
+	
 	// Renormalize the normal and tangent
 	input.normal = normalize(input.normal);
+	return MapCube.Sample(BasicSampler, input.normal);
 	input.tangent = normalize(input.tangent);
 
 	// Sample the textures at this pixel
 	float4 sampleDS = MapDiffuse.Sample(BasicSampler, input.uv * uvScale + uvPosition);
 	// Unpack and normalize the normal map
 	float3 sampleNormalUnpacked = SampleUnpacked(MapNormal, BasicSampler, input.uv * uvScale + uvPosition);
+
 	
 	// Pull info out of the diffuse texture
 	float3 sampleDiffuse = sampleDS.rgb;
