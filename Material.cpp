@@ -184,7 +184,7 @@ void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11Shad
 	// If SRV with same name was found, release it
 	if (textureSRVs.find(name) != textureSRVs.end()) {
 		textureSRVs[name] = nullptr;
-		samplers.erase(name);
+		textureSRVs.erase(name);
 	}
 	textureSRVs.insert({ name, srv });
 	textureList.push_back(srv.Get());

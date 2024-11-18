@@ -6,67 +6,73 @@
 #define LIGHT_COUNT	8
 
 // Calculates Lambert diffuse shading for a pixel
-float DiffuseLambert(float3 lightDirectionOut, float3 surfaceNormal)
+float DiffuseLambert(float3 _lightDirectionOut, float3 _surfaceNormal)
 {
     // Get dot product of normal and light direction, scale by intensity and the color of the light and surface 
-    return saturate(dot(surfaceNormal, lightDirectionOut));
+    return saturate(dot(_surfaceNormal, _lightDirectionOut));
 }
 
 // Calculates Phong specular shading for a pixel 
-float SpecularPhong(float3 lightDirectionIn, float3 surfaceNormal, float surfaceRoughness, float3 surfaceWorldPos, float3 cameraPosition)
+float SpecularPhong(float3 _lightDirectionIn, float3 _surfaceNormal, float _surfaceRoughness, float3 _surfaceWorldPos, float3 _cameraPosition)
 {
     return pow(
         saturate(dot(
-            reflect(lightDirectionIn, surfaceNormal), // R
-            normalize(cameraPosition - surfaceWorldPos) // V
+            reflect(_lightDirectionIn, _surfaceNormal), // R
+            normalize(_cameraPosition - _surfaceWorldPos) // V
         )),
-        (1.0f - min(surfaceRoughness, 0.99f)) * MAX_SPECULAR_EXPONENT // Specular Exponent
+        (1.0f - min(_surfaceRoughness, 0.99f)) * MAX_SPECULAR_EXPONENT // Specular Exponent
     );
 }
 
 // Calculates the strength of a point light for a pixel. Returns a value that attenuates the light when multiplied
-float Attenuate(Light light, float3 worldPosition)
+float Attenuate(Light _light, float3 _worldPosition)
 {
-    float attenuationDistance = distance(light.Position, worldPosition);
-    float attenuation = saturate(1.0f - (pow(attenuationDistance, 2) / pow(light.Range, 2)));
+    float attenuationDistance = distance(_light.Position, _worldPosition);
+    float attenuation = saturate(1.0f - (pow(attenuationDistance, 2) / pow(_light.Range, 2)));
     return pow(attenuation, 2);
 }
 
 // Calculates the strength of a spot light for a pixel. Returns a value that attenuates the light when multiplied
-float SpotTerm(Light light, float3 lightDirectionIn)
+float SpotTerm(Light _light, float3 _lightDirectionIn)
 {
-    float cosOuter = cos(light.SpotOuterAngle);
-    float cosInner = cos(light.SpotInnerAngle);
+    float cosOuter = cos(_light.SpotOuterAngle);
+    float cosInner = cos(_light.SpotInnerAngle);
     
     return saturate(
         (cosOuter - 
-            saturate(dot(lightDirectionIn, light.Direction)) // Angle from pixel to light direction
+            saturate(dot(_lightDirectionIn, _light.Direction)) // Angle from pixel to light direction
         ) /
         (cosOuter - cosInner) // Falloff range
     );
 
 }
 
-// Calculates Lambert-Phong lighting result of a single light treated as a directional light
-float3 LightDirectionalLambertPhong(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float surfaceSpecular, float3 surfaceWorldPos, float3 cameraPosition)
+// Calculates the Fresnel term for a pixel using Schlick's approximation
+float FresnelTermSchlick(float3 _normal, float3 _cameraDirectionOut, float _specularAmount)
 {
-    float3 lightDirectionIn = normalize(light.Direction);
-    
-    float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
+    return _specularAmount + (1.0f - _specularAmount) * pow(1.0f - saturate(dot(_normal, _cameraDirectionOut)), 5);
+}
 
-    return light.Color * light.Intensity * (surfaceColor * diffuse + specular);
+// Calculates Lambert-Phong lighting result of a single light treated as a directional light
+float3 LightDirectionalLambertPhong(Light _light, float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceSpecular, float3 _surfaceWorldPos, float3 _cameraPosition)
+{
+    float3 lightDirectionIn = normalize(_light.Direction);
+    
+    float diffuse = DiffuseLambert(-lightDirectionIn, _surfaceNormal);
+    float specular = _surfaceSpecular * SpecularPhong(lightDirectionIn, _surfaceNormal, _surfaceRoughness, _surfaceWorldPos, _cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
+
+    return _light.Color * _light.Intensity * (_surfaceColor * diffuse + specular);
 }
 
 // Calculates Lambert-Phong lighting result of a single light treated as a point light
-float3 LightPointLambertPhong(Light light, float3 surfaceNormal, float3 surfaceColor, float surfaceRoughness, float surfaceSpecular, float3 surfaceWorldPos, float3 cameraPosition)
+float3 LightPointLambertPhong(Light _light, float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceSpecular, float3 _surfaceWorldPos, float3 _cameraPosition)
 {
-    float3 lightDirectionIn = normalize(surfaceWorldPos - light.Position);
+    float3 lightDirectionIn = normalize(_surfaceWorldPos - _light.Position);
     
-    float diffuse = DiffuseLambert(-lightDirectionIn, surfaceNormal);
-    float specular = surfaceSpecular * SpecularPhong(lightDirectionIn, surfaceNormal, surfaceRoughness, surfaceWorldPos, cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
+    float diffuse = DiffuseLambert(-lightDirectionIn, _surfaceNormal);
+    float specular = _surfaceSpecular * SpecularPhong(lightDirectionIn, _surfaceNormal, _surfaceRoughness, _surfaceWorldPos, _cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
 
-    return light.Color * light.Intensity * (surfaceColor * diffuse + specular) * Attenuate(light, surfaceWorldPos);
+    return _light.Color * _light.Intensity * (_surfaceColor * diffuse + specular) * Attenuate(_light, _surfaceWorldPos);
 }
 
 // Calculates Lambert-Phong lighting result of a single light treated as a spot light
@@ -108,6 +114,16 @@ float3 CalculateLightingLambertPhong(Light _lights[LIGHT_COUNT], float3 _lightAm
     }
     
     return lightsFinal;
+}
+
+// Interpolates calculated lit color with reflection using a Fresnel calculation
+float3 CalculateReflections(float3 _totalLight, float3 _reflectionColor, float3 _normal, float3 _cameraDirectionOut)
+{
+    return lerp(
+        _totalLight,
+        _reflectionColor,
+        FresnelTermSchlick(_normal, _cameraDirectionOut, 0.04f)
+    );
 }
 
 #endif
