@@ -31,8 +31,8 @@ float4 main(VertexToPixel_Normal input) : SV_TARGET
 
 	// Sample the textures at this pixel
 	float4 sampleDS = MapDiffuse.Sample(BasicSampler, input.uv * uvScale + uvPosition);
-	// Pull info out of the diffuse texture
-	float3 sampleDiffuse = sampleDS.rgb;
+	// Pull info out of the diffuse/specular texture
+	float3 sampleDiffuse = pow(sampleDS.rgb, 2.2f); // Gamma uncorrected so it gets the expected value after end correction
 	float sampleSpecular = sampleDS.a;
 	float3 surfaceColor = sampleDiffuse * colorTint.rgb;
 
@@ -44,8 +44,8 @@ float4 main(VertexToPixel_Normal input) : SV_TARGET
 	// Get necessary vectors for sampling reflection
 	float3 cameraDirectionOut = normalize(cameraPosition - input.worldPosition);
 	float3 cameraReflection = reflect(-cameraDirectionOut, mapNormal);
-	// Sample Cubemap
-	float3 sampleCubeReflection = MapCube.Sample(BasicSampler, cameraReflection).rgb;
+	// Sample Cubemap with gamma uncorrected
+	float3 sampleCubeReflection = pow(MapCube.Sample(BasicSampler, cameraReflection).rgb, 2.2f);
 
 	// Color of surface with all lighting calculated
 	float3 litColor = CalculateLightingLambertPhong(
@@ -60,5 +60,13 @@ float4 main(VertexToPixel_Normal input) : SV_TARGET
 	);
 
 	// Return the result of our lighting equations
-	return float4(CalculateReflections(litColor, sampleCubeReflection, mapNormal, cameraDirectionOut), 1.0f);
+	return float4(
+		pow(CalculateReflections(
+			litColor,
+			sampleCubeReflection,
+			mapNormal,
+			cameraDirectionOut
+		), 1.0f / 2.2f),
+		1.0f
+	);
 }

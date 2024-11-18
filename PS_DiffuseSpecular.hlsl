@@ -35,13 +35,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	// Sample the texture at this pixel
 	float4 sampleDS = MapDiffuseSpecular.Sample(BasicSampler, input.uv * uvScale + uvPosition);
-	float3 sampleDiffuse = sampleDS.rgb;
+	float3 sampleDiffuse = pow(sampleDS.rgb, 2.2f); // Gamma uncorrected so it gets the expected value after end correction
 	float sampleSpecular = sampleDS.a;
 	float3 surfaceColor = sampleDiffuse * colorTint.rgb;
 
 	// Return the result of our lighting equations
 	return float4(
-		CalculateLightingLambertPhong(
+		pow(CalculateLightingLambertPhong(
 			lights,
 			lightAmbient,
 			input.normal,
@@ -50,7 +50,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 			sampleSpecular,
 			input.worldPosition,
 			cameraPosition
-		),
+		), 1.0f / 2.2f),
 		1.0f
 	);
 }

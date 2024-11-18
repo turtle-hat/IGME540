@@ -13,5 +13,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	return float4(input.normal, 1);
+	// Added gamma correction
+	return float4(pow(input.normal, 1.0f / 2.2f), 1);
 }

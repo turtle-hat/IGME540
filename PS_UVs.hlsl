@@ -11,5 +11,6 @@ cbuffer PrimaryBuffer : register(b0)
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	return float4(input.uv, 0, 1);
+	// Added gamma correction
+	return float4(pow(input.uv, 1.0f / 2.2f), 0, 1);
 }

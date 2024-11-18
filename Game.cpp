@@ -233,49 +233,29 @@ void Game::CreateSkyboxes() {
 	// SKYBOXES 0-3
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsBlue", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_R.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_L.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_U.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_D.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_F.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue_B.png").c_str()
+		L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue"
 	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.15f));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.075f));
 	// Set this as the environment map used by each material with normal map calculations
 	SetMaterialEnvironmentMaps(skyboxes[0]);
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_R.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_L.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_U.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_D.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_F.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink_B.png").c_str()
+		L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink"
 	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.05f, 0.0f, 0.10f));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.025f, 0.0f, 0.05f));
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_ColdSunset", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_R.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_L.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_U.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_D.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_F.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset_B.png").c_str()
+		L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset"
 	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.1f, 0.1f, 0.25f));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.05f, 0.05f, 0.125f));
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_Planet", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_R.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_L.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_U.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_D.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_F.png").c_str(),
-		FixPath(L"../../Assets/Textures/Cubemaps/Planet/CM_Planet_B.png").c_str()
+		L"../../Assets/Textures/Cubemaps/Planet/CM_Planet"
 	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.05f));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.025f));
 
 
 }
@@ -374,7 +354,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
-		ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
+		ps->SetFloat3("lightAmbient", pDrawSkybox ? skyboxAmbientColors[pSkyboxCurrent] : XMFLOAT3(0, 0, 0));
 
 		// COPY DATA TO CONSTANT BUFFERS
 		vs->CopyAllBufferData();
@@ -384,8 +364,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		entities[i]->GetMesh()->Draw();
 	}
 
-	// Draw the selected skybox
-	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
+	if (pDrawSkybox) {
+		// Draw the selected skybox
+		skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
+	}
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
@@ -427,7 +409,10 @@ void Game::InitializeSimulationParameters() {
 	// IMGUI PARAMETERS
 
 	igShowDemo = false;
-	float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f };
+	
+	// Uncomment for original cornflower blue
+	//float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f };
+	float bgColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	memcpy(pBackgroundColor, bgColor, sizeof(float) * 4);
 	pObjectRotationSpeed = 1.0f;
 
@@ -439,6 +424,7 @@ void Game::InitializeSimulationParameters() {
 
 	pCameraCurrent = 0;
 	pSkyboxCurrent = 0;
+	pDrawSkybox = true;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -687,13 +673,25 @@ void Game::SetMaterialSamplerStates() {
 }
 
 // --------------------------------------------------------
-// Sets the environment map of each Material, if they have one
+// Sets the environment map of each Material, if they use one
 // --------------------------------------------------------
-void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> skybox)
+void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 {
 	for (int i = 0; i < materials.size(); i++) {
 		if (materials[i]->useGlobalEnvironmentMap) {
-			materials[i]->AddTextureSRV("MapCube", skybox->GetSRV());
+			materials[i]->AddTextureSRV("MapCube", _skybox->GetSRV());
+		}
+	}
+}
+
+// --------------------------------------------------------
+// Removes the environment map of each Material, if they use one
+// --------------------------------------------------------
+void Game::DisableMaterialEnvironmentMaps()
+{
+	for (int i = 0; i < materials.size(); i++) {
+		if (materials[i]->useGlobalEnvironmentMap) {
+			materials[i]->RemoveTextureSRV("MapCube");
 		}
 	}
 }
@@ -701,11 +699,11 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> skybox)
 // --------------------------------------------------------
 // Prepares the ImGui UI window for being created
 // --------------------------------------------------------
-void Game::ImGuiUpdate(float deltaTime) {
+void Game::ImGuiUpdate(float _deltaTime) {
 	// Put this all in a helper method that is called from Game::Update()
 	// Feed fresh data to ImGui
 	ImGuiIO& io = ImGui::GetIO();
-	io.DeltaTime = deltaTime;
+	io.DeltaTime = _deltaTime;
 	io.DisplaySize.x = (float)Window::Width();
 	io.DisplaySize.y = (float)Window::Height();
 	// Reset the frame
@@ -1193,6 +1191,13 @@ void Game::ImGuiBuild() {
 	}
 
 	if (ImGui::CollapsingHeader("Skyboxes")) {					// Info about each texture
+		ImGui::Spacing();
+
+		if (ImGui::Checkbox("Draw Skybox", &pDrawSkybox)) {
+			pDrawSkybox ?
+				SetMaterialEnvironmentMaps(skyboxes[pSkyboxCurrent]) :
+				DisableMaterialEnvironmentMaps();
+		}
 		ImGui::Spacing();
 
 		ImGui::PushID("SKYBOX");

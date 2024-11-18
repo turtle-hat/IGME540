@@ -29,8 +29,9 @@ public:
 	void LockSamplerState();
 	void UnlockSamplerState();
 
-	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
-	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+	void AddTextureSRV(std::string _name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _srv);
+	void RemoveTextureSRV(std::string _name);
+	void AddSampler(std::string _name, Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampler);
 	void PrepareMaterial();
 	// Whether this material uses the global environment map. Allows a function in Game to change the shader's MapCube SRV to match the environment
 	bool useGlobalEnvironmentMap;

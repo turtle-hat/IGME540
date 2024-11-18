@@ -58,8 +58,9 @@ private:
 	void AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic, float _orthoWidth);
 	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
 	void SetMaterialSamplerStates();
-	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> skybox);
-	void ImGuiUpdate(float deltaTime);
+	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);
+	void DisableMaterialEnvironmentMaps();
+	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods
 	void ImGuiBuild();
@@ -133,6 +134,7 @@ private:
 	// Ambient light colors for each skybox
 	std::vector<DirectX::XMFLOAT3> skyboxAmbientColors;
 	int pSkyboxCurrent;
+	bool pDrawSkybox;
 
 
 

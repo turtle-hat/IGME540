@@ -179,15 +179,29 @@ void Material::UnlockSamplerState()
 /// </summary>
 /// <param name="name">The name of the texture</param>
 /// <param name="srv">The texture's SRV</param>
-void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+void Material::AddTextureSRV(std::string _name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _srv)
 {
 	// If SRV with same name was found, release it
+	if (textureSRVs.find(_name) != textureSRVs.end()) {
+		textureSRVs[_name] = nullptr;
+		textureSRVs.erase(_name);
+	}
+	textureSRVs.insert({ _name, _srv });
+	textureList.push_back(_srv.Get());
+}
+
+/// <summary>
+/// Removes the SRV for a texture from this material
+/// </summary>
+/// <param name="name">The name of the texture</param>
+/// <param name="srv">The texture's SRV</param>
+void Material::RemoveTextureSRV(std::string _name)
+{
+	// If SRV with name was found, release it
 	if (textureSRVs.find(name) != textureSRVs.end()) {
 		textureSRVs[name] = nullptr;
 		textureSRVs.erase(name);
 	}
-	textureSRVs.insert({ name, srv });
-	textureList.push_back(srv.Get());
 }
 
 /// <summary>
@@ -195,15 +209,15 @@ void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11Shad
 /// </summary>
 /// <param name="name">The name of the sampler</param>
 /// <param name="sampler">The sampler state itself</param>
-void Material::AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+void Material::AddSampler(std::string _name, Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampler)
 {
 	if (!isSamplerStateLocked) {
 		// If sampler with same name was found, release it first
-		if (samplers.find(name) != samplers.end()) {
-			samplers[name] = nullptr;
-			samplers.erase(name);
+		if (samplers.find(_name) != samplers.end()) {
+			samplers[_name] = nullptr;
+			samplers.erase(_name);
 		}
-		samplers.insert({ name, sampler });
+		samplers.insert({ _name, _sampler });
 	}
 }
 

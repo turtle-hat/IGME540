@@ -52,5 +52,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 	
 	float3 finalColor = progress * colorTint.xyz;
 	
-	return float4(finalColor, colorTint.w);
+	// Added gamma correction
+	return float4(pow(finalColor, 1.0f / 2.2f), colorTint.w);
 }

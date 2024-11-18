@@ -2,6 +2,7 @@
 
 #include "Graphics.h"
 #include "WICTextureLoader.h"
+#include "PathHelpers.h"
 
 using namespace std;
 using namespace DirectX;
@@ -14,31 +15,38 @@ using namespace DirectX;
 /// <param name="_samplerState">The sampler state to use for rendering</param>
 /// <param name="_vertexShader">The vertex shader to use for rendering</param>
 /// <param name="_pixelShader">The pixel shader to use for rendering</param>
-/// <param name="right">The filepath of the texture for the skybox's right face</param>
-/// <param name="left">The filepath of the texture for the skybox's left face</param>
-/// <param name="up">The filepath of the texture for the skybox's top face</param>
-/// <param name="down">The filepath of the texture for the skybox's bottom face</param>
-/// <param name="front">The filepath of the texture for the skybox's front face</param>
-/// <param name="back">The filepath of the texture for the skybox's back face</param>
+/// <param name="_pathBase">The starting filepath of the textures to be loaded for the skybox.
+/// Files are expected in the format of [_pathBase]_[R, L, U, D, F, or B].png</param>
 Skybox::Skybox(
 	const char* _name,
 	shared_ptr<Mesh> _mesh,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> _samplerState,
 	shared_ptr<SimpleVertexShader> _vertexShader,
 	shared_ptr<SimplePixelShader> _pixelShader,
-	const wchar_t* right,
-	const wchar_t* left,
-	const wchar_t* up,
-	const wchar_t* down,
-	const wchar_t* front,
-	const wchar_t* back
+	std::wstring _pathBase
 )
 {
 	// Initialize member variables from constructor parameters
 	name = _name;
 	mesh = _mesh;
 	samplerState = _samplerState;
-	srv = CreateCubemap(right, left, up, down, front, back);
+
+	// Construct file paths from base
+	wstring pathR = _pathBase + L"_R.png";
+	wstring pathL = _pathBase + L"_L.png";
+	wstring pathU = _pathBase + L"_U.png";
+	wstring pathD = _pathBase + L"_D.png";
+	wstring pathF = _pathBase + L"_F.png";
+	wstring pathB = _pathBase + L"_B.png";
+
+	srv = CreateCubemap(
+		FixPath(pathR).c_str(),
+		FixPath(pathL).c_str(),
+		FixPath(pathU).c_str(),
+		FixPath(pathD).c_str(),
+		FixPath(pathF).c_str(),
+		FixPath(pathB).c_str()
+	);
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
 

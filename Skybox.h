@@ -18,12 +18,7 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> _samplerState,
 		std::shared_ptr<SimpleVertexShader> _vertexShader,
 		std::shared_ptr<SimplePixelShader> _pixelShader,
-		const wchar_t* right,
-		const wchar_t* left,
-		const wchar_t* up,
-		const wchar_t* down,
-		const wchar_t* front,
-		const wchar_t* back
+		std::wstring _pathBase
 	);
 	void Draw(std::shared_ptr<Camera> camera);
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV();
