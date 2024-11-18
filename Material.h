@@ -37,6 +37,8 @@ public:
 	bool useGlobalEnvironmentMap;
 
 private:
+	void RebuildTextureList();
+
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	DirectX::XMFLOAT4 colorTint;

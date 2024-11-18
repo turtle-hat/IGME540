@@ -185,6 +185,7 @@ void Material::AddTextureSRV(std::string _name, Microsoft::WRL::ComPtr<ID3D11Sha
 	if (textureSRVs.find(_name) != textureSRVs.end()) {
 		textureSRVs[_name] = nullptr;
 		textureSRVs.erase(_name);
+		RebuildTextureList();
 	}
 	textureSRVs.insert({ _name, _srv });
 	textureList.push_back(_srv.Get());
@@ -201,6 +202,7 @@ void Material::RemoveTextureSRV(std::string _name)
 	if (textureSRVs.find(name) != textureSRVs.end()) {
 		textureSRVs[name] = nullptr;
 		textureSRVs.erase(name);
+		RebuildTextureList();
 	}
 }
 
@@ -231,5 +233,18 @@ void Material::PrepareMaterial()
 	}
 	for (auto& s : samplers) {
 		pixelShader->SetSamplerState(s.first.c_str(), s.second);
+	}
+}
+
+/// <summary>
+/// Rebuilds textureList from textureSRVs
+/// </summary>
+void Material::RebuildTextureList()
+{
+	// If textures have been removed or updated, rebuild textureList
+	textureList.clear();
+	// https://stackoverflow.com/a/8484055
+	for (auto srv : textureSRVs) {
+		textureList.push_back(srv.second.Get());
 	}
 }
