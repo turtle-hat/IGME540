@@ -156,23 +156,23 @@ void Game::CreateMaterials()
 	materials[5]->AddSampler("BasicSampler", samplerState);
 
 	// MATERIALS 6-9
-	AddMaterial("Mat_Cobblestone",	1, 1, 0.3f, true);
+	AddMaterial("Mat_Cobblestone_LambertPhong",	1, 1, 0.3f, true);
 	materials[6]->AddTextureSRV("MapDiffuse", textures[3]);
 	materials[6]->AddTextureSRV("MapNormal", textures[4]);
 	materials[6]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Cushion",		1, 1, 0.0f, true);
+	AddMaterial("Mat_Cushion",			1, 1, 0.0f, true);
 	materials[7]->AddTextureSRV("MapDiffuse", textures[5]);
 	materials[7]->AddTextureSRV("MapNormal", textures[6]);
 	materials[7]->AddSampler("BasicSampler", samplerState);
 	materials[7]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 
-	AddMaterial("Mat_Rock",			1, 1, 0.5f, true);
+	AddMaterial("Mat_Rock",				1, 1, 0.5f, true);
 	materials[8]->AddTextureSRV("MapDiffuse", textures[8]);
 	materials[8]->AddTextureSRV("MapNormal", textures[9]);
 	materials[8]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Flat",			1, 1, 0.0f, true);
+	AddMaterial("Mat_Flat",				1, 1, 0.0f, true);
 	materials[9]->AddTextureSRV("MapDiffuse", textures[7]);	// Normal map used for diffuse
 	materials[9]->AddTextureSRV("MapNormal", textures[7]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
@@ -195,13 +195,23 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
-	AddEntity("E_Cube",				0, 6, XMFLOAT3(-9.0f,  0.0f, 0.0f));
-	AddEntity("E_Cylinder",			1, 7, XMFLOAT3(-6.0f,  0.0f, 0.0f));
-	AddEntity("E_Helix",			2, 8, XMFLOAT3(-3.0f,  0.0f, 0.0f));
-	AddEntity("E_Sphere",			5, 8, XMFLOAT3( 0.0f,  0.0f, 0.0f));
-	AddEntity("E_Torus",			6, 7, XMFLOAT3( 3.0f,  0.0f, 0.0f));
-	AddEntity("E_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -1.0f, 0.0f));
-	AddEntity("E_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
+	AddEntity("E_LambertPhong_BrokenTiles",	5, 3, XMFLOAT3(-9.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_RustyMetal",	5, 4, XMFLOAT3(-6.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_Tiles",		5, 5, XMFLOAT3(-3.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_Cobblestone",	5, 6, XMFLOAT3( 0.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_Cushion",		5, 7, XMFLOAT3( 3.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_Rock",		5, 8, XMFLOAT3( 6.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_Flat",		5, 9, XMFLOAT3( 9.0f, 0.0f, 0.0f));
+
+	// ENTITIES 7-13
+	AddEntity("E_PBR_Floor",		5, 3, XMFLOAT3(-9.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Scratched",	5, 4, XMFLOAT3(-6.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Paint",		5, 5, XMFLOAT3(-3.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Cobblestone",	5, 6, XMFLOAT3( 0.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Rough",		5, 7, XMFLOAT3( 3.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Bronze",		5, 8, XMFLOAT3( 6.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Wood",			5, 9, XMFLOAT3( 9.0f, -3.0f, 0.0f));
+
 }
 
 // --------------------------------------------------------
@@ -213,7 +223,7 @@ void Game::CreateLights() {
 	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 1-2
 	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
-	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 }
 
 // --------------------------------------------------------
@@ -267,8 +277,8 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update current camera
 	cameras[pCameraCurrent]->Update(deltaTime);
 
-	// Rotate OBJ-imported meshes
-	for (int i = 0; i <= 6; i++) {
+	// Rotate meshes
+	for (int i = 0; i <= 13; i++) {
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 

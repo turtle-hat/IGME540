@@ -22,6 +22,15 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	isSamplerStateLocked = false;
 }
 
+/// <summary>
+/// Constructs a Material with the given shaders and tint
+/// </summary>
+/// <param name="_name">The internal name for the Material</param>
+/// <param name="_vertexShader">The vertex shader to draw the Material with</param>
+/// <param name="_pixelShader">The pixel shader to draw the Material with</param>
+/// <param name="_colorTint">An RGBA color to multiply to the Material</param>
+/// <param name="_roughness">The material's roughness</param>
+/// <param name="_useGlobalEnvironmentMap">Whether the material should use the global skybox as an environment map</param>
 Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap)
 {
 	name = _name;
