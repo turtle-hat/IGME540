@@ -24,7 +24,7 @@ SamplerState BasicSampler : register(s0); // "s" registers for samplers
 
 float4 main(VertexToPixel_Normal input) : SV_TARGET
 {
-	
+
 	// Renormalize the normal and tangent
 	input.normal = normalize(input.normal);
 	input.tangent = normalize(input.tangent);

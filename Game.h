@@ -56,6 +56,7 @@ private:
 	void AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, float _fov);
 	void AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic);
 	void AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation, float _aspect, bool _isOrthographic, float _orthoWidth);
+	void AddSkybox(const char* _name, std::wstring _pathBase, DirectX::XMFLOAT3 _ambientColor);
 	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
 	void SetMaterialSamplerStates();
 	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);

@@ -94,13 +94,17 @@ void Game::LoadShaders()
 	// VERTEX SHADERS 0-2
 	AddVertexShader(L"VS_DiffuseSpecular.cso");
 	AddVertexShader(L"VS_DiffuseNormal.cso");
+	AddVertexShader(L"VS_PBR.cso");
+	// VERTEX SHADER 3
 	AddVertexShader(L"VS_Skybox.cso");
-	// PIXEL SHADERS 0-1
+
+	// PIXEL SHADERS 0-2
 	AddPixelShader(L"PS_DiffuseSpecular.cso");
 	AddPixelShader(L"PS_DiffuseNormal.cso");
-	// PIXEL SHADER 2
+	AddPixelShader(L"PS_PBR.cso");
+	// PIXEL SHADER 3
 	AddPixelShader(L"PS_Skybox.cso");
-	// PIXEL SHADERS 3-5
+	// PIXEL SHADERS 4-6
 	AddPixelShader(L"PS_Normals.cso");
 	AddPixelShader(L"PS_UVs.cso");
 	AddPixelShader(L"PS_Custom.cso");
@@ -231,37 +235,15 @@ void Game::CreateCameras() {
 
 void Game::CreateSkyboxes() {
 	// SKYBOXES 0
-	skyboxes.push_back(make_shared<Skybox>(
-		"SB_Blank", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		L"../../Assets/Textures/Cubemaps/Blank/CM_Blank"
-	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	AddSkybox("SB_Blank", L"../../Assets/Textures/Cubemaps/Blank/CM_Blank", XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 	// SKYBOXES 1-4
-	skyboxes.push_back(make_shared<Skybox>(
-		"SB_CloudsBlue", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue"
-	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.075f));
+	AddSkybox("SB_CloudsBlue", L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue", XMFLOAT3(0.0f, 0.0f, 0.075f));
 	// Set this as the environment map used by each material with normal map calculations
 	SetMaterialEnvironmentMaps(skyboxes[1]);
-
-	skyboxes.push_back(make_shared<Skybox>(
-		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink"
-	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.025f, 0.0f, 0.05f));
-
-	skyboxes.push_back(make_shared<Skybox>(
-		"SB_ColdSunset", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset"
-	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.05f, 0.05f, 0.125f));
-
-	skyboxes.push_back(make_shared<Skybox>(
-		"SB_Planet", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
-		L"../../Assets/Textures/Cubemaps/Planet/CM_Planet"
-	));
-	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.025f));
+	AddSkybox("SB_CloudsPink", L"../../Assets/Textures/Cubemaps/CloudsPink/CM_CloudsPink", XMFLOAT3(0.025f, 0.0f, 0.05f));
+	AddSkybox("SB_ColdSunset", L"../../Assets/Textures/Cubemaps/ColdSunset/CM_ColdSunset", XMFLOAT3(0.05f, 0.05f, 0.125f));
+	AddSkybox("SB_Planet", L"../../Assets/Textures/Cubemaps/Planet/CM_Planet", XMFLOAT3(0.0f, 0.0f, 0.025f));
 }
 
 // --------------------------------------------------------
@@ -640,6 +622,18 @@ void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XM
 	camera->GetTransform()->SetRotation(_rotation);
 
 	cameras.push_back(camera);
+}
+
+// --------------------------------------------------------
+// Adds a Skybox to the list of Skyboxes
+// --------------------------------------------------------
+void Game::AddSkybox(const char* _name, std::wstring _pathBase, DirectX::XMFLOAT3 _ambientColor)
+{
+	skyboxes.push_back(make_shared<Skybox>(
+		_name, meshes[0], samplerState, vertexShaders[3], pixelShaders[3],
+		_pathBase
+	));
+	skyboxAmbientColors.push_back(_ambientColor);
 }
 
 // --------------------------------------------------------

@@ -4,11 +4,15 @@
 #include "ShaderStructs.hlsli"
 
 // Samples and unpacks the first three components of a normal map
-float3 SampleUnpacked(Texture2D _mapNormal, SamplerState _sampler, float2 _uv)
+float4 SampleUnpacked(Texture2D _mapNormal, SamplerState _sampler, float2 _uv)
 {
-    return normalize(
-		_mapNormal.Sample(_sampler, _uv).rgb * 2 - 1
-	);
+    float4 sample = _mapNormal.Sample(_sampler, _uv);
+    
+    // Unpack only the first three components
+    return float4(
+        normalize(sample.rgb * 2 - 1),
+        sample.a
+    );
 }
 
 // Calculates a pixel's final normal given the normalized surface normal, the normalized tangent, and the unpacked value from the normal map
