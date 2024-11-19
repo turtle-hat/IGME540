@@ -59,7 +59,6 @@ private:
 	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
 	void SetMaterialSamplerStates();
 	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);
-	void DisableMaterialEnvironmentMaps();
 	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods
@@ -134,7 +133,6 @@ private:
 	// Ambient light colors for each skybox
 	std::vector<DirectX::XMFLOAT3> skyboxAmbientColors;
 	int pSkyboxCurrent;
-	bool pDrawSkybox;
 
 
 

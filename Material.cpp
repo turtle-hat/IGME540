@@ -192,21 +192,6 @@ void Material::AddTextureSRV(std::string _name, Microsoft::WRL::ComPtr<ID3D11Sha
 }
 
 /// <summary>
-/// Removes the SRV for a texture from this material
-/// </summary>
-/// <param name="name">The name of the texture</param>
-/// <param name="srv">The texture's SRV</param>
-void Material::RemoveTextureSRV(std::string _name)
-{
-	// If SRV with name was found, release it
-	if (textureSRVs.find(name) != textureSRVs.end()) {
-		textureSRVs[name] = nullptr;
-		textureSRVs.erase(name);
-		RebuildTextureList();
-	}
-}
-
-/// <summary>
 /// Adds a sampler state to this material, or replaces it if one of the same name already exists
 /// </summary>
 /// <param name="name">The name of the sampler</param>

@@ -230,14 +230,20 @@ void Game::CreateCameras() {
 
 
 void Game::CreateSkyboxes() {
-	// SKYBOXES 0-3
+	// SKYBOXES 0
+	skyboxes.push_back(make_shared<Skybox>(
+		"SB_Blank", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
+		L"../../Assets/Textures/Cubemaps/Blank/CM_Blank"
+	));
+	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	// SKYBOXES 1-4
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsBlue", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
 		L"../../Assets/Textures/Cubemaps/CloudsBlue/CM_CloudsBlue"
 	));
 	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.075f));
 	// Set this as the environment map used by each material with normal map calculations
-	SetMaterialEnvironmentMaps(skyboxes[0]);
+	SetMaterialEnvironmentMaps(skyboxes[1]);
 
 	skyboxes.push_back(make_shared<Skybox>(
 		"SB_CloudsPink", meshes[0], samplerState, vertexShaders[2], pixelShaders[2],
@@ -354,7 +360,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
-		ps->SetFloat3("lightAmbient", pDrawSkybox ? skyboxAmbientColors[pSkyboxCurrent] : XMFLOAT3(0, 0, 0));
+		ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
 
 		// COPY DATA TO CONSTANT BUFFERS
 		vs->CopyAllBufferData();
@@ -364,10 +370,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		entities[i]->GetMesh()->Draw();
 	}
 
-	if (pDrawSkybox) {
-		// Draw the selected skybox
-		skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
-	}
+	// Draw the selected skybox
+	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
@@ -423,8 +427,7 @@ void Game::InitializeSimulationParameters() {
 	pMatCustomZoom = XMFLOAT2(-0.2f, -0.61f);
 
 	pCameraCurrent = 0;
-	pSkyboxCurrent = 0;
-	pDrawSkybox = true;
+	pSkyboxCurrent = 1;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -680,18 +683,6 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 	for (int i = 0; i < materials.size(); i++) {
 		if (materials[i]->useGlobalEnvironmentMap) {
 			materials[i]->AddTextureSRV("MapCube", _skybox->GetSRV());
-		}
-	}
-}
-
-// --------------------------------------------------------
-// Removes the environment map of each Material, if they use one
-// --------------------------------------------------------
-void Game::DisableMaterialEnvironmentMaps()
-{
-	for (int i = 0; i < materials.size(); i++) {
-		if (materials[i]->useGlobalEnvironmentMap) {
-			materials[i]->RemoveTextureSRV("MapCube");
 		}
 	}
 }
@@ -1191,13 +1182,6 @@ void Game::ImGuiBuild() {
 	}
 
 	if (ImGui::CollapsingHeader("Skyboxes")) {					// Info about each texture
-		ImGui::Spacing();
-
-		if (ImGui::Checkbox("Draw Skybox", &pDrawSkybox)) {
-			pDrawSkybox ?
-				SetMaterialEnvironmentMaps(skyboxes[pSkyboxCurrent]) :
-				DisableMaterialEnvironmentMaps();
-		}
 		ImGui::Spacing();
 
 		ImGui::PushID("SKYBOX");
