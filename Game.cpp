@@ -191,13 +191,13 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
-	AddEntity("E_Mat_Cube",				0, 6, XMFLOAT3(-9.0f,  0.0f, 0.0f));
-	AddEntity("E_Mat_Cylinder",			1, 7, XMFLOAT3(-6.0f,  0.0f, 0.0f));
-	AddEntity("E_Mat_Helix",			2, 8, XMFLOAT3(-3.0f,  0.0f, 0.0f));
-	AddEntity("E_Mat_Sphere",			5, 8, XMFLOAT3( 0.0f,  0.0f, 0.0f));
-	AddEntity("E_Mat_Torus",			6, 7, XMFLOAT3( 3.0f,  0.0f, 0.0f));
-	AddEntity("E_Mat_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -1.0f, 0.0f));
-	AddEntity("E_Mat_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
+	AddEntity("E_Cube",				0, 6, XMFLOAT3(-9.0f,  0.0f, 0.0f));
+	AddEntity("E_Cylinder",			1, 7, XMFLOAT3(-6.0f,  0.0f, 0.0f));
+	AddEntity("E_Helix",			2, 8, XMFLOAT3(-3.0f,  0.0f, 0.0f));
+	AddEntity("E_Sphere",			5, 8, XMFLOAT3( 0.0f,  0.0f, 0.0f));
+	AddEntity("E_Torus",			6, 7, XMFLOAT3( 3.0f,  0.0f, 0.0f));
+	AddEntity("E_Quad-SingleSided",	3, 6, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	AddEntity("E_Quad-DoubleSided",	4, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
 }
 
 // --------------------------------------------------------
@@ -262,8 +262,6 @@ void Game::CreateSkyboxes() {
 		L"../../Assets/Textures/Cubemaps/Planet/CM_Planet"
 	));
 	skyboxAmbientColors.push_back(XMFLOAT3(0.0f, 0.0f, 0.025f));
-
-
 }
 
 // --------------------------------------------------------
@@ -935,14 +933,31 @@ void Game::ImGuiBuild() {
 						materials[i]->SetUVScale(uv_sca);
 					}
 
+					int non2DTextures = 0;
+
 					ImGui::Text("Textures:");
 					for (ID3D11ShaderResourceView* texture : textures) {
-						ImGui::Image(
-							(void*)texture,
-							ImVec2(240, 240),
-							ImVec2(uv_pos.x, uv_pos.y),
-							ImVec2(uv_pos.x + uv_sca.x, uv_pos.y + uv_sca.y)
-						);
+						D3D11_SHADER_RESOURCE_VIEW_DESC blah = {};
+						texture->GetDesc(&blah);
+						
+						// Only display the texture if it's a Texture2D
+						if (blah.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D) {
+							ImGui::Image(
+								(void*)texture,
+								ImVec2(240, 240),
+								ImVec2(uv_pos.x, uv_pos.y),
+								ImVec2(uv_pos.x + uv_sca.x, uv_pos.y + uv_sca.y)
+							);
+						}
+						else {
+							// Count the number of non-Texture2D textures
+							non2DTextures++;
+						}
+					}
+
+					// Print number of SRVs not displayed
+					if (non2DTextures > 0) {
+						ImGui::Text("(%d non-Texture2D SRV(s) not displayed)", non2DTextures);
 					}
 				}
 
