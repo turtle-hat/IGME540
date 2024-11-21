@@ -53,15 +53,20 @@ float FresnelTermSchlick(float3 _normal, float3 _cameraDirectionOut, float _spec
     return _specularAmount + (1.0f - _specularAmount) * pow(1.0f - saturate(dot(_normal, _cameraDirectionOut)), 5);
 }
 
+float LightLambertPhong(Light _light, float3 _lightDirectionIn, float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceSpecular, float3 _surfaceWorldPos, float3 _cameraPosition)
+{
+    float diffuse = DiffuseLambert(-_lightDirectionIn, _surfaceNormal);
+    float specular = _surfaceSpecular * SpecularPhong(_lightDirectionIn, _surfaceNormal, _surfaceRoughness, _surfaceWorldPos, _cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
+    
+    return _light.Color * _light.Intensity * (_surfaceColor * diffuse + specular);
+}
+
 // Calculates Lambert-Phong lighting result of a single light treated as a directional light
 float3 LightDirectionalLambertPhong(Light _light, float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceSpecular, float3 _surfaceWorldPos, float3 _cameraPosition)
 {
     float3 lightDirectionIn = normalize(_light.Direction);
     
-    float diffuse = DiffuseLambert(-lightDirectionIn, _surfaceNormal);
-    float specular = _surfaceSpecular * SpecularPhong(lightDirectionIn, _surfaceNormal, _surfaceRoughness, _surfaceWorldPos, _cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
-
-    return _light.Color * _light.Intensity * (_surfaceColor * diffuse + specular);
+    return LightLambertPhong(_light, lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition);
 }
 
 // Calculates Lambert-Phong lighting result of a single light treated as a point light
@@ -69,10 +74,10 @@ float3 LightPointLambertPhong(Light _light, float3 _surfaceNormal, float3 _surfa
 {
     float3 lightDirectionIn = normalize(_surfaceWorldPos - _light.Position);
     
-    float diffuse = DiffuseLambert(-lightDirectionIn, _surfaceNormal);
-    float specular = _surfaceSpecular * SpecularPhong(lightDirectionIn, _surfaceNormal, _surfaceRoughness, _surfaceWorldPos, _cameraPosition) * any(diffuse); // Specular is cut if diffuse term is 0
-
-    return _light.Color * _light.Intensity * (_surfaceColor * diffuse + specular) * Attenuate(_light, _surfaceWorldPos);
+    return (
+        LightLambertPhong(_light, lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition)
+        * Attenuate(_light, _surfaceWorldPos)
+    );
 }
 
 // Calculates Lambert-Phong lighting result of a single light treated as a spot light
@@ -80,14 +85,51 @@ float3 LightSpotLambertPhong(Light _light, float3 _surfaceNormal, float3 _surfac
 {
     float3 lightDirectionIn = normalize(_surfaceWorldPos - _light.Position);
     
-    return LightPointLambertPhong(_light, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition) * SpotTerm(_light, lightDirectionIn);
+    return (
+        LightLambertPhong(_light, lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition)
+        * Attenuate(_light, _surfaceWorldPos)
+        * SpotTerm(_light, lightDirectionIn)
+    );
 }
 
-// Calculates Lambert-Phong lighting result of an array of lights
+// Calculates Lambert & Phong lighting result of an array of lights
 float3 CalculateLightingLambertPhong(Light _lights[LIGHT_COUNT], float3 _lightAmbient, float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceSpecular, float3 _surfaceWorldPos, float3 _cameraPosition)
 {
     // Start accumulator with ambient light value
     float3 lightsFinal = _lightAmbient;
+
+	// For each light in the scene
+    for (uint i = 0; i < LIGHT_COUNT; i++)
+    {
+		// If it's active
+        if (_lights[i].Active)
+        {
+			// Run a different lighting equation on it depending on the type of light
+            switch (_lights[i].Type)
+            {
+                case LIGHT_TYPE_DIRECTIONAL:
+                    lightsFinal += LightDirectionalLambertPhong(_lights[i], _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition);
+                    break;
+                case LIGHT_TYPE_POINT:
+                    lightsFinal += LightPointLambertPhong(_lights[i], _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition);
+                    break;
+                case LIGHT_TYPE_SPOT:
+                    lightsFinal += LightSpotLambertPhong(_lights[i], _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceSpecular, _surfaceWorldPos, _cameraPosition);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    
+    return lightsFinal;
+}
+
+// Calculates physically based Lambert & Cook-Torrance lighting result of an array of lights
+float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceMetalness, float3 _surfaceWorldPos, float3 _cameraPosition)
+{
+    // Start accumulator with ambient light value
+    float3 lightsFinal = 0.0f;
 
 	// For each light in the scene
     for (uint i = 0; i < LIGHT_COUNT; i++)

@@ -13,6 +13,7 @@ cbuffer PrimaryBuffer : register(b0)
 	float2 uvScale;
 
 	Light lights[LIGHT_COUNT];
+
 	float3 lightAmbient;
 }
 

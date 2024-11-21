@@ -16,10 +16,12 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+	metalness = 0.0f;
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 	useGlobalEnvironmentMap = false;
 	isSamplerStateLocked = false;
+	isPBR = false;
 }
 
 /// <summary>
@@ -38,10 +40,36 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+	metalness = 0.0f;
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 	useGlobalEnvironmentMap = _useGlobalEnvironmentMap;
 	isSamplerStateLocked = false;
+	isPBR = false;
+}
+
+/// <summary>
+/// Constructs a PBR Material with the given shaders and tint
+/// </summary>
+/// <param name="_name">The internal name for the Material</param>
+/// <param name="_vertexShader">The vertex shader to draw the Material with</param>
+/// <param name="_pixelShader">The pixel shader to draw the Material with</param>
+/// <param name="_colorTint">An RGBA color to multiply to the Material</param>
+/// <param name="_roughness">The value multiplied to the material's roughness</param>
+/// <param name="_metalness">The value multiplied to the material's metalness</param>
+Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness)
+{
+	name = _name;
+	vertexShader = _vertexShader;
+	pixelShader = _pixelShader;
+	colorTint = _colorTint;
+	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+	metalness = std::clamp(_metalness, 0.0f, 1.0f);
+	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
+	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
+	useGlobalEnvironmentMap = false;
+	isSamplerStateLocked = false;
+	isPBR = true;
 }
 
 /// <summary>
@@ -78,6 +106,15 @@ DirectX::XMFLOAT4 Material::GetColorTint()
 float Material::GetRoughness()
 {
 	return roughness;
+}
+
+/// <summary>
+/// Gets the Material's metalness
+/// </summary>
+/// <returns>The Material's metalness value</returns>
+float Material::GetMetalness()
+{
+	return metalness;
 }
 
 /// <summary>
@@ -147,6 +184,15 @@ void Material::SetColorTint(DirectX::XMFLOAT4 _colorTint)
 void Material::SetRoughness(float _roughness)
 {
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
+}
+
+/// <summary>
+/// Sets the Materials's metalness
+/// </summary>
+/// <param name="_metalness">A new metalness for the Material in the range 0-1</param>
+void Material::SetMetalness(float _metalness)
+{
+	metalness = std::clamp(_metalness, 0.0f, 1.0f);
 }
 
 /// <summary>

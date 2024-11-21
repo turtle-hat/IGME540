@@ -10,11 +10,13 @@ class Material
 public:
 	Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);
 	Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
+	Material(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness);
 
 	std::shared_ptr<SimpleVertexShader> GetVertexShader();
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
 	DirectX::XMFLOAT4 GetColorTint();
 	float GetRoughness();
+	float GetMetalness();
 	const char* GetName();
 	DirectX::XMFLOAT2 GetUVPosition();
 	DirectX::XMFLOAT2 GetUVScale();
@@ -24,6 +26,7 @@ public:
 	void SetPixelShader(std::shared_ptr<SimplePixelShader> _pixelShader);
 	void SetColorTint(DirectX::XMFLOAT4 _colorTint);
 	void SetRoughness(float _roughness);
+	void SetMetalness(float _metalness);
 	void SetUVPosition(DirectX::XMFLOAT2 _position);
 	void SetUVScale(DirectX::XMFLOAT2 _scale);
 	void LockSamplerState();
@@ -34,6 +37,8 @@ public:
 	void PrepareMaterial();
 	// Whether this material uses the global environment map. Allows a function in Game to change the shader's MapCube SRV to match the environment
 	bool useGlobalEnvironmentMap;
+	// Whether this material uses PBR shaders and thus ignores roughness
+	bool isPBR;
 
 private:
 	void RebuildTextureList();
@@ -42,6 +47,7 @@ private:
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	DirectX::XMFLOAT4 colorTint;
 	float roughness;
+	float metalness;
 
 	// Texture settings
 

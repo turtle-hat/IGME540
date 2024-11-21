@@ -128,6 +128,22 @@ void Game::CreateMaterials()
 	AddTexture(L"../../Assets/Textures/T_flat_N.png");
 	AddTexture(L"../../Assets/Textures/T_rock_D.png");
 	AddTexture(L"../../Assets/Textures/T_rock_N.png");
+	// TEXTURES 10-23
+	AddTexture(L"../../Assets/Textures/T_bronze_AM.png");
+	AddTexture(L"../../Assets/Textures/T_bronze_NR.png");
+	AddTexture(L"../../Assets/Textures/T_cobblestone_AM.png");
+	AddTexture(L"../../Assets/Textures/T_cobblestone_NR.png");
+	AddTexture(L"../../Assets/Textures/T_floor_AM.png");
+	AddTexture(L"../../Assets/Textures/T_floor_NR.png");
+	AddTexture(L"../../Assets/Textures/T_paint_AM.png");
+	AddTexture(L"../../Assets/Textures/T_paint_NR.png");
+	AddTexture(L"../../Assets/Textures/T_rough_AM.png");
+	AddTexture(L"../../Assets/Textures/T_rough_NR.png");
+	AddTexture(L"../../Assets/Textures/T_scratched_AM.png");
+	AddTexture(L"../../Assets/Textures/T_scratched_NR.png");
+	AddTexture(L"../../Assets/Textures/T_wood_AM.png");
+	AddTexture(L"../../Assets/Textures/T_wood_NR.png");
+
 
 	// Set default sampler state settings
 	pSamplerFilter = D3D11_FILTER_ANISOTROPIC;
@@ -176,6 +192,42 @@ void Game::CreateMaterials()
 	materials[9]->AddTextureSRV("MapDiffuse", textures[7]);	// Normal map used for diffuse
 	materials[9]->AddTextureSRV("MapNormal", textures[7]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
+
+	// MATERIALS 10-16
+	AddMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
+	materials[10]->AddTextureSRV("MapAlbedoMetalness", textures[10]);
+	materials[10]->AddTextureSRV("MapNormalRoughness", textures[11]);
+	materials[10]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
+	materials[11]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
+	materials[11]->AddTextureSRV("MapNormalRoughness", textures[13]);
+	materials[11]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Floor_PBR",		2, 2, 1.0f, 1.0f);
+	materials[12]->AddTextureSRV("MapAlbedoMetalness", textures[14]);
+	materials[12]->AddTextureSRV("MapNormalRoughness", textures[15]);
+	materials[12]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Paint_PBR",		2, 2, 1.0f, 1.0f);
+	materials[13]->AddTextureSRV("MapAlbedoMetalness", textures[16]);
+	materials[13]->AddTextureSRV("MapNormalRoughness", textures[17]);
+	materials[13]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Rough_PBR",		2, 2, 1.0f, 1.0f);
+	materials[14]->AddTextureSRV("MapAlbedoMetalness", textures[18]);
+	materials[14]->AddTextureSRV("MapNormalRoughness", textures[19]);
+	materials[14]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Scratched_PBR",	2, 2, 1.0f, 1.0f);
+	materials[15]->AddTextureSRV("MapAlbedoMetalness", textures[20]);
+	materials[15]->AddTextureSRV("MapNormalRoughness", textures[21]);
+	materials[15]->AddSampler("BasicSampler", samplerState);
+
+	AddMaterial("Mat_Wood_PBR",			2, 2, 1.0f, 1.0f);
+	materials[16]->AddTextureSRV("MapAlbedoMetalness", textures[22]);
+	materials[16]->AddTextureSRV("MapNormalRoughness", textures[23]);
+	materials[16]->AddSampler("BasicSampler", samplerState);
 }
 
 // --------------------------------------------------------
@@ -195,22 +247,22 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
-	AddEntity("E_LambertPhong_BrokenTiles",	5, 3, XMFLOAT3(-9.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_RustyMetal",	5, 4, XMFLOAT3(-6.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_Tiles",		5, 5, XMFLOAT3(-3.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_Cobblestone",	5, 6, XMFLOAT3( 0.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_Cushion",		5, 7, XMFLOAT3( 3.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_Rock",		5, 8, XMFLOAT3( 6.0f, 0.0f, 0.0f));
-	AddEntity("E_LambertPhong_Flat",		5, 9, XMFLOAT3( 9.0f, 0.0f, 0.0f));
+	AddEntity("E_LambertPhong_BrokenTiles",	5, 3, XMFLOAT3(-9.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_RustyMetal",	5, 4, XMFLOAT3(-6.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_Tiles",		5, 5, XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_Cobblestone",	5, 6, XMFLOAT3( 0.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_Cushion",		5, 7, XMFLOAT3( 3.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_Rock",		5, 8, XMFLOAT3( 6.0f, 1.0f, 0.0f));
+	AddEntity("E_LambertPhong_Flat",		5, 9, XMFLOAT3( 9.0f, 1.0f, 0.0f));
 
 	// ENTITIES 7-13
-	AddEntity("E_PBR_Floor",		5, 3, XMFLOAT3(-9.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Scratched",	5, 4, XMFLOAT3(-6.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Paint",		5, 5, XMFLOAT3(-3.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Cobblestone",	5, 6, XMFLOAT3( 0.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Rough",		5, 7, XMFLOAT3( 3.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Bronze",		5, 8, XMFLOAT3( 6.0f, -3.0f, 0.0f));
-	AddEntity("E_PBR_Wood",			5, 9, XMFLOAT3( 9.0f, -3.0f, 0.0f));
+	AddEntity("E_PBR_Floor",		5, 12, XMFLOAT3(-9.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Scratched",	5, 15, XMFLOAT3(-6.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Paint",		5, 13, XMFLOAT3(-3.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Cobblestone",	5, 11, XMFLOAT3( 0.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Rough",		5, 14, XMFLOAT3( 3.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Bronze",		5, 10, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	AddEntity("E_PBR_Wood",			5, 16, XMFLOAT3( 9.0f, -1.0f, 0.0f));
 
 }
 
@@ -282,10 +334,6 @@ void Game::Update(float deltaTime, float totalTime)
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 
-	// Scroll and scale UV of Mat_RustyMetal
-	materials[4]->SetUVPosition(XMFLOAT2(sin(totalTime), cos(totalTime)));
-	materials[4]->SetUVScale(XMFLOAT2(sin(totalTime * 0.5f) * 0.5f + 1.0f, cos(totalTime * 0.5f) * 0.5f + 1.0f));
-
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
 
@@ -350,7 +398,15 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps->SetFloat2("zoomCenter", pMatCustomZoom);
 			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
-		ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
+
+		if (material->isPBR) {
+			// Only use metalness for PBR materials
+			ps->SetFloat("metalness", material->GetRoughness());
+		}
+		else {
+			// Only use ambient light for non-PBR materials
+			ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
+		}
 
 		// COPY DATA TO CONSTANT BUFFERS
 		vs->CopyAllBufferData();
@@ -926,6 +982,15 @@ void Game::ImGuiBuild() {
 				// If the user has edited the material's roughness this frame, change the material's roughness
 				if (ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f, "%.2f")) {
 					materials[i]->SetRoughness(roughness);
+				}
+
+				// Only display metalness if the material uses PBR
+				if (materials[i]->isPBR) {
+					float metalness = materials[i]->GetRoughness();
+					// If the user has edited the material's metalness this frame, change the material's roughness
+					if (ImGui::SliderFloat("Metalness", &metalness, 0.0f, 1.0f, "%.2f")) {
+						materials[i]->SetMetalness(metalness);
+					}
 				}
 
 				// If any textures exist, include texture settings
