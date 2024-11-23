@@ -16,7 +16,7 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
-	metalness = 0.0f;
+	metalness = 1.0f;
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 	useGlobalEnvironmentMap = false;
@@ -40,7 +40,7 @@ Material::Material(const char* _name, std::shared_ptr<SimpleVertexShader> _verte
 	pixelShader = _pixelShader;
 	colorTint = _colorTint;
 	roughness = std::clamp(_roughness, 0.0f, 1.0f);
-	metalness = 0.0f;
+	metalness = 1.0f;
 	uvPosition = DirectX::XMFLOAT2(0.0f, 0.0f);
 	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 	useGlobalEnvironmentMap = _useGlobalEnvironmentMap;

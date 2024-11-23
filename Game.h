@@ -48,6 +48,8 @@ private:
 	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, bool _useGlobalEnvironmentMap);
 	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness);
 	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex);
+	void AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness);
+	void AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, float _metalness);
 	void AddEntity(const char* _name, unsigned int _meshIndex, unsigned int _materialIndex, DirectX::XMFLOAT3 _position);
 	void AddLightDirectional(DirectX::XMFLOAT3 _direction, DirectX::XMFLOAT3 _color, float _intensity, bool _isActive);
 	void AddLightPoint(DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _color, float _intensity, float _range, bool _isActive);

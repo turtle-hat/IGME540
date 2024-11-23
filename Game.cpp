@@ -194,37 +194,37 @@ void Game::CreateMaterials()
 	materials[9]->AddSampler("BasicSampler", samplerState);
 
 	// MATERIALS 10-16
-	AddMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
 	materials[10]->AddTextureSRV("MapAlbedoMetalness", textures[10]);
 	materials[10]->AddTextureSRV("MapNormalRoughness", textures[11]);
 	materials[10]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
 	materials[11]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
 	materials[11]->AddTextureSRV("MapNormalRoughness", textures[13]);
 	materials[11]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Floor_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Floor_PBR",			2, 2, 1.0f, 1.0f);
 	materials[12]->AddTextureSRV("MapAlbedoMetalness", textures[14]);
 	materials[12]->AddTextureSRV("MapNormalRoughness", textures[15]);
 	materials[12]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Paint_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Paint_PBR",			2, 2, 1.0f, 1.0f);
 	materials[13]->AddTextureSRV("MapAlbedoMetalness", textures[16]);
 	materials[13]->AddTextureSRV("MapNormalRoughness", textures[17]);
 	materials[13]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Rough_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Rough_PBR",			2, 2, 1.0f, 1.0f);
 	materials[14]->AddTextureSRV("MapAlbedoMetalness", textures[18]);
 	materials[14]->AddTextureSRV("MapNormalRoughness", textures[19]);
 	materials[14]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Scratched_PBR",	2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Scratched_PBR",		2, 2, 1.0f, 1.0f);
 	materials[15]->AddTextureSRV("MapAlbedoMetalness", textures[20]);
 	materials[15]->AddTextureSRV("MapNormalRoughness", textures[21]);
 	materials[15]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Wood_PBR",			2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Wood_PBR",			2, 2, 1.0f, 1.0f);
 	materials[16]->AddTextureSRV("MapAlbedoMetalness", textures[22]);
 	materials[16]->AddTextureSRV("MapNormalRoughness", textures[23]);
 	materials[16]->AddSampler("BasicSampler", samplerState);
@@ -401,7 +401,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		if (material->isPBR) {
 			// Only use metalness for PBR materials
-			ps->SetFloat("metalness", material->GetRoughness());
+			ps->SetFloat("metalness", material->GetMetalness());
 		}
 		else {
 			// Only use ambient light for non-PBR materials
@@ -569,6 +569,23 @@ void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsig
 void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex)
 {
 	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f, false);
+}
+
+void Game::AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness)
+{
+	materials.push_back(make_shared<Material>(
+		_name,
+		vertexShaders[_vertexShaderIndex],
+		pixelShaders[_pixelShaderIndex],
+		_colorTint,
+		_roughness,
+		_metalness
+	));
+}
+
+void Game::AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, float _metalness)
+{
+	AddPBRMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
 }
 
 // --------------------------------------------------------
@@ -986,7 +1003,7 @@ void Game::ImGuiBuild() {
 
 				// Only display metalness if the material uses PBR
 				if (materials[i]->isPBR) {
-					float metalness = materials[i]->GetRoughness();
+					float metalness = materials[i]->GetMetalness();
 					// If the user has edited the material's metalness this frame, change the material's roughness
 					if (ImGui::SliderFloat("Metalness", &metalness, 0.0f, 1.0f, "%.2f")) {
 						materials[i]->SetMetalness(metalness);
