@@ -272,10 +272,11 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 	// LIGHTS 1-2
-	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(-1.0f, -0.5f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 }
 
 // --------------------------------------------------------

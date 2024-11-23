@@ -165,7 +165,7 @@ float3 CalculateLightingLambertPhong(Light _lights[LIGHT_COUNT], float3 _lightAm
 // metalness - surface metalness amount 
 float3 DiffuseEnergyConserve(float3 _surfaceDiffuse, float3 _fresnel, float _surfaceMetalness)
 {
-    return _surfaceDiffuse * (1 - _fresnel) * (1 - _surfaceMetalness);
+    return _surfaceDiffuse * (1.0f - _fresnel) * (1.0f - _surfaceMetalness);
 }
 
 // Normal Distribution Function: GGX (Trowbridge-Reitz)
@@ -277,7 +277,7 @@ float3 LightLambertCookTorrance(Light _light, float3 _lightDirectionOut, float3 
         _surfaceNormal,
         _lightDirectionOut,
         normalize(_cameraPosition - _surfaceWorldPos),
-        _surfaceRoughness,
+        max(_surfaceRoughness, MIN_ROUGHNESS),
         specularColor,
         diffuse,
         fresnel

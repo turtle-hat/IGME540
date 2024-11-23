@@ -41,6 +41,12 @@ float4 main(VertexToPixel_Normal input) : SV_TARGET
 	float3 finalNormal = NormalFromMap(input.normal, input.tangent, sampleNR.rgb);
 	float finalRoughness = sampleNR.a * roughness;
 
+	// Testing overrides
+	//surfaceColor = colorTint.rgb;
+	//finalRoughness = roughness;
+	//finalMetalness = metalness;
+	//finalNormal = input.normal;
+
 	// Color of surface with all lighting calculated
 	float3 litColor = CalculateLightingLambertCookTorrance(
 		lights,
