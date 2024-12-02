@@ -176,4 +176,3 @@ private:
 	std::vector<std::shared_ptr<SimpleVertexShader>> vertexShaders;
 	std::vector<std::shared_ptr<SimplePixelShader>> pixelShaders;
 };
-

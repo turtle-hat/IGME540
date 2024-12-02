@@ -116,19 +116,7 @@ void Game::LoadShaders()
 void Game::CreateMaterials()
 {
 	// Load textures
-	// TEXTURES 0-2
-	AddTexture(L"../../Assets/Textures/T_brokentiles_DS.png");
-	AddTexture(L"../../Assets/Textures/T_rustymetal_DS.png");
-	AddTexture(L"../../Assets/Textures/T_tiles_DS.png");
-	// TEXTURES 3-9
-	AddTexture(L"../../Assets/Textures/T_cobblestone_D.png");
-	AddTexture(L"../../Assets/Textures/T_cobblestone_N.png");
-	AddTexture(L"../../Assets/Textures/T_cushion_D.png");
-	AddTexture(L"../../Assets/Textures/T_cushion_N.png");
-	AddTexture(L"../../Assets/Textures/T_flat_N.png");
-	AddTexture(L"../../Assets/Textures/T_rock_D.png");
-	AddTexture(L"../../Assets/Textures/T_rock_N.png");
-	// TEXTURES 10-23
+	// TEXTURES 0-13
 	AddTexture(L"../../Assets/Textures/T_bronze_AM.png");
 	AddTexture(L"../../Assets/Textures/T_bronze_NR.png");
 	AddTexture(L"../../Assets/Textures/T_cobblestone_AM.png");
@@ -158,76 +146,41 @@ void Game::CreateMaterials()
 	AddMaterial("Mat_UVs",			0, 4);
 	AddMaterial("Mat_Custom",		0, 5);
 
-	// MATERIALS 3-5
-	AddMaterial("Mat_BrokenTiles",	0, 0, 0.2f);
-	materials[3]->AddTextureSRV("MapDiffuseSpecular", textures[0]);
+	// MATERIALS 3-9
+	AddPBRMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
+	materials[3]->AddTextureSRV("MapAlbedoMetalness", textures[0]);
+	materials[3]->AddTextureSRV("MapNormalRoughness", textures[1]);
 	materials[3]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_RustyMetal",	0, 0, 0.8f);
-	materials[4]->AddTextureSRV("MapDiffuseSpecular", textures[1]);
+	AddPBRMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
+	materials[4]->AddTextureSRV("MapAlbedoMetalness", textures[2]);
+	materials[4]->AddTextureSRV("MapNormalRoughness", textures[3]);
 	materials[4]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Tiles",		0, 0, 0.0f);
-	materials[5]->AddTextureSRV("MapDiffuseSpecular", textures[2]);
+	AddPBRMaterial("Mat_Floor_PBR",			2, 2, 1.0f, 1.0f);
+	materials[5]->AddTextureSRV("MapAlbedoMetalness", textures[4]);
+	materials[5]->AddTextureSRV("MapNormalRoughness", textures[5]);
 	materials[5]->AddSampler("BasicSampler", samplerState);
 
-	// MATERIALS 6-9
-	AddMaterial("Mat_Cobblestone_LambertPhong",	1, 1, 0.3f, true);
-	materials[6]->AddTextureSRV("MapDiffuse", textures[3]);
-	materials[6]->AddTextureSRV("MapNormal", textures[4]);
+	AddPBRMaterial("Mat_Paint_PBR",			2, 2, 1.0f, 1.0f);
+	materials[6]->AddTextureSRV("MapAlbedoMetalness", textures[6]);
+	materials[6]->AddTextureSRV("MapNormalRoughness", textures[7]);
 	materials[6]->AddSampler("BasicSampler", samplerState);
 
-	AddMaterial("Mat_Cushion",			1, 1, 0.0f, true);
-	materials[7]->AddTextureSRV("MapDiffuse", textures[5]);
-	materials[7]->AddTextureSRV("MapNormal", textures[6]);
-	materials[7]->AddSampler("BasicSampler", samplerState);
-	materials[7]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
-
-	AddMaterial("Mat_Rock",				1, 1, 0.5f, true);
-	materials[8]->AddTextureSRV("MapDiffuse", textures[8]);
-	materials[8]->AddTextureSRV("MapNormal", textures[9]);
-	materials[8]->AddSampler("BasicSampler", samplerState);
-
-	AddMaterial("Mat_Flat",				1, 1, 0.0f, true);
-	materials[9]->AddTextureSRV("MapDiffuse", textures[7]);	// Normal map used for diffuse
-	materials[9]->AddTextureSRV("MapNormal", textures[7]);
-	materials[9]->AddSampler("BasicSampler", samplerState);
-
-	// MATERIALS 10-16
-	AddPBRMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
-	materials[10]->AddTextureSRV("MapAlbedoMetalness", textures[10]);
-	materials[10]->AddTextureSRV("MapNormalRoughness", textures[11]);
-	materials[10]->AddSampler("BasicSampler", samplerState);
-
-	AddPBRMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
-	materials[11]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
-	materials[11]->AddTextureSRV("MapNormalRoughness", textures[13]);
-	materials[11]->AddSampler("BasicSampler", samplerState);
-
-	AddPBRMaterial("Mat_Floor_PBR",			2, 2, 1.0f, 1.0f);
-	materials[12]->AddTextureSRV("MapAlbedoMetalness", textures[14]);
-	materials[12]->AddTextureSRV("MapNormalRoughness", textures[15]);
-	materials[12]->AddSampler("BasicSampler", samplerState);
-
-	AddPBRMaterial("Mat_Paint_PBR",			2, 2, 1.0f, 1.0f);
-	materials[13]->AddTextureSRV("MapAlbedoMetalness", textures[16]);
-	materials[13]->AddTextureSRV("MapNormalRoughness", textures[17]);
-	materials[13]->AddSampler("BasicSampler", samplerState);
-
 	AddPBRMaterial("Mat_Rough_PBR",			2, 2, 1.0f, 1.0f);
-	materials[14]->AddTextureSRV("MapAlbedoMetalness", textures[18]);
-	materials[14]->AddTextureSRV("MapNormalRoughness", textures[19]);
-	materials[14]->AddSampler("BasicSampler", samplerState);
+	materials[7]->AddTextureSRV("MapAlbedoMetalness", textures[8]);
+	materials[7]->AddTextureSRV("MapNormalRoughness", textures[9]);
+	materials[7]->AddSampler("BasicSampler", samplerState);
 
 	AddPBRMaterial("Mat_Scratched_PBR",		2, 2, 1.0f, 1.0f);
-	materials[15]->AddTextureSRV("MapAlbedoMetalness", textures[20]);
-	materials[15]->AddTextureSRV("MapNormalRoughness", textures[21]);
-	materials[15]->AddSampler("BasicSampler", samplerState);
+	materials[8]->AddTextureSRV("MapAlbedoMetalness", textures[10]);
+	materials[8]->AddTextureSRV("MapNormalRoughness", textures[11]);
+	materials[8]->AddSampler("BasicSampler", samplerState);
 
 	AddPBRMaterial("Mat_Wood_PBR",			2, 2, 1.0f, 1.0f);
-	materials[16]->AddTextureSRV("MapAlbedoMetalness", textures[22]);
-	materials[16]->AddTextureSRV("MapNormalRoughness", textures[23]);
-	materials[16]->AddSampler("BasicSampler", samplerState);
+	materials[9]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
+	materials[9]->AddTextureSRV("MapNormalRoughness", textures[13]);
+	materials[9]->AddSampler("BasicSampler", samplerState);
 }
 
 // --------------------------------------------------------
@@ -247,22 +200,13 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
-	AddEntity("E_LambertPhong_BrokenTiles",	5, 3, XMFLOAT3(-9.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_RustyMetal",	5, 4, XMFLOAT3(-6.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_Tiles",		5, 5, XMFLOAT3(-3.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_Cobblestone",	5, 6, XMFLOAT3( 0.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_Cushion",		5, 7, XMFLOAT3( 3.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_Rock",		5, 8, XMFLOAT3( 6.0f, 1.0f, 0.0f));
-	AddEntity("E_LambertPhong_Flat",		5, 9, XMFLOAT3( 9.0f, 1.0f, 0.0f));
-
-	// ENTITIES 7-13
-	AddEntity("E_PBR_Floor",		5, 12, XMFLOAT3(-9.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Scratched",	5, 15, XMFLOAT3(-6.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Paint",		5, 13, XMFLOAT3(-3.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Cobblestone",	5, 11, XMFLOAT3( 0.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Rough",		5, 14, XMFLOAT3( 3.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Bronze",		5, 10, XMFLOAT3( 6.0f, -1.0f, 0.0f));
-	AddEntity("E_PBR_Wood",			5, 16, XMFLOAT3( 9.0f, -1.0f, 0.0f));
+	AddEntity("E_Bronze",		5, 3, XMFLOAT3( 6.0f, -1.0f, 0.0f));
+	AddEntity("E_Cobblestone",	5, 4, XMFLOAT3( 0.0f, -1.0f, 0.0f));
+	AddEntity("E_Floor",		5, 5, XMFLOAT3(-9.0f, -1.0f, 0.0f));
+	AddEntity("E_Paint",		5, 6, XMFLOAT3(-3.0f, -1.0f, 0.0f));
+	AddEntity("E_Rough",		5, 7, XMFLOAT3( 3.0f, -1.0f, 0.0f));
+	AddEntity("E_Scratched",	5, 8, XMFLOAT3(-6.0f, -1.0f, 0.0f));
+	AddEntity("E_Wood",			5, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
 
 }
 
@@ -331,7 +275,7 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[pCameraCurrent]->Update(deltaTime);
 
 	// Rotate meshes
-	for (int i = 0; i <= 13; i++) {
+	for (int i = 0; i <= 6; i++) {
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
 
