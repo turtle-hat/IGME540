@@ -137,6 +137,26 @@ private:
 	std::vector<DirectX::XMFLOAT3> skyboxAmbientColors;
 	int pSkyboxCurrent;
 
+	// SHADOWS
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
+	DirectX::XMFLOAT4X4 lightViewMatrix;
+	DirectX::XMFLOAT4X4 lightProjectionMatrix;
+	// Parameters
+	// Whether to render shadows
+	bool pRenderShadows;
+	// Shadow map's dimensions are 2^this value
+	int pShadowResolutionExponent;
+	// Area the shadow map covers in the world
+	float pShadowAreaWidth;
+	// Center of the area the shadow map covers in the world (far clip plane ends at this point)
+	DirectX::XMFLOAT3 pShadowAreaCenter;
+	// Distance from the shadow map's center to pull the camera back when rendering the shadow map
+	float pShadowLightDistance;
+
+
 
 
 

@@ -181,6 +181,7 @@ void Game::CreateMaterials()
 	materials[9]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
 	materials[9]->AddTextureSRV("MapNormalRoughness", textures[13]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
+	materials[9]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 }
 
 // --------------------------------------------------------
@@ -215,6 +216,7 @@ void Game::CreateGeometry()
 	// ENTITIES 8-9
 	AddEntity("E_BouncerSpring",		2, 7, XMFLOAT3( 0.0f, -1.0f, 3.0f));
 	AddEntity("E_BouncerCylinder",		1, 6, XMFLOAT3( 0.0f, 0.0f, 3.0f));
+	entities[9]->GetTransform()->Scale(XMFLOAT3(1.2f, 1.0f, 1.2f));
 }
 
 // --------------------------------------------------------
@@ -225,9 +227,8 @@ void Game::CreateLights() {
 	// LIGHT 0
 	AddLightDirectional(XMFLOAT3(-0.25f, -1.0f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 1-2
-	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
-	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
-	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
+	AddLightDirectional(XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 }
 
 // --------------------------------------------------------
@@ -438,6 +439,12 @@ void Game::InitializeSimulationParameters() {
 
 	pCameraCurrent = 0;
 	pSkyboxCurrent = 1;
+
+	pRenderShadows = true;
+	pShadowResolutionExponent = 10;
+	pShadowAreaWidth = 10.0f;
+	pShadowAreaCenter = XMFLOAT3(0.0f, -5.0f, 0.0f);
+	pShadowLightDistance = 100.0f;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -777,7 +784,7 @@ void Game::ImGuiBuild() {
 			ImGui::TreePop();
 			ImGui::Spacing();
 		}
-		if (ImGui::TreeNode("Performance")) {					// Stats about the app's performance
+		if (ImGui::TreeNode("Performance")) {						// Stats about the app's performance
 			ImGui::Spacing();
 			
 			ImGui::Text("Framerate:    %6dfps", (int)ImGui::GetIO().Framerate);
@@ -785,7 +792,7 @@ void Game::ImGuiBuild() {
 			ImGui::Text("Delta Time:   %6dus", (int)(ImGui::GetIO().DeltaTime * 1000000));
 			ImGui::SetItemTooltip("Time between frames in microseconds\n(I didn't want to break things by trying to print the mu)");
 
-			if (ImGui::TreeNode("Framerate Graph")) {				// Graph of framerate over time
+			if (ImGui::TreeNode("Framerate Graph")) {					// Graph of framerate over time
 				// Sets tooptip of enclosing TreeNode
 				ImGui::SetItemTooltip("Records the framerate over time\n(Slows down performance in Debug build while open)");
 				
@@ -1246,7 +1253,7 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 	}
 
-	if (ImGui::CollapsingHeader("Skyboxes")) {					// Info about each texture
+	if (ImGui::CollapsingHeader("Skyboxes")) {					// Info about each skybox
 		ImGui::Spacing();
 
 		ImGui::PushID("SKYBOX");
@@ -1262,10 +1269,7 @@ void Game::ImGuiBuild() {
 
 			ImGui::SameLine();
 			if (ImGui::TreeNode("", "(%06d) %s", i, skyboxes[i]->GetName())) {
-				float ambientColor[3] = { skyboxAmbientColors[i].x, skyboxAmbientColors[i].y, skyboxAmbientColors[i].z};
-				if (ImGui::ColorEdit3("Ambient Light", ambientColor)) {
-					skyboxAmbientColors[i] = XMFLOAT3(ambientColor);
-				}
+				ImGui::ColorEdit3("Ambient Light", &skyboxAmbientColors[i].x);
 
 				ImGui::TreePop();
 				ImGui::Spacing();
@@ -1275,6 +1279,30 @@ void Game::ImGuiBuild() {
 			ImGui::Spacing();
 		}
 		ImGui::PopID();
+
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Shadows")) {					// Info about the shadow map
+		ImGui::Spacing();
+
+		ImGui::Checkbox("Render shadows?", &pRenderShadows);
+		ImGui::SetItemTooltip("Shadows are cast from the first light in the scene.");
+		ImGui::Spacing();
+
+		if (pRenderShadows) {
+			ImGui::SliderInt("Shadow Map Resolution", &pShadowResolutionExponent, 1, 12);
+			ImGui::SetItemTooltip("Shadow map will be rendered at %d tx.", (int)pow(2, pShadowResolutionExponent));
+			
+			ImGui::SliderFloat("Shadow Area Width", &pShadowAreaWidth, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+			ImGui::SetItemTooltip("The width of the area in the world onto which shadows will be cast.");
+			
+			ImGui::DragFloat3("Shadow Area Center", &pShadowAreaCenter.x, 0.1f, NULL, NULL, "%.1f");
+			ImGui::SetItemTooltip("The center of the area in the world onto which shadows will be cast.\nThe shadow map's far clip plane intersects this point.");
+
+			ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.1f, 100.0f, "%.1f");
+			ImGui::SetItemTooltip("The distance from the area center to pull back the camera.");
+		}
 
 		ImGui::Spacing();
 	}
