@@ -200,14 +200,21 @@ void Game::CreateGeometry()
 	meshes.push_back(make_shared<Mesh>("M_Torus", FixPath(L"../../Assets/Models/torus.obj").c_str()));
 
 	// ENTITIES 0-6
-	AddEntity("E_Bronze",		5, 3, XMFLOAT3( 6.0f, -1.0f, 0.0f));
-	AddEntity("E_Cobblestone",	5, 4, XMFLOAT3( 0.0f, -1.0f, 0.0f));
-	AddEntity("E_Floor",		5, 5, XMFLOAT3(-9.0f, -1.0f, 0.0f));
-	AddEntity("E_Paint",		5, 6, XMFLOAT3(-3.0f, -1.0f, 0.0f));
-	AddEntity("E_Rough",		5, 7, XMFLOAT3( 3.0f, -1.0f, 0.0f));
-	AddEntity("E_Scratched",	5, 8, XMFLOAT3(-6.0f, -1.0f, 0.0f));
-	AddEntity("E_Wood",			5, 9, XMFLOAT3( 9.0f, -1.0f, 0.0f));
+	AddEntity("E_ObjectBronze",			0, 3, XMFLOAT3(-9.0f,  0.0f, 0.0f));
+	AddEntity("E_ObjectCobblestone",	1, 4, XMFLOAT3(-6.0f,  0.0f, 0.0f));
+	AddEntity("E_ObjectFloor",			2, 5, XMFLOAT3(-3.0f,  0.0f, 0.0f));
+	AddEntity("E_ObjectPaint",			3, 6, XMFLOAT3( 0.0f, -1.0f, 0.0f));
+	AddEntity("E_ObjectRough",			4, 7, XMFLOAT3( 3.0f, -1.0f, 0.0f));
+	AddEntity("E_ObjectScratched",		5, 8, XMFLOAT3( 6.0f,  0.0f, 0.0f));
+	AddEntity("E_ObjectWood",			6, 9, XMFLOAT3( 9.0f,  0.0f, 0.0f));
 
+	// ENTITY 7
+	AddEntity("E_Floor",				0, 9, XMFLOAT3( 0.0f, -2.0f, 0.0f));
+	entities[7]->GetTransform()->Scale(XMFLOAT3(50.0f, 0.125f, 50.0f));
+
+	// ENTITIES 8-9
+	AddEntity("E_BouncerSpring",		2, 7, XMFLOAT3( 0.0f, -1.0f, 3.0f));
+	AddEntity("E_BouncerCylinder",		1, 6, XMFLOAT3( 0.0f, 0.0f, 3.0f));
 }
 
 // --------------------------------------------------------
@@ -216,11 +223,11 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
+	AddLightDirectional(XMFLOAT3(-0.25f, -1.0f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	// LIGHTS 1-2
+	AddLightDirectional(XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 	AddLightDirectional(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
-	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
-	AddLightDirectional(XMFLOAT3(-1.0f, -0.5f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 }
 
 // --------------------------------------------------------
@@ -278,6 +285,18 @@ void Game::Update(float deltaTime, float totalTime)
 	for (int i = 0; i <= 6; i++) {
 		entities[i]->GetTransform()->Rotate(0.0f, deltaTime * pObjectRotationSpeed, 0.0f);
 	}
+
+	// Move bouncer
+	shared_ptr<Transform> bouncerSpringTransform = entities[8]->GetTransform();
+	bouncerSpringTransform->SetPosition(0.0f,
+		sin(totalTime * 4.0f) * 1.5f,
+		3.0f);
+	bouncerSpringTransform->SetScale(1.0f,
+		1.2f + sin(totalTime * 4.0f + 0.75f) * 0.8f,
+		1.0f);
+	entities[9]->GetTransform()->SetPosition(0.0f,
+		sin(totalTime * 4.0f) * 1.5f + sin(totalTime * 4.0f + 0.75f) * 0.8f + 2.0f,
+		3.0f);
 
 	ImGuiUpdate(deltaTime);
 	ImGuiBuild();
