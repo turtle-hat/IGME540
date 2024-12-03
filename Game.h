@@ -62,6 +62,7 @@ private:
 	void SetGlobalSamplerState(D3D11_FILTER _filter, int _anisotropyLevel);
 	void SetMaterialSamplerStates();
 	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);
+	void BuildShadowMap();
 	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods

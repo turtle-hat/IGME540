@@ -38,6 +38,9 @@ void Game::Initialize()
 	CreateCameras();
 	CreateSkyboxes();
 	InitializeSimulationParameters();
+	BuildShadowMap();
+	BuildShadowMap();
+	BuildShadowMap();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -290,13 +293,13 @@ void Game::Update(float deltaTime, float totalTime)
 	// Move bouncer
 	shared_ptr<Transform> bouncerSpringTransform = entities[8]->GetTransform();
 	bouncerSpringTransform->SetPosition(0.0f,
-		sin(totalTime * 4.0f) * 1.5f,
+		sin(totalTime * 4.0f) * 2.0f - sin((totalTime + 0.225f) * 8.0f) * 0.8f,
 		3.0f);
 	bouncerSpringTransform->SetScale(1.0f,
-		1.2f + sin(totalTime * 4.0f + 0.75f) * 0.8f,
+		1.2f + sin((totalTime + 0.225f) * 8.0f) * 0.8f,
 		1.0f);
 	entities[9]->GetTransform()->SetPosition(0.0f,
-		sin(totalTime * 4.0f) * 1.5f + sin(totalTime * 4.0f + 0.75f) * 0.8f + 2.0f,
+		sin(totalTime * 4.0f) * 2.0f + 2.0f,
 		3.0f);
 
 	ImGuiUpdate(deltaTime);
@@ -731,6 +734,56 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 			materials[i]->AddTextureSRV("MapCube", _skybox->GetSRV());
 		}
 	}
+}
+
+// --------------------------------------------------------
+// Builds or rebuilds all resources related to the shadow map
+// Code written by Chris Cascioli
+// --------------------------------------------------------
+void Game::BuildShadowMap()
+{
+	UINT shadowMapResolution = (UINT)pow(2, pShadowResolutionExponent);
+
+	// Create the actual texture that will be the shadow map
+	D3D11_TEXTURE2D_DESC shadowTexDesc = {};
+	shadowTexDesc.Width = shadowMapResolution;
+	shadowTexDesc.Height = shadowMapResolution;
+	shadowTexDesc.ArraySize = 1;
+	shadowTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowTexDesc.CPUAccessFlags = 0;
+	shadowTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowTexDesc.MipLevels = 1;
+	shadowTexDesc.MiscFlags = 0;
+	shadowTexDesc.SampleDesc.Count = 1;
+	shadowTexDesc.SampleDesc.Quality = 0;
+	shadowTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
+	Graphics::Device->CreateTexture2D(&shadowTexDesc, 0, shadowTexture.GetAddressOf());
+
+	// Reset DSV and SRV pointers
+	shadowDSV.ReleaseAndGetAddressOf();
+	shadowSRV.ReleaseAndGetAddressOf();
+
+	// Create the depth/stencil view
+	D3D11_DEPTH_STENCIL_VIEW_DESC shadowDSVDesc = {};
+	shadowDSVDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	shadowDSVDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	shadowDSVDesc.Texture2D.MipSlice = 0;
+	Graphics::Device->CreateDepthStencilView(
+		shadowTexture.Get(),
+		&shadowDSVDesc,
+		shadowDSV.GetAddressOf());
+
+	// Create the SRV for the shadow map
+	D3D11_SHADER_RESOURCE_VIEW_DESC shadowSRVDesc = {};
+	shadowSRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	shadowSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shadowSRVDesc.Texture2D.MipLevels = 1;
+	shadowSRVDesc.Texture2D.MostDetailedMip = 0;
+	Graphics::Device->CreateShaderResourceView(
+		shadowTexture.Get(),
+		&shadowSRVDesc,
+		shadowSRV.GetAddressOf());
 }
 
 // --------------------------------------------------------

@@ -15,6 +15,7 @@ cbuffer PrimaryBuffer : register(b0)
 	Light lights[LIGHT_COUNT];
 
 	float metalness;
+	int shadowsActive;
 }
 
 Texture2D MapAlbedoMetalness : register(t0); // "t" registers for textures
@@ -55,7 +56,8 @@ float4 main(VertexToPixel_Normal input) : SV_TARGET
 		finalRoughness,
 		finalMetalness,
 		input.worldPosition,
-		cameraPosition
+		cameraPosition,
+		0
 	);
 
 	// Return the result of our lighting equations

@@ -107,7 +107,7 @@ float3 CalculateLightingLambertPhong(Light _lights[LIGHT_COUNT], float3 _lightAm
         if (_lights[i].Active)
         {
             // Declare lightDirectionIn, calculated differently for each light type
-            float3 lightDirectionIn;
+                float3 lightDirectionIn;
             
 			// Run a different lighting equation on it depending on the type of light
             switch (_lights[i].Type)
@@ -291,13 +291,13 @@ float3 LightLambertCookTorrance(Light _light, float3 _lightDirectionOut, float3 
 }
 
 // Calculates physically based Lambert & Cook-Torrance lighting result of an array of lights
-float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceMetalness, float3 _surfaceWorldPos, float3 _cameraPosition)
+float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceMetalness, float3 _surfaceWorldPos, float3 _cameraPosition, uint _isShadowed)
 {
     // Start accumulator with nothing
     float3 lightsFinal = 0.0f;
 
 	// For each light in the scene
-    for (uint i = 0; i < LIGHT_COUNT; i++)
+    for (uint i = 0 + _isShadowed; i < LIGHT_COUNT; i++) // If _isShadowed is 1, skip the first light
     {
 		// If it's active
         if (_lights[i].Active)
