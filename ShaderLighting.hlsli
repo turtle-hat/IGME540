@@ -291,19 +291,20 @@ float3 LightLambertCookTorrance(Light _light, float3 _lightDirectionOut, float3 
 }
 
 // Calculates physically based Lambert & Cook-Torrance lighting result of an array of lights
-float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceMetalness, float3 _surfaceWorldPos, float3 _cameraPosition, uint _isShadowed)
+float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _surfaceNormal, float3 _surfaceColor, float _surfaceRoughness, float _surfaceMetalness, float3 _surfaceWorldPos, float3 _cameraPosition, float _shadowAmount)
 {
     // Start accumulator with nothing
     float3 lightsFinal = 0.0f;
 
 	// For each light in the scene
-    for (uint i = 0 + _isShadowed; i < LIGHT_COUNT; i++) // If _isShadowed is 1, skip the first light
+    for (uint i = 0; i < LIGHT_COUNT; i++)
     {
 		// If it's active
         if (_lights[i].Active)
         {
 			// Declare lightDirectionIn, calculated differently for each light type
             float3 lightDirectionIn;
+            float3 lightResult;
             
 			// Run a different lighting equation on it depending on the type of light
             switch (_lights[i].Type)
@@ -312,13 +313,13 @@ float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _
                     // Direction in is the light's direction 
                     lightDirectionIn = normalize(_lights[i].Direction);
                     
-                    lightsFinal += LightLambertCookTorrance(_lights[i], -lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceMetalness, _surfaceWorldPos, _cameraPosition);
+                    lightResult = LightLambertCookTorrance(_lights[i], -lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceMetalness, _surfaceWorldPos, _cameraPosition);
                     break;
                 case LIGHT_TYPE_POINT:
                     // Direction in is the vector to the light's position
                     lightDirectionIn = normalize(_surfaceWorldPos - _lights[i].Position);
      
-                    lightsFinal += (
+                    lightResult = (
                         LightLambertCookTorrance(_lights[i], -lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceMetalness, _surfaceWorldPos, _cameraPosition)
                         // Light attenuates over distance
                         * Attenuate(_lights[i], _surfaceWorldPos)
@@ -328,7 +329,7 @@ float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _
                     // Direction in is the vector to the light's position
                     lightDirectionIn = normalize(_surfaceWorldPos - _lights[i].Position);
     
-                    lightsFinal += (
+                    lightResult = (
                         LightLambertCookTorrance(_lights[i], -lightDirectionIn, _surfaceNormal, _surfaceColor, _surfaceRoughness, _surfaceMetalness, _surfaceWorldPos, _cameraPosition)
                         // Light attenuates over distance
                         * Attenuate(_lights[i], _surfaceWorldPos)
@@ -339,6 +340,14 @@ float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _
                 default:
                     break;
             }
+            
+            // Multiply lighting by shadow amount if this is the first light
+            if (i == 0)
+            {
+                lightResult *= _shadowAmount;
+            }
+            
+            lightsFinal += lightResult;
         }
     }
     

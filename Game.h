@@ -63,6 +63,7 @@ private:
 	void SetMaterialSamplerStates();
 	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);
 	void BuildShadowMap();
+	void RebuildShadowMap();
 	void BuildShadowMatrices();
 	void ImGuiUpdate(float _deltaTime);
 

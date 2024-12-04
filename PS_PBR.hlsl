@@ -23,6 +23,7 @@ Texture2D MapNormalRoughness : register(t1);
 Texture2D MapShadow          : register(t2);
 
 SamplerState BasicSampler : register(s0); // "s" registers for samplers
+SamplerComparisonState ShadowSampler : register(s1);
 
 float4 main(VertexToPixel_Shadow input) : SV_TARGET
 {
@@ -43,6 +44,23 @@ float4 main(VertexToPixel_Shadow input) : SV_TARGET
 	float3 finalNormal = NormalFromMap(input.normal, input.tangent, sampleNR.rgb);
 	float finalRoughness = sampleNR.a * roughness;
 
+
+
+	// Shadow calculations
+
+	// Perspective divide
+	input.shadowPosition /= input.shadowPosition.w;
+
+	// Convert NDCs to UV coordinates for sampling
+	float2 shadowUV = input.shadowPosition.xy * 0.5f + 0.5f;
+	shadowUV.y = 1 - shadowUV.y;
+
+	// Get distances from light to the closest surface and to this pixel
+	float lightToPixel = input.shadowPosition.z;
+	float shadowAmount = MapShadow.SampleCmpLevelZero(ShadowSampler, shadowUV, lightToPixel).r;
+
+
+
 	// Testing overrides
 	//surfaceColor = colorTint.rgb;
 	//finalRoughness = roughness;
@@ -58,7 +76,7 @@ float4 main(VertexToPixel_Shadow input) : SV_TARGET
 		finalMetalness,
 		input.worldPosition,
 		cameraPosition,
-		0
+		shadowAmount
 	);
 
 	// Return the result of our lighting equations

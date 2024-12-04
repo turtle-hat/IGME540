@@ -14,7 +14,7 @@ cbuffer PrimaryBuffer : register(b0)
 VertexToPixel_Shadow main(VertexShaderInput input)
 {
 	// Set up output struct
-	VertexToPixel_Normal output;
+	VertexToPixel_Shadow output;
 
 	// Build wvp matrix and find the screen position
 	matrix wvp = mul(tfProjection, mul(tfView, tfWorld));

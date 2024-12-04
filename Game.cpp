@@ -33,11 +33,11 @@ void Game::Initialize()
 	//  - You'll be expanding and/or replacing these later
 	InitializeSimulationParameters();
 	LoadShaders();
+	CreateLights();
 	BuildShadowMap();
 	BuildShadowMatrices();
 	CreateMaterials();
 	CreateGeometry();
-	CreateLights();
 	CreateCameras();
 	CreateSkyboxes();
 
@@ -188,8 +188,10 @@ void Game::CreateMaterials()
 	materials[9]->AddSampler("BasicSampler", samplerState);
 	materials[9]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
 
+	// Add shadow map texture and sampler state to each material
 	for (int i = 3; i < materials.size(); i++) {
-		materials[9]->AddTextureSRV("MapShadow", shadowSRV);
+		materials[i]->AddTextureSRV("MapShadow", shadowSRV);
+		materials[i]->AddSampler("ShadowSampler", shadowSampler);
 	}
 }
 
@@ -238,7 +240,7 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	AddLightSpot(XMFLOAT3(5.0f, 3.0f, -3.0f), XMFLOAT3(-0.25f, -0.5f, 0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, 25.0f, 0.0f, XM_PIDIV2, true);
+	AddLightSpot(XMFLOAT3(5.0f, 3.0f, -3.0f), XMFLOAT3(-0.25f, -0.5f, 0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, 25.0f, 0.0f, 1.4f, true);
 	lights[0].Type = LIGHT_TYPE_DIRECTIONAL;
 	// LIGHTS 1-2
 	AddLightDirectional(XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 0.5f, true);
@@ -339,6 +341,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	// RENDER SHADOW MAP
 	// Clear shadow map depth buffer
 	Graphics::Context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	// Set shadow map rasterizer state
+	Graphics::Context->RSSetState(shadowRasterizer.Get());
 
 	// Set render target to nothing, depth buffer to shadow map
 	ID3D11RenderTargetView* nullRTV{};
@@ -367,7 +371,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		entities[i]->GetMesh()->Draw();
 	}
 
-	// Reset viewport, render target, and depth buffer for normal rendering
+	// Reset viewport, render target, depth buffer, and rasterizer state for normal rendering
 	viewport.Width = (float)Window::Width();
 	viewport.Height = (float)Window::Height();
 	Graphics::Context->RSSetViewports(1, &viewport);
@@ -375,6 +379,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		1,
 		Graphics::BackBufferRTV.GetAddressOf(),
 		Graphics::DepthBufferDSV.Get());
+	Graphics::Context->RSSetState(0);
 	
 
 
@@ -464,6 +469,10 @@ void Game::Draw(float deltaTime, float totalTime)
 			1,
 			Graphics::BackBufferRTV.GetAddressOf(),
 			Graphics::DepthBufferDSV.Get());
+
+		// Unbind all SRVs at the end of the frame
+		ID3D11ShaderResourceView* nullSRVs[128] = {};
+		Graphics::Context->PSSetShaderResources(0, 128, nullSRVs);
 	}
 }
 
@@ -797,10 +806,38 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 }
 
 // --------------------------------------------------------
-// Builds or rebuilds all DirectX resources for the shadow map
+// Builds all DirectX resources for the shadow map for the first time
 // Code written by Chris Cascioli
 // --------------------------------------------------------
-void Game::BuildShadowMap()
+void Game::BuildShadowMap() {
+	// Build DSV and SRV
+	RebuildShadowMap();
+
+	// Create the rasterizer state for rendering the shadow map
+	D3D11_RASTERIZER_DESC shadowRastDesc = {};
+	shadowRastDesc.FillMode = D3D11_FILL_SOLID;
+	shadowRastDesc.CullMode = D3D11_CULL_BACK;
+	shadowRastDesc.DepthClipEnable = true;
+	shadowRastDesc.DepthBias = 1000; // Min. precision units, not world units!
+	shadowRastDesc.SlopeScaledDepthBias = 1.0f; // Bias more based on slope
+	Graphics::Device->CreateRasterizerState(&shadowRastDesc, &shadowRasterizer);
+
+	// Create the sampler for the shadow map texture
+	D3D11_SAMPLER_DESC shadowSampDesc = {};
+	shadowSampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	shadowSampDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+	shadowSampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.BorderColor[0] = 1.0f; // Only need the first component
+	Graphics::Device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
+}
+
+// --------------------------------------------------------
+// Rebuilds just the shadow map's DSV and SRV
+// Code written by Chris Cascioli
+// --------------------------------------------------------
+void Game::RebuildShadowMap()
 {
 	// Reset DSV and SRV pointers
 	shadowDSV.ReleaseAndGetAddressOf();
@@ -1474,7 +1511,7 @@ void Game::ImGuiBuild() {
 		if (pRenderShadows) {
 			if (ImGui::SliderInt("Shadow Map Resolution", &pShadowResolutionExponent, 1, 12)) {
 				pShadowResolution = (int)pow(2, pShadowResolutionExponent);
-				BuildShadowMap();
+				RebuildShadowMap();
 			}
 			ImGui::SetItemTooltip("Shadow map will be rendered at %d tx.", pShadowResolution);
 			
