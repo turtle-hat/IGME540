@@ -34,9 +34,9 @@ void Game::Initialize()
 	InitializeSimulationParameters();
 	LoadShaders();
 	CreateLights();
+	CreateMaterials();
 	BuildShadowMap();
 	BuildShadowMatrices();
-	CreateMaterials();
 	CreateGeometry();
 	CreateCameras();
 	CreateSkyboxes();
@@ -187,12 +187,6 @@ void Game::CreateMaterials()
 	materials[9]->AddTextureSRV("MapNormalRoughness", textures[13]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
 	materials[9]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
-
-	// Add shadow map texture and sampler state to each material
-	for (int i = 3; i < materials.size(); i++) {
-		materials[i]->AddTextureSRV("MapShadow", shadowSRV);
-		materials[i]->AddSampler("ShadowSampler", shadowSampler);
-	}
 }
 
 // --------------------------------------------------------
@@ -516,7 +510,7 @@ void Game::InitializeSimulationParameters() {
 	pShadowResolution = 1024;
 	pShadowAreaWidth = 30.0f;
 	pShadowAreaCenter = XMFLOAT3(0.0f, -5.0f, 0.0f);
-	pShadowLightDistance = 40.0f;
+	pShadowLightDistance = 500.0f;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -810,9 +804,6 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 // Code written by Chris Cascioli
 // --------------------------------------------------------
 void Game::BuildShadowMap() {
-	// Build DSV and SRV
-	RebuildShadowMap();
-
 	// Create the rasterizer state for rendering the shadow map
 	D3D11_RASTERIZER_DESC shadowRastDesc = {};
 	shadowRastDesc.FillMode = D3D11_FILL_SOLID;
@@ -831,6 +822,14 @@ void Game::BuildShadowMap() {
 	shadowSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSampDesc.BorderColor[0] = 1.0f; // Only need the first component
 	Graphics::Device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
+
+	// Add shadow map sampler state to materials that need it
+	for (int i = 3; i < materials.size(); i++) {
+		materials[i]->AddSampler("ShadowSampler", shadowSampler);
+	}
+
+	// Build DSV and SRV
+	RebuildShadowMap();
 }
 
 // --------------------------------------------------------
@@ -879,6 +878,11 @@ void Game::RebuildShadowMap()
 		shadowTexture.Get(),
 		&shadowSRVDesc,
 		shadowSRV.GetAddressOf());
+
+	// Add shadow map texture to materials that need it
+	for (int i = 3; i < materials.size(); i++) {
+		materials[i]->AddTextureSRV("MapShadow", shadowSRV);
+	}
 }
 
 // --------------------------------------------------------
@@ -917,7 +921,7 @@ void Game::BuildShadowMatrices() {
 			// Build light Projection matrix
 			XMStoreFloat4x4(&shadowLightProjectionMatrix,
 				XMMatrixPerspectiveFovLH(
-					lights[0].SpotOuterAngle * 2.0f,
+					(lights[0].SpotOuterAngle * 2.0f),
 					1.0f,
 					0.1f,
 					max(lights[0].Range, 0.2f)
@@ -1504,6 +1508,8 @@ void Game::ImGuiBuild() {
 	if (ImGui::CollapsingHeader("Shadows")) {					// Info about the shadow map
 		ImGui::Spacing();
 
+		ImGui::Text("Fun tip: Try changing the first light in the scene to a Spot Light!");
+
 		ImGui::Checkbox("Render shadows?", &pRenderShadows);
 		ImGui::SetItemTooltip("Shadows are cast from the first light in the scene.");
 		ImGui::Spacing();
@@ -1525,7 +1531,7 @@ void Game::ImGuiBuild() {
 			}
 			ImGui::SetItemTooltip("The center of the area in the world onto which shadows will be cast.\nThe shadow map's far clip plane intersects this point.");
 
-			if (ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.2f, 100.0f, "%.1f")) {
+			if (ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.2f, 1000.0f, "%.1f", ImGuiSliderFlags_Logarithmic)) {
 				BuildShadowMatrices();
 			}
 			ImGui::SetItemTooltip("The distance from the area center to pull back the camera.");
