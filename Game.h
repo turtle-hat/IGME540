@@ -63,6 +63,7 @@ private:
 	void SetMaterialSamplerStates();
 	void SetMaterialEnvironmentMaps(std::shared_ptr<Skybox> _skybox);
 	void BuildShadowMap();
+	void BuildShadowMatrices();
 	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods
@@ -143,11 +144,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
-	DirectX::XMFLOAT4X4 lightViewMatrix;
-	DirectX::XMFLOAT4X4 lightProjectionMatrix;
+	DirectX::XMFLOAT4X4 shadowLightViewMatrix;
+	DirectX::XMFLOAT4X4 shadowLightProjectionMatrix;
 	// Parameters
 	// Whether to render shadows
 	bool pRenderShadows;
+	// Shadow map's dimensions
+	int pShadowResolution;
 	// Shadow map's dimensions are 2^this value
 	int pShadowResolutionExponent;
 	// Area the shadow map covers in the world

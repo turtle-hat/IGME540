@@ -100,6 +100,9 @@ void Game::LoadShaders()
 	AddVertexShader(L"VS_PBR.cso");
 	// VERTEX SHADER 3
 	AddVertexShader(L"VS_Skybox.cso");
+	// VERTEX SHADER 4
+	AddVertexShader(L"VS_ShadowMap.cso");
+
 
 	// PIXEL SHADERS 0-2
 	AddPixelShader(L"PS_DiffuseSpecular.cso");
@@ -228,7 +231,8 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	AddLightDirectional(XMFLOAT3(-0.25f, -1.0f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightSpot(XMFLOAT3(-2.0f, 7.0f, 0.0f), XMFLOAT3(-0.25f, -1.0f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, 10.0f, 0.0f, XM_PIDIV2, true);
+	lights[0].Type = LIGHT_TYPE_DIRECTIONAL;
 	// LIGHTS 1-2
 	AddLightDirectional(XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
 	AddLightDirectional(XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
@@ -323,69 +327,92 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the back buffer (erase what's on screen) and depth buffer
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	pBackgroundColor);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		// Clear shadow map depth buffer
+		Graphics::Context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	}
+
+	// RENDER SHADOW MAP
+	{
+		// Set render target to nothing, depth buffer to shadow map
+		ID3D11RenderTargetView* nullRTV{};
+		Graphics::Context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get());
+
+		// Change viewport
+		D3D11_VIEWPORT viewport = {};
+		viewport.Width		= (float)pShadowResolution;
+		viewport.Height		= (float)pShadowResolution;
+		viewport.MaxDepth	= 1.0f;
+		Graphics::Context->RSSetViewports(1, &viewport);
+
+		// Set shaders
+		Graphics::Context->PSSetShader(0, 0, 0);
+		vertexShaders[4]->SetShader();
+
 	}
 	
-	// Loop through every entity and draw it
-	for (int i = 0; i < entities.size(); i++) {
-		//entities[i]->Draw(cameras[pCameraCurrent]);
+	// RENDER OBJECTS
+	{
+		// Loop through every entity and draw it
+		for (int i = 0; i < entities.size(); i++) {
 
-		// Get entity material
-		std::shared_ptr<Material> material = entities[i]->GetMaterial();
-		// Prepare the material for drawing
-		material->PrepareMaterial();
+			// Get entity material
+			std::shared_ptr<Material> material = entities[i]->GetMaterial();
+			// Prepare the material for drawing
+			material->PrepareMaterial();
 
-		// Get entity's shaders
-		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
-		std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
+			// Get entity's shaders
+			std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
+			std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 
 
-		// Set vertex and pixel shaders
-		vs->SetShader();
-		ps->SetShader();
+			// Set vertex and pixel shaders
+			vs->SetShader();
+			ps->SetShader();
 
-		// Fill constant buffers with entity's data
-		// VERTEX
-		vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
-		vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
-		vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
-		vs->SetMatrix4x4("tfWorldIT", entities[i]->GetTransform()->GetWorldInverseTranspose());
-		// PIXEL
-		ps->SetFloat4("colorTint", material->GetColorTint());
-		ps->SetFloat("roughness", material->GetRoughness());
-		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
+			// Fill constant buffers with entity's data
+			// VERTEX
+			vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
+			vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
+			vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
+			vs->SetMatrix4x4("tfWorldIT", entities[i]->GetTransform()->GetWorldInverseTranspose());
+			// PIXEL
+			ps->SetFloat4("colorTint", material->GetColorTint());
+			ps->SetFloat("roughness", material->GetRoughness());
+			ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
 
-		ps->SetFloat2("uvPosition", material->GetUVPosition());
-		ps->SetFloat2("uvScale", material->GetUVScale());
+			ps->SetFloat2("uvPosition", material->GetUVPosition());
+			ps->SetFloat2("uvScale", material->GetUVScale());
 
-		// Set lights on pixel shader
-		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
-		if (material->GetName() == "Mat_Custom") {
-			ps->SetFloat("totalTime", totalTime);
-			ps->SetFloat2("imageCenter", pMatCustomImage);
-			ps->SetFloat2("zoomCenter", pMatCustomZoom);
-			ps->SetInt("maxIterations", pMatCustomIterations);
+			// Set lights on pixel shader
+			ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+			// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
+			if (material->GetName() == "Mat_Custom") {
+				ps->SetFloat("totalTime", totalTime);
+				ps->SetFloat2("imageCenter", pMatCustomImage);
+				ps->SetFloat2("zoomCenter", pMatCustomZoom);
+				ps->SetInt("maxIterations", pMatCustomIterations);
+			}
+
+			if (material->isPBR) {
+				// Only use metalness for PBR materials
+				ps->SetFloat("metalness", material->GetMetalness());
+			}
+			else {
+				// Only use ambient light for non-PBR materials
+				ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
+			}
+
+			// COPY DATA TO CONSTANT BUFFERS
+			vs->CopyAllBufferData();
+			ps->CopyAllBufferData();
+
+			// Draw the entity's mesh
+			entities[i]->GetMesh()->Draw();
 		}
 
-		if (material->isPBR) {
-			// Only use metalness for PBR materials
-			ps->SetFloat("metalness", material->GetMetalness());
-		}
-		else {
-			// Only use ambient light for non-PBR materials
-			ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
-		}
-
-		// COPY DATA TO CONSTANT BUFFERS
-		vs->CopyAllBufferData();
-		ps->CopyAllBufferData();
-
-		// Draw the entity's mesh
-		entities[i]->GetMesh()->Draw();
+		// Draw the selected skybox
+		skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
 	}
-
-	// Draw the selected skybox
-	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
 
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
@@ -737,17 +764,15 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 }
 
 // --------------------------------------------------------
-// Builds or rebuilds all resources related to the shadow map
+// Builds or rebuilds all DirectX resources for the shadow map
 // Code written by Chris Cascioli
 // --------------------------------------------------------
 void Game::BuildShadowMap()
 {
-	UINT shadowMapResolution = (UINT)pow(2, pShadowResolutionExponent);
-
 	// Create the actual texture that will be the shadow map
 	D3D11_TEXTURE2D_DESC shadowTexDesc = {};
-	shadowTexDesc.Width = shadowMapResolution;
-	shadowTexDesc.Height = shadowMapResolution;
+	shadowTexDesc.Width = pShadowResolution;
+	shadowTexDesc.Height = pShadowResolution;
 	shadowTexDesc.ArraySize = 1;
 	shadowTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	shadowTexDesc.CPUAccessFlags = 0;
@@ -784,6 +809,52 @@ void Game::BuildShadowMap()
 		shadowTexture.Get(),
 		&shadowSRVDesc,
 		shadowSRV.GetAddressOf());
+}
+
+// --------------------------------------------------------
+// Builds or rebuilds the light's matrices
+// --------------------------------------------------------
+void Game::BuildShadowMatrices() {
+	// Only do so if a light exists
+	if (lights.size() > 0) {
+		XMVECTOR lightDirection = XMLoadFloat3(&lights[0].Direction);
+
+		if (lights[0].Type == LIGHT_TYPE_DIRECTIONAL) {
+			// Build light View matrix
+			XMStoreFloat4x4(&shadowLightViewMatrix, XMMatrixLookToLH(
+				XMLoadFloat3(&pShadowAreaCenter) + (-lightDirection * pShadowLightDistance),
+				lightDirection,
+				XMVectorSet(0, 1, 0, 0)
+			));
+
+			// Build light Projection matrix
+			XMStoreFloat4x4(&shadowLightProjectionMatrix,
+				XMMatrixOrthographicLH(
+					pShadowAreaWidth,
+					pShadowAreaWidth,
+					0.1f,	// Near clip value is hardcoded
+					pShadowLightDistance
+				)
+			);
+		} else {
+			// Build light View matrix
+			XMStoreFloat4x4(&shadowLightViewMatrix, XMMatrixLookToLH(
+				XMLoadFloat3(&lights[0].Position),
+				lightDirection,
+				XMVectorSet(0, 1, 0, 0)
+			));
+
+			// Build light Projection matrix
+			XMStoreFloat4x4(&shadowLightProjectionMatrix,
+				XMMatrixPerspectiveFovLH(
+					lights[0].SpotOuterAngle * 2.0f,
+					1.0f,
+					0.1f,
+					lights[0].Range
+				)
+			);
+		}
+	}
 }
 
 // --------------------------------------------------------
@@ -1169,34 +1240,58 @@ void Game::ImGuiBuild() {
 				
 				ImGui::Spacing();
 				ImGui::Text("Type:");
-				ImGui::RadioButton("Directional", &lights[i].Type, LIGHT_TYPE_DIRECTIONAL);
+				if (ImGui::RadioButton("Directional", &lights[i].Type, LIGHT_TYPE_DIRECTIONAL) && i == 0) {
+					BuildShadowMatrices();
+				}
 				ImGui::SameLine();
-				ImGui::RadioButton("Point", &lights[i].Type, LIGHT_TYPE_POINT);
+				if (ImGui::RadioButton("Point", &lights[i].Type, LIGHT_TYPE_POINT) && i == 0) {
+					BuildShadowMatrices();
+				}
 				ImGui::SameLine();
-				ImGui::RadioButton("Spot", &lights[i].Type, LIGHT_TYPE_SPOT);
+				if (ImGui::RadioButton("Spot", &lights[i].Type, LIGHT_TYPE_SPOT) && i == 0) {
+					BuildShadowMatrices();
+				}
 
 				ImGui::Spacing();
 				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) {
-					ImGui::DragFloat3("Position", &lights[i].Position.x, 0.01f);
+					// If first light's position is changed, update shadow matrices
+					if (ImGui::DragFloat3("Position", &lights[i].Position.x, 0.01f) && i == 0) {
+						BuildShadowMatrices();
+					}
 				}
 				if (lights[i].Type != LIGHT_TYPE_POINT) {
-					ImGui::DragFloat3("Direction", &lights[i].Direction.x, 0.01f);
+					// If first light's direction is changed, update shadow matrices
+					if (ImGui::DragFloat3("Direction", &lights[i].Direction.x, 0.01f) && i == 0) {
+						BuildShadowMatrices();
+					}
 				}
 				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) {
 					if (ImGui::DragFloat("Range", &lights[i].Range, 0.1f, 0.0f, NULL, "%.1f")) {
 						lights[i].Range = max(lights[i].Range, 0.0f);
+						// If first light's range is changed, update shadow matrices
+						if (i == 0) {
+							BuildShadowMatrices();
+						}
 					}
 				}
 				if (lights[i].Type == LIGHT_TYPE_SPOT) {
 					if (ImGui::DragFloat("Spot Inner Angle", &lights[i].SpotInnerAngle, 0.01f, 0.0f, XM_PIDIV2, "%.2f")) {
 						if (lights[i].SpotOuterAngle <= lights[i].SpotInnerAngle) {
 							lights[i].SpotOuterAngle = lights[i].SpotInnerAngle + 0.01f;
+							// If changing the first light's inner angle would change its outer angle, update shadow matrices
+							if (i == 0) {
+								BuildShadowMatrices();
+							}
 						}
 					}
 					ImGui::SetItemTooltip("In radians");
 					if (ImGui::DragFloat("Spot Outer Angle", &lights[i].SpotOuterAngle, 0.01f, 0.01f, XM_PIDIV2, "%.2f")) {
 						if (lights[i].SpotOuterAngle <= lights[i].SpotInnerAngle) {
 							lights[i].SpotInnerAngle = lights[i].SpotOuterAngle - 0.01f;
+						}
+						// If first light's outer angle is changed, update shadow matrices
+						if (i == 0) {
+							BuildShadowMatrices();
 						}
 					}
 					ImGui::SetItemTooltip("In radians");
@@ -1344,17 +1439,29 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 
 		if (pRenderShadows) {
-			ImGui::SliderInt("Shadow Map Resolution", &pShadowResolutionExponent, 1, 12);
-			ImGui::SetItemTooltip("Shadow map will be rendered at %d tx.", (int)pow(2, pShadowResolutionExponent));
+			if (ImGui::SliderInt("Shadow Map Resolution", &pShadowResolutionExponent, 1, 12)) {
+				pShadowResolution = (int)pow(2, pShadowResolutionExponent);
+				BuildShadowMap();
+			}
+			ImGui::SetItemTooltip("Shadow map will be rendered at %d tx.", pShadowResolution);
 			
-			ImGui::SliderFloat("Shadow Area Width", &pShadowAreaWidth, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+			if (ImGui::SliderFloat("Shadow Area Width", &pShadowAreaWidth, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_Logarithmic)) {
+				BuildShadowMatrices();
+			}
 			ImGui::SetItemTooltip("The width of the area in the world onto which shadows will be cast.");
 			
-			ImGui::DragFloat3("Shadow Area Center", &pShadowAreaCenter.x, 0.1f, NULL, NULL, "%.1f");
+			if (ImGui::DragFloat3("Shadow Area Center", &pShadowAreaCenter.x, 0.1f, NULL, NULL, "%.1f")) {
+				BuildShadowMatrices();
+			}
 			ImGui::SetItemTooltip("The center of the area in the world onto which shadows will be cast.\nThe shadow map's far clip plane intersects this point.");
 
-			ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.1f, 100.0f, "%.1f");
+			if (ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.1f, 100.0f, "%.1f")) {
+				BuildShadowMatrices();
+			}
 			ImGui::SetItemTooltip("The distance from the area center to pull back the camera.");
+
+			ImGui::Spacing();
+			ImGui::Image((void*)shadowSRV.Get(), ImVec2(240, 240));
 		}
 
 		ImGui::Spacing();
