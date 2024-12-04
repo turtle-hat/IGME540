@@ -49,6 +49,17 @@ struct VertexToPixel_Normal
     float3 worldPosition    : POSITION; // World position of the pixel
 };
 
+// For shaders that take normal maps and shadow maps
+struct VertexToPixel_Shadow
+{
+    float4 screenPosition : SV_POSITION; // XYZW position (System Value Position)
+    float3 normal         : NORMAL; // Normal vector
+    float3 tangent        : TANGENT; // Tangent vector
+    float2 uv             : TEXCOORD; // UV coordinate
+    float3 worldPosition  : POSITION; // World position of the pixel
+    float4 shadowPosition : SHADOW_POSITION; // UV coordinate of the pixel on the shadow map
+};
+
 // For skybox shader
 struct VertexToPixel_Sky
 {

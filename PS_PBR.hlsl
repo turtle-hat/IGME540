@@ -20,10 +20,11 @@ cbuffer PrimaryBuffer : register(b0)
 
 Texture2D MapAlbedoMetalness : register(t0); // "t" registers for textures
 Texture2D MapNormalRoughness : register(t1);
+Texture2D MapShadow          : register(t2);
 
 SamplerState BasicSampler : register(s0); // "s" registers for samplers
 
-float4 main(VertexToPixel_Normal input) : SV_TARGET
+float4 main(VertexToPixel_Shadow input) : SV_TARGET
 {
 	// Renormalize the normal and tangent
 	input.normal = normalize(input.normal);

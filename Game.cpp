@@ -31,16 +31,15 @@ void Game::Initialize()
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
+	InitializeSimulationParameters();
 	LoadShaders();
+	BuildShadowMap();
+	BuildShadowMatrices();
 	CreateMaterials();
 	CreateGeometry();
 	CreateLights();
 	CreateCameras();
 	CreateSkyboxes();
-	InitializeSimulationParameters();
-	BuildShadowMap();
-	BuildShadowMap();
-	BuildShadowMap();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -188,6 +187,10 @@ void Game::CreateMaterials()
 	materials[9]->AddTextureSRV("MapNormalRoughness", textures[13]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
 	materials[9]->SetUVScale(XMFLOAT2(3.0f, 3.0f));
+
+	for (int i = 3; i < materials.size(); i++) {
+		materials[9]->AddTextureSRV("MapShadow", shadowSRV);
+	}
 }
 
 // --------------------------------------------------------
@@ -215,14 +218,18 @@ void Game::CreateGeometry()
 	AddEntity("E_ObjectScratched",		5, 8, XMFLOAT3( 6.0f,  0.0f, 0.0f));
 	AddEntity("E_ObjectWood",			6, 9, XMFLOAT3( 9.0f,  0.0f, 0.0f));
 
-	// ENTITY 7
+	// ENTITY 7-9
 	AddEntity("E_Floor",				0, 9, XMFLOAT3( 0.0f, -2.0f, 0.0f));
 	entities[7]->GetTransform()->Scale(XMFLOAT3(50.0f, 0.125f, 50.0f));
+	AddEntity("E_Wall1",				0, 6, XMFLOAT3( -12.0f, 1.0f, 0.0f));
+	entities[8]->GetTransform()->Scale(XMFLOAT3(0.125f, 3.0f, 5.0f));
+	AddEntity("E_Wall2",				0, 6, XMFLOAT3( 0.0f, 1.0f, 5.0f));
+	entities[9]->GetTransform()->Scale(XMFLOAT3(12.0f, 3.0f, 0.125f));
 
-	// ENTITIES 8-9
+	// ENTITIES 10-11
 	AddEntity("E_BouncerSpring",		2, 7, XMFLOAT3( 0.0f, -1.0f, 3.0f));
-	AddEntity("E_BouncerCylinder",		1, 6, XMFLOAT3( 0.0f, 0.0f, 3.0f));
-	entities[9]->GetTransform()->Scale(XMFLOAT3(1.2f, 1.0f, 1.2f));
+	AddEntity("E_BouncerCylinder",		1, 3, XMFLOAT3( 0.0f, 0.0f, 3.0f));
+	entities[11]->GetTransform()->Scale(XMFLOAT3(1.2f, 1.0f, 1.2f));
 }
 
 // --------------------------------------------------------
@@ -231,10 +238,10 @@ void Game::CreateGeometry()
 void Game::CreateLights() {
 	// Create lights
 	// LIGHT 0
-	AddLightSpot(XMFLOAT3(-2.0f, 7.0f, 0.0f), XMFLOAT3(-0.25f, -1.0f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, 10.0f, 0.0f, XM_PIDIV2, true);
+	AddLightSpot(XMFLOAT3(5.0f, 3.0f, -3.0f), XMFLOAT3(-0.25f, -0.5f, 0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, 25.0f, 0.0f, XM_PIDIV2, true);
 	lights[0].Type = LIGHT_TYPE_DIRECTIONAL;
 	// LIGHTS 1-2
-	AddLightDirectional(XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, true);
+	AddLightDirectional(XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 0.5f, true);
 	AddLightDirectional(XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, false);
 }
 
@@ -295,14 +302,14 @@ void Game::Update(float deltaTime, float totalTime)
 	}
 
 	// Move bouncer
-	shared_ptr<Transform> bouncerSpringTransform = entities[8]->GetTransform();
+	shared_ptr<Transform> bouncerSpringTransform = entities[10]->GetTransform();
 	bouncerSpringTransform->SetPosition(0.0f,
 		sin(totalTime * 4.0f) * 2.0f - sin((totalTime + 0.225f) * 8.0f) * 0.8f,
 		3.0f);
 	bouncerSpringTransform->SetScale(1.0f,
 		1.2f + sin((totalTime + 0.225f) * 8.0f) * 0.8f,
 		1.0f);
-	entities[9]->GetTransform()->SetPosition(0.0f,
+	entities[11]->GetTransform()->SetPosition(0.0f,
 		sin(totalTime * 4.0f) * 2.0f + 2.0f,
 		3.0f);
 
@@ -327,97 +334,122 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the back buffer (erase what's on screen) and depth buffer
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	pBackgroundColor);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-		// Clear shadow map depth buffer
-		Graphics::Context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
 	// RENDER SHADOW MAP
-	{
-		// Set render target to nothing, depth buffer to shadow map
-		ID3D11RenderTargetView* nullRTV{};
-		Graphics::Context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get());
+	// Clear shadow map depth buffer
+	Graphics::Context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-		// Change viewport
-		D3D11_VIEWPORT viewport = {};
-		viewport.Width		= (float)pShadowResolution;
-		viewport.Height		= (float)pShadowResolution;
-		viewport.MaxDepth	= 1.0f;
-		Graphics::Context->RSSetViewports(1, &viewport);
+	// Set render target to nothing, depth buffer to shadow map
+	ID3D11RenderTargetView* nullRTV{};
+	Graphics::Context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get());
 
-		// Set shaders
-		Graphics::Context->PSSetShader(0, 0, 0);
-		vertexShaders[4]->SetShader();
+	// Change viewport
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width		= (float)pShadowResolution;
+	viewport.Height		= (float)pShadowResolution;
+	viewport.MaxDepth	= 1.0f;
+	Graphics::Context->RSSetViewports(1, &viewport);
 
+	// Set shaders
+	Graphics::Context->PSSetShader(0, 0, 0);
+	std::shared_ptr<SimpleVertexShader> vs = vertexShaders[4];
+	vs->SetShader();
+	vs->SetMatrix4x4("view", shadowLightViewMatrix);
+	vs->SetMatrix4x4("projection", shadowLightProjectionMatrix);
+
+	// Draw all entities
+	for (int i = 0; i < entities.size(); i++) {
+		vs->SetMatrix4x4("world", entities[i]->GetTransform()->GetWorld());
+		vs->CopyAllBufferData();
+
+		// Draw the entity's mesh
+		entities[i]->GetMesh()->Draw();
 	}
+
+	// Reset viewport, render target, and depth buffer for normal rendering
+	viewport.Width = (float)Window::Width();
+	viewport.Height = (float)Window::Height();
+	Graphics::Context->RSSetViewports(1, &viewport);
+	Graphics::Context->OMSetRenderTargets(
+		1,
+		Graphics::BackBufferRTV.GetAddressOf(),
+		Graphics::DepthBufferDSV.Get());
 	
+
+
 	// RENDER OBJECTS
-	{
-		// Loop through every entity and draw it
-		for (int i = 0; i < entities.size(); i++) {
+	// Loop through every entity and draw it
+	for (int i = 0; i < entities.size(); i++) {
 
-			// Get entity material
-			std::shared_ptr<Material> material = entities[i]->GetMaterial();
-			// Prepare the material for drawing
-			material->PrepareMaterial();
+		// Get entity material
+		std::shared_ptr<Material> material = entities[i]->GetMaterial();
+		// Prepare the material for drawing
+		material->PrepareMaterial();
 
-			// Get entity's shaders
-			std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
-			std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
+		// Get entity's shaders
+		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
+		std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 
+		// Set vertex and pixel shaders
+		vs->SetShader();
+		ps->SetShader();
 
-			// Set vertex and pixel shaders
-			vs->SetShader();
-			ps->SetShader();
+		// Fill constant buffers with entity's data
+		// VERTEX
+		vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
+		vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
+		vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
+		vs->SetMatrix4x4("tfWorldIT", entities[i]->GetTransform()->GetWorldInverseTranspose());
+		vs->SetMatrix4x4("tfShadowView", shadowLightViewMatrix);
+		vs->SetMatrix4x4("tfShadowProjection", shadowLightProjectionMatrix);
+		// PIXEL
+		ps->SetFloat4("colorTint", material->GetColorTint());
+		ps->SetFloat("roughness", material->GetRoughness());
+		ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
 
-			// Fill constant buffers with entity's data
-			// VERTEX
-			vs->SetMatrix4x4("tfWorld", entities[i]->GetTransform()->GetWorld());
-			vs->SetMatrix4x4("tfView", cameras[pCameraCurrent]->GetViewMatrix());
-			vs->SetMatrix4x4("tfProjection", cameras[pCameraCurrent]->GetProjectionMatrix());
-			vs->SetMatrix4x4("tfWorldIT", entities[i]->GetTransform()->GetWorldInverseTranspose());
-			// PIXEL
-			ps->SetFloat4("colorTint", material->GetColorTint());
-			ps->SetFloat("roughness", material->GetRoughness());
-			ps->SetFloat3("cameraPosition", cameras[pCameraCurrent]->GetTransform()->GetPosition());
+		ps->SetFloat2("uvPosition", material->GetUVPosition());
+		ps->SetFloat2("uvScale", material->GetUVScale());
 
-			ps->SetFloat2("uvPosition", material->GetUVPosition());
-			ps->SetFloat2("uvScale", material->GetUVScale());
-
-			// Set lights on pixel shader
-			ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-			// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
-			if (material->GetName() == "Mat_Custom") {
-				ps->SetFloat("totalTime", totalTime);
-				ps->SetFloat2("imageCenter", pMatCustomImage);
-				ps->SetFloat2("zoomCenter", pMatCustomZoom);
-				ps->SetInt("maxIterations", pMatCustomIterations);
-			}
-
-			if (material->isPBR) {
-				// Only use metalness for PBR materials
-				ps->SetFloat("metalness", material->GetMetalness());
-			}
-			else {
-				// Only use ambient light for non-PBR materials
-				ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
-			}
-
-			// COPY DATA TO CONSTANT BUFFERS
-			vs->CopyAllBufferData();
-			ps->CopyAllBufferData();
-
-			// Draw the entity's mesh
-			entities[i]->GetMesh()->Draw();
+		// Set lights on pixel shader
+		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+		// MATERIAL-SPECIFIC PIXEL SHADER CONSTANT BUFFER INPUTS
+		if (material->GetName() == "Mat_Custom") {
+			ps->SetFloat("totalTime", totalTime);
+			ps->SetFloat2("imageCenter", pMatCustomImage);
+			ps->SetFloat2("zoomCenter", pMatCustomZoom);
+			ps->SetInt("maxIterations", pMatCustomIterations);
 		}
 
-		// Draw the selected skybox
-		skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
+		if (material->isPBR) {
+			// Only use metalness for PBR materials
+			ps->SetFloat("metalness", material->GetMetalness());
+		}
+		else {
+			// Only use ambient light for non-PBR materials
+			ps->SetFloat3("lightAmbient", skyboxAmbientColors[pSkyboxCurrent]);
+		}
+
+		// COPY DATA TO CONSTANT BUFFERS
+		vs->CopyAllBufferData();
+		ps->CopyAllBufferData();
+
+		// Draw the entity's mesh
+		entities[i]->GetMesh()->Draw();
 	}
 
+	// Draw the selected skybox
+	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
+
+
+
+	// RENDER IMGUI
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
+	
 
-	// Frame END
+
+	// FRAME END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
 	{
@@ -472,9 +504,10 @@ void Game::InitializeSimulationParameters() {
 
 	pRenderShadows = true;
 	pShadowResolutionExponent = 10;
-	pShadowAreaWidth = 10.0f;
+	pShadowResolution = 1024;
+	pShadowAreaWidth = 30.0f;
 	pShadowAreaCenter = XMFLOAT3(0.0f, -5.0f, 0.0f);
-	pShadowLightDistance = 100.0f;
+	pShadowLightDistance = 40.0f;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -769,6 +802,10 @@ void Game::SetMaterialEnvironmentMaps(shared_ptr<Skybox> _skybox)
 // --------------------------------------------------------
 void Game::BuildShadowMap()
 {
+	// Reset DSV and SRV pointers
+	shadowDSV.ReleaseAndGetAddressOf();
+	shadowSRV.ReleaseAndGetAddressOf();
+
 	// Create the actual texture that will be the shadow map
 	D3D11_TEXTURE2D_DESC shadowTexDesc = {};
 	shadowTexDesc.Width = pShadowResolution;
@@ -784,10 +821,6 @@ void Game::BuildShadowMap()
 	shadowTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
 	Graphics::Device->CreateTexture2D(&shadowTexDesc, 0, shadowTexture.GetAddressOf());
-
-	// Reset DSV and SRV pointers
-	shadowDSV.ReleaseAndGetAddressOf();
-	shadowSRV.ReleaseAndGetAddressOf();
 
 	// Create the depth/stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC shadowDSVDesc = {};
@@ -850,7 +883,7 @@ void Game::BuildShadowMatrices() {
 					lights[0].SpotOuterAngle * 2.0f,
 					1.0f,
 					0.1f,
-					lights[0].Range
+					max(lights[0].Range, 0.2f)
 				)
 			);
 		}
@@ -1455,7 +1488,7 @@ void Game::ImGuiBuild() {
 			}
 			ImGui::SetItemTooltip("The center of the area in the world onto which shadows will be cast.\nThe shadow map's far clip plane intersects this point.");
 
-			if (ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.1f, 100.0f, "%.1f")) {
+			if (ImGui::SliderFloat("Shadow Light Distance", &pShadowLightDistance, 0.2f, 100.0f, "%.1f")) {
 				BuildShadowMatrices();
 			}
 			ImGui::SetItemTooltip("The distance from the area center to pull back the camera.");

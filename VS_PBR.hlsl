@@ -7,9 +7,11 @@ cbuffer PrimaryBuffer : register(b0)
 	float4x4 tfView;
 	float4x4 tfProjection;
 	float4x4 tfWorldIT;
+	float4x4 tfShadowView;
+	float4x4 tfShadowProjection;
 }
 
-VertexToPixel_Normal main(VertexShaderInput input)
+VertexToPixel_Shadow main(VertexShaderInput input)
 {
 	// Set up output struct
 	VertexToPixel_Normal output;
@@ -22,6 +24,10 @@ VertexToPixel_Normal main(VertexShaderInput input)
 	output.tangent = mul((float3x3)tfWorld, input.tangent);
 	output.uv = input.uv;
 	output.worldPosition = mul(tfWorld, float4(input.localPosition, 1)).xyz;
+
+	// Calculate shadow map position
+	matrix shadowWVP = mul(tfShadowProjection, mul(tfShadowView, tfWorld));
+	output.shadowPosition = mul(shadowWVP, float4(input.localPosition, 1.0f));
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
