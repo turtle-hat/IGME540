@@ -93,26 +93,21 @@ Game::~Game()
 void Game::LoadShaders()
 {
 	// Load shaders in with SimpleShader
-	// VERTEX SHADERS 0-2
-	AddVertexShader(L"VS_DiffuseSpecular.cso");
-	AddVertexShader(L"VS_DiffuseNormal.cso");
-	AddVertexShader(L"VS_PBR.cso");
-	// VERTEX SHADER 3
-	AddVertexShader(L"VS_Skybox.cso");
-	// VERTEX SHADER 4
-	AddVertexShader(L"VS_ShadowMap.cso");
+	// VERTEX SHADERS
+	AddVertexShader(L"VS_DiffuseSpecular.cso",	vsDiffuseSpecular);
+	AddVertexShader(L"VS_DiffuseNormal.cso",	vsDiffuseNormal);
+	AddVertexShader(L"VS_PBR.cso",				vsPBR);
+	AddVertexShader(L"VS_Skybox.cso",			vsSkybox);
+	AddVertexShader(L"VS_ShadowMap.cso",		vsShadowMap);
 
-
-	// PIXEL SHADERS 0-2
-	AddPixelShader(L"PS_DiffuseSpecular.cso");
-	AddPixelShader(L"PS_DiffuseNormal.cso");
-	AddPixelShader(L"PS_PBR.cso");
-	// PIXEL SHADER 3
-	AddPixelShader(L"PS_Skybox.cso");
-	// PIXEL SHADERS 4-6
-	AddPixelShader(L"PS_Normals.cso");
-	AddPixelShader(L"PS_UVs.cso");
-	AddPixelShader(L"PS_Custom.cso");
+	// PIXEL SHADERS
+	AddPixelShader(L"PS_DiffuseSpecular.cso",	psDiffuseSpecular);
+	AddPixelShader(L"PS_DiffuseNormal.cso",		psDiffuseNormal);
+	AddPixelShader(L"PS_PBR.cso",				psPBR);
+	AddPixelShader(L"PS_Normals.cso",			psNormals);
+	AddPixelShader(L"PS_UVs.cso",				psUVs);
+	AddPixelShader(L"PS_Custom.cso",			psCustom);
+	AddPixelShader(L"PS_Skybox.cso",			psSkybox);
 }
 
 // --------------------------------------------------------
@@ -147,42 +142,42 @@ void Game::CreateMaterials()
 
 	// Create materials
 	// MATERIALS 0-2
-	AddMaterial("Mat_Normals",		0, 3);
-	AddMaterial("Mat_UVs",			0, 4);
-	AddMaterial("Mat_Custom",		0, 5);
+	AddMaterial("Mat_Normals",		vsDiffuseSpecular, psNormals);
+	AddMaterial("Mat_UVs",			vsDiffuseSpecular, psUVs);
+	AddMaterial("Mat_Custom",		vsDiffuseSpecular, psCustom);
 
 	// MATERIALS 3-9
-	AddPBRMaterial("Mat_Bronze_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Bronze_PBR",		vsPBR, psPBR, 1.0f, 1.0f);
 	materials[3]->AddTextureSRV("MapAlbedoMetalness", textures[0]);
 	materials[3]->AddTextureSRV("MapNormalRoughness", textures[1]);
 	materials[3]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Cobblestone_PBR",	2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Cobblestone_PBR",	vsPBR, psPBR, 1.0f, 1.0f);
 	materials[4]->AddTextureSRV("MapAlbedoMetalness", textures[2]);
 	materials[4]->AddTextureSRV("MapNormalRoughness", textures[3]);
 	materials[4]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Floor_PBR",			2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Floor_PBR",			vsPBR, psPBR, 1.0f, 1.0f);
 	materials[5]->AddTextureSRV("MapAlbedoMetalness", textures[4]);
 	materials[5]->AddTextureSRV("MapNormalRoughness", textures[5]);
 	materials[5]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Paint_PBR",			2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Paint_PBR",			vsPBR, psPBR, 1.0f, 1.0f);
 	materials[6]->AddTextureSRV("MapAlbedoMetalness", textures[6]);
 	materials[6]->AddTextureSRV("MapNormalRoughness", textures[7]);
 	materials[6]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Rough_PBR",			2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Rough_PBR",			vsPBR, psPBR, 1.0f, 1.0f);
 	materials[7]->AddTextureSRV("MapAlbedoMetalness", textures[8]);
 	materials[7]->AddTextureSRV("MapNormalRoughness", textures[9]);
 	materials[7]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Scratched_PBR",		2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Scratched_PBR",		vsPBR, psPBR, 1.0f, 1.0f);
 	materials[8]->AddTextureSRV("MapAlbedoMetalness", textures[10]);
 	materials[8]->AddTextureSRV("MapNormalRoughness", textures[11]);
 	materials[8]->AddSampler("BasicSampler", samplerState);
 
-	AddPBRMaterial("Mat_Wood_PBR",			2, 2, 1.0f, 1.0f);
+	AddPBRMaterial("Mat_Wood_PBR",			vsPBR, psPBR, 1.0f, 1.0f);
 	materials[9]->AddTextureSRV("MapAlbedoMetalness", textures[12]);
 	materials[9]->AddTextureSRV("MapNormalRoughness", textures[13]);
 	materials[9]->AddSampler("BasicSampler", samplerState);
@@ -351,15 +346,14 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Set shaders
 	Graphics::Context->PSSetShader(0, 0, 0);
-	std::shared_ptr<SimpleVertexShader> vs = vertexShaders[4];
-	vs->SetShader();
-	vs->SetMatrix4x4("view", shadowLightViewMatrix);
-	vs->SetMatrix4x4("projection", shadowLightProjectionMatrix);
+	vsShadowMap->SetShader();
+	vsShadowMap->SetMatrix4x4("view", shadowLightViewMatrix);
+	vsShadowMap->SetMatrix4x4("projection", shadowLightProjectionMatrix);
 
 	// Draw all entities
 	for (int i = 0; i < entities.size(); i++) {
-		vs->SetMatrix4x4("world", entities[i]->GetTransform()->GetWorld());
-		vs->CopyAllBufferData();
+		vsShadowMap->SetMatrix4x4("world", entities[i]->GetTransform()->GetWorld());
+		vsShadowMap->CopyAllBufferData();
 
 		// Draw the entity's mesh
 		entities[i]->GetMesh()->Draw();
@@ -529,25 +523,25 @@ void Game::InitializeSimulationParameters() {
 // --------------------------------------------------------
 // Adds a vertex shader to the list of vertex shaders
 // --------------------------------------------------------
-void Game::AddVertexShader(const wchar_t* _path)
+void Game::AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader> _shader)
 {
-	vertexShaders.push_back(make_shared<SimpleVertexShader>(
+	_shader = make_shared<SimpleVertexShader>(
 		Graphics::Device,
 		Graphics::Context,
 		FixPath(_path).c_str()
-	));
+	);
 }
 
 // --------------------------------------------------------
 // Adds a pixel shader to the list of pixel shaders
 // --------------------------------------------------------
-void Game::AddPixelShader(const wchar_t* _path)
+void Game::AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader> _shader)
 {
-	pixelShaders.push_back(make_shared<SimplePixelShader>(
+	_shader = make_shared<SimplePixelShader>(
 		Graphics::Device,
 		Graphics::Context,
 		FixPath(_path).c_str()
-	));
+	);
 }
 
 // --------------------------------------------------------
@@ -571,58 +565,58 @@ void Game::AddTexture(const wchar_t* _path)
 // --------------------------------------------------------
 // Adds a Material to the list of Materials
 // --------------------------------------------------------
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap)
 {
 	materials.push_back(make_shared<Material>(
 		_name,
-		vertexShaders[_vertexShaderIndex],
-		pixelShaders[_pixelShaderIndex],
+		_vertexShader,
+		_pixelShader,
 		_colorTint,
 		_roughness,
 		_useGlobalEnvironmentMap
 	));
 }
 
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, _roughness, false);
+	AddMaterial(_name, _vertexShader, _pixelShader, _colorTint, _roughness, false);
 }
 
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, _colorTint, 0.0f, false);
+	AddMaterial(_name, _vertexShader, _pixelShader, _colorTint, 0.0f, false);
 }
 
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, bool _useGlobalEnvironmentMap)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness, bool _useGlobalEnvironmentMap)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, _useGlobalEnvironmentMap);
+	AddMaterial(_name, _vertexShader, _pixelShader, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, _useGlobalEnvironmentMap);
 }
 
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, false);
+	AddMaterial(_name, _vertexShader, _pixelShader, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), _roughness, false);
 }
 
-void Game::AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex)
+void Game::AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader)
 {
-	AddMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f, false);
+	AddMaterial(_name, _vertexShader, _pixelShader, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f, false);
 }
 
-void Game::AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness)
+void Game::AddPBRMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness)
 {
 	materials.push_back(make_shared<Material>(
 		_name,
-		vertexShaders[_vertexShaderIndex],
-		pixelShaders[_pixelShaderIndex],
+		_vertexShader,
+		_pixelShader,
 		_colorTint,
 		_roughness,
 		_metalness
 	));
 }
 
-void Game::AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, float _metalness)
+void Game::AddPBRMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness, float _metalness)
 {
-	AddPBRMaterial(_name, _vertexShaderIndex, _pixelShaderIndex, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
+	AddPBRMaterial(_name, _vertexShader, _pixelShader, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
 }
 
 // --------------------------------------------------------
@@ -750,7 +744,7 @@ void Game::AddCamera(const char* _name, DirectX::XMFLOAT3 _position, DirectX::XM
 void Game::AddSkybox(const char* _name, std::wstring _pathBase, DirectX::XMFLOAT3 _ambientColor)
 {
 	skyboxes.push_back(make_shared<Skybox>(
-		_name, meshes[0], samplerState, vertexShaders[3], pixelShaders[3],
+		_name, meshes[0], samplerState, vsSkybox, psSkybox,
 		_pathBase
 	));
 	skyboxAmbientColors.push_back(_ambientColor);

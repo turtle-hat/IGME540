@@ -39,17 +39,17 @@ private:
 	void CreateCameras();
 	void CreateSkyboxes();
 	void InitializeSimulationParameters();
-	void AddVertexShader(const wchar_t* _path);
-	void AddPixelShader(const wchar_t* _path);
+	void AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader> _shader);
+	void AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader> _shader);
 	void AddTexture(const wchar_t* _path);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, bool _useGlobalEnvironmentMap);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness);
-	void AddMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex);
-	void AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness);
-	void AddPBRMaterial(const char* _name, unsigned int _vertexShaderIndex, unsigned int _pixelShaderIndex, float _roughness, float _metalness);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness, bool _useGlobalEnvironmentMap);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness);
+	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader);
+	void AddPBRMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, float _metalness);
+	void AddPBRMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, float _roughness, float _metalness);
 	void AddEntity(const char* _name, unsigned int _meshIndex, unsigned int _materialIndex, DirectX::XMFLOAT3 _position);
 	void AddLightDirectional(DirectX::XMFLOAT3 _direction, DirectX::XMFLOAT3 _color, float _intensity, bool _isActive);
 	void AddLightPoint(DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _color, float _intensity, float _range, bool _isActive);
@@ -112,6 +112,23 @@ private:
 
 	const char* LIGHT_TYPE_STRINGS[3] = { "Directional", "Point", "Spot" };
 
+	// Note the usage of ComPtr below
+	//  - This is a smart pointer for objects that abide by the
+	//     Component Object Model, which DirectX objects do
+	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
+
+	// MATERIAL SHADERS
+	std::shared_ptr<SimpleVertexShader> vsDiffuseSpecular;
+	std::shared_ptr<SimpleVertexShader> vsDiffuseNormal;
+	std::shared_ptr<SimpleVertexShader> vsPBR;
+
+	std::shared_ptr<SimplePixelShader> psDiffuseSpecular;
+	std::shared_ptr<SimplePixelShader> psDiffuseNormal;
+	std::shared_ptr<SimplePixelShader> psPBR;
+	std::shared_ptr<SimplePixelShader> psNormals;
+	std::shared_ptr<SimplePixelShader> psUVs;
+	std::shared_ptr<SimplePixelShader> psCustom;
+
 	// MESHES
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
@@ -136,6 +153,10 @@ private:
 
 	// SKYBOXES
 	std::vector<std::shared_ptr<Skybox>> skyboxes;
+	// Shaders
+	std::shared_ptr<SimpleVertexShader> vsSkybox;
+	std::shared_ptr<SimplePixelShader> psSkybox;
+
 	// Ambient light colors for each skybox
 	std::vector<DirectX::XMFLOAT3> skyboxAmbientColors;
 	int pSkyboxCurrent;
@@ -147,6 +168,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
 	DirectX::XMFLOAT4X4 shadowLightViewMatrix;
 	DirectX::XMFLOAT4X4 shadowLightProjectionMatrix;
+	// Vertex Shader
+	std::shared_ptr<SimpleVertexShader> vsShadowMap;
 	// Parameters
 	// Whether to render shadows
 	bool pRenderShadows;
@@ -161,6 +184,10 @@ private:
 	// Distance from the shadow map's center to pull the camera back when rendering the shadow map
 	float pShadowLightDistance;
 
+	// POST-PROCESSING
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppSampler;
+
+
 
 
 
@@ -168,7 +195,7 @@ private:
 
 	// IMGUI-SPECIFIC VARIABLES
 	// All start with a "ig" for "ImGui"
-	
+
 	// Whether to show the ImGui demo
 	bool igShowDemo;
 
@@ -190,14 +217,4 @@ private:
 	float igFrameGraphHighest;
 	// Whether to continue sampling framerate for the graph
 	bool igFrameGraphDoAnimate;
-
-
-	// Note the usage of ComPtr below
-	//  - This is a smart pointer for objects that abide by the
-	//     Component Object Model, which DirectX objects do
-	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
-
-	// Shaders and shader-related constructs
-	std::vector<std::shared_ptr<SimpleVertexShader>> vertexShaders;
-	std::vector<std::shared_ptr<SimplePixelShader>> pixelShaders;
 };
