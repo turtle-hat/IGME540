@@ -304,7 +304,7 @@ float3 CalculateLightingLambertCookTorrance(Light _lights[LIGHT_COUNT], float3 _
         {
 			// Declare lightDirectionIn, calculated differently for each light type
             float3 lightDirectionIn;
-            float3 lightResult;
+            float3 lightResult = 0;
             
 			// Run a different lighting equation on it depending on the type of light
             switch (_lights[i].Type)
