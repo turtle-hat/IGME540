@@ -65,6 +65,7 @@ private:
 	void BuildShadowMap();
 	void RebuildShadowMap();
 	void BuildShadowMatrices();
+	void RebuildPostProcesses();
 	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods
@@ -81,6 +82,8 @@ private:
 	// SIMULATION PARAMETERS
 	// All start with a "p" for "parameter"
 	
+	// Whether parameters have been initialized
+	bool isInitialized;
 	// The background color used by Direct3D
 	float pBackgroundColor[4];
 	// How fast to rotate the objects
@@ -186,6 +189,12 @@ private:
 
 	// POST-PROCESSING
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppSampler;
+	std::shared_ptr<SimpleVertexShader> ppVS;
+	// POST-PROCESS 1: Blur
+	bool ppBlurRun;
+	std::shared_ptr<SimplePixelShader> ppBlurPS;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppBlurRTV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppBlurSRV;
 
 
 

@@ -40,6 +40,7 @@ void Game::Initialize()
 	CreateGeometry();
 	CreateCameras();
 	CreateSkyboxes();
+	RebuildPostProcesses();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -93,6 +94,11 @@ Game::~Game()
 void Game::LoadShaders()
 {
 	// Load shaders in with SimpleShader
+	
+
+
+	// MATERIAL SHADERS
+	
 	// VERTEX SHADERS
 	AddVertexShader(L"VS_DiffuseSpecular.cso",	vsDiffuseSpecular);
 	AddVertexShader(L"VS_DiffuseNormal.cso",	vsDiffuseNormal);
@@ -108,6 +114,16 @@ void Game::LoadShaders()
 	AddPixelShader(L"PS_UVs.cso",				psUVs);
 	AddPixelShader(L"PS_Custom.cso",			psCustom);
 	AddPixelShader(L"PS_Skybox.cso",			psSkybox);
+
+
+
+	// POST-PROCESS SHADERS
+
+	// VERTEX SHADER
+	AddVertexShader(L"VS_PostProcess.cso",		ppVS);
+
+	// PIXEL SHADERS
+	AddPixelShader(L"PS_PostProcess_Blur.cso",	ppBlurPS);
 }
 
 // --------------------------------------------------------
@@ -272,9 +288,14 @@ void Game::CreateSkyboxes() {
 // --------------------------------------------------------
 void Game::OnResize()
 {
-	// If cameras exist, resize it
-	if (cameras.size() > 0) {
-		cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
+	// Only run these functions if the Window has been initialized
+	if (isInitialized) {
+		// If cameras exist, resize it
+		if (cameras.size() > 0) {
+			cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
+		}
+
+		RebuildPostProcesses();
 	}
 }
 
@@ -327,6 +348,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
+
 	// RENDER SHADOW MAP
 	// Clear shadow map depth buffer
 	Graphics::Context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -363,10 +385,27 @@ void Game::Draw(float deltaTime, float totalTime)
 	viewport.Width = (float)Window::Width();
 	viewport.Height = (float)Window::Height();
 	Graphics::Context->RSSetViewports(1, &viewport);
-	Graphics::Context->OMSetRenderTargets(
-		1,
-		Graphics::BackBufferRTV.GetAddressOf(),
-		Graphics::DepthBufferDSV.Get());
+
+
+	// If running the blur post-process
+	if (ppBlurRun) {
+		// Clear blur render target view
+		Graphics::Context->ClearRenderTargetView(ppBlurRTV.Get(), pBackgroundColor);
+		// Set render target to our blur's render target
+		Graphics::Context->OMSetRenderTargets(
+			1,
+			ppBlurRTV.GetAddressOf(),
+			Graphics::DepthBufferDSV.Get()
+		);
+	}
+	else {
+		Graphics::Context->OMSetRenderTargets(
+			1,
+			Graphics::BackBufferRTV.GetAddressOf(),
+			Graphics::DepthBufferDSV.Get()
+		);
+	}
+
 	Graphics::Context->RSSetState(0);
 	
 
@@ -506,6 +545,8 @@ void Game::InitializeSimulationParameters() {
 	pShadowAreaCenter = XMFLOAT3(0.0f, -5.0f, 0.0f);
 	pShadowLightDistance = 500.0f;
 
+	ppBlurRun = true;
+
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
 	// Zero out all of our sample array
@@ -518,6 +559,8 @@ void Game::InitializeSimulationParameters() {
 	igFrameGraphSampleOffset = 0;
 	igFrameGraphHighest = 0.0f;
 	igFrameGraphDoAnimate = true;
+
+	isInitialized = true;
 }
 
 // --------------------------------------------------------
@@ -923,6 +966,45 @@ void Game::BuildShadowMatrices() {
 			);
 		}
 	}
+}
+
+// --------------------------------------------------------
+// Builds or rebuilds the texture, RTV, and SRV for each
+// post-process
+// --------------------------------------------------------
+void Game::RebuildPostProcesses()
+{
+	// Describe the texture
+	D3D11_TEXTURE2D_DESC ppBlurTexDesc	= {};
+	ppBlurTexDesc.Width					= Window::Width();
+	ppBlurTexDesc.Height				= Window::Height();
+	ppBlurTexDesc.ArraySize				= 1;
+	ppBlurTexDesc.BindFlags				= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	ppBlurTexDesc.CPUAccessFlags		= 0;
+	ppBlurTexDesc.Format				= DXGI_FORMAT_R8G8B8A8_UNORM;
+	ppBlurTexDesc.MipLevels				= 1;
+	ppBlurTexDesc.MiscFlags				= 0;
+	ppBlurTexDesc.SampleDesc.Count		= 1;
+	ppBlurTexDesc.SampleDesc.Quality	= 0;
+	ppBlurTexDesc.Usage					= D3D11_USAGE_DEFAULT;
+	
+	// Create the texture
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppBlurTex;
+	Graphics::Device->CreateTexture2D(&ppBlurTexDesc, 0, ppBlurTex.ReleaseAndGetAddressOf());
+
+
+
+	// Describe the Render Target View
+	D3D11_RENDER_TARGET_VIEW_DESC ppBlurRTVDesc = {};
+	ppBlurRTVDesc.Format				= ppBlurTexDesc.Format;
+	ppBlurRTVDesc.Texture2D.MipSlice	= 0;
+	ppBlurRTVDesc.ViewDimension			= D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	// Create the RTV
+	Graphics::Device->CreateRenderTargetView(ppBlurTex.Get(), &ppBlurRTVDesc, ppBlurRTV.ReleaseAndGetAddressOf());
+	
+	// Create the SRV
+	Graphics::Device->CreateShaderResourceView(ppBlurTex.Get(), 0, ppBlurSRV.ReleaseAndGetAddressOf());
 }
 
 // --------------------------------------------------------
@@ -1532,6 +1614,21 @@ void Game::ImGuiBuild() {
 
 			ImGui::Spacing();
 			ImGui::Image((void*)shadowSRV.Get(), ImVec2(240, 240));
+		}
+
+		ImGui::Spacing();
+	}
+
+	if (ImGui::CollapsingHeader("Post-Process")) {				// Info about the shadow map
+		ImGui::Spacing();
+
+		ImGui::Checkbox("Run Blur?", &ppBlurRun);
+		ImGui::Spacing();
+
+		if (ppBlurRun) {
+			ImGui::Text("Initial Render:");
+			ImGui::Spacing();
+			ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(240, 240));
 		}
 
 		ImGui::Spacing();

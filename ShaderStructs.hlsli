@@ -67,6 +67,18 @@ struct VertexToPixel_Sky
     float3 sampleDirection  : DIRECTION; // Direction to sample in
 };
 
+// For post-process shaders
+struct VertexToPixel_PostProcess
+{
+	// Data type
+	//  |
+	//  |   Name          Semantic
+	//  |    |                |
+	//  v    v                v
+    float4 position : SV_POSITION; // XYZW position (System Value Position)
+    float2 uv       : TEXCOORD0; // UV coordinate
+};
+
 // Light structs
 
 // From C++
