@@ -39,8 +39,8 @@ private:
 	void CreateCameras();
 	void CreateSkyboxes();
 	void InitializeSimulationParameters();
-	void AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader> _shader);
-	void AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader> _shader);
+	void AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader>& _shader);
+	void AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader>& _shader);
 	void AddTexture(const wchar_t* _path);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);

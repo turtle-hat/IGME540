@@ -523,7 +523,7 @@ void Game::InitializeSimulationParameters() {
 // --------------------------------------------------------
 // Adds a vertex shader to the list of vertex shaders
 // --------------------------------------------------------
-void Game::AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader> _shader)
+void Game::AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader>& _shader)
 {
 	_shader = make_shared<SimpleVertexShader>(
 		Graphics::Device,
@@ -535,7 +535,7 @@ void Game::AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexSha
 // --------------------------------------------------------
 // Adds a pixel shader to the list of pixel shaders
 // --------------------------------------------------------
-void Game::AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader> _shader)
+void Game::AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader>& _shader)
 {
 	_shader = make_shared<SimplePixelShader>(
 		Graphics::Device,
