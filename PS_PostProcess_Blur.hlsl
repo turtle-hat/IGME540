@@ -7,5 +7,5 @@ float4 main(VertexToPixel_PostProcess input) : SV_TARGET
 {
 	float4 pixelColor = BaseRender.Sample(ClampSampler, input.uv);
 
-	return float4(-pixelColor.xyz, pixelColor.a);
+	return float4(1.0f - pixelColor.xyz, pixelColor.a);
 }

@@ -65,6 +65,7 @@ private:
 	void BuildShadowMap();
 	void RebuildShadowMap();
 	void BuildShadowMatrices();
+	void BuildPostProcesses();
 	void RebuildPostProcesses();
 	void ImGuiUpdate(float _deltaTime);
 

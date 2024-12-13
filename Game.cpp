@@ -40,7 +40,7 @@ void Game::Initialize()
 	CreateGeometry();
 	CreateCameras();
 	CreateSkyboxes();
-	RebuildPostProcesses();
+	BuildPostProcesses();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -387,7 +387,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	Graphics::Context->RSSetViewports(1, &viewport);
 
 
-	// If running the blur post-process
+	// POST-PROCESS SETUP
+	// If running the blur post-process, set render target to the blur's texture
 	if (ppBlurRun) {
 		// Clear blur render target view
 		Graphics::Context->ClearRenderTargetView(ppBlurRTV.Get(), pBackgroundColor);
@@ -398,6 +399,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			Graphics::DepthBufferDSV.Get()
 		);
 	}
+	// If no blur, set render target to back buffer
 	else {
 		Graphics::Context->OMSetRenderTargets(
 			1,
@@ -473,6 +475,21 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Draw the selected skybox
 	skyboxes[pSkyboxCurrent]->Draw(cameras[pCameraCurrent]);
 
+
+	// POST-PROCESS
+	if (ppBlurRun) {
+		// Set render target to back buffer
+		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
+
+		// Bind shaders
+		ppVS->SetShader();
+		ppBlurPS->SetShader();
+		ppBlurPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
+		ppBlurPS->SetSamplerState("ClampSampler", ppSampler.Get());
+		
+		// Draw
+		Graphics::Context->Draw(3, 0);
+	}
 
 
 	// RENDER IMGUI
@@ -972,37 +989,52 @@ void Game::BuildShadowMatrices() {
 // Builds or rebuilds the texture, RTV, and SRV for each
 // post-process
 // --------------------------------------------------------
+void Game::BuildPostProcesses()
+{
+	// Describe sampler state for post processing
+	D3D11_SAMPLER_DESC ppSamplerDesc = {};
+	ppSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ppSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	ppSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	
+	// Create the sampler state
+	Graphics::Device->CreateSamplerState(&ppSamplerDesc, ppSampler.GetAddressOf());
+
+	// Build other resources
+	RebuildPostProcesses();
+}
+
 void Game::RebuildPostProcesses()
 {
 	// Describe the texture
-	D3D11_TEXTURE2D_DESC ppBlurTexDesc	= {};
-	ppBlurTexDesc.Width					= Window::Width();
-	ppBlurTexDesc.Height				= Window::Height();
-	ppBlurTexDesc.ArraySize				= 1;
-	ppBlurTexDesc.BindFlags				= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	ppBlurTexDesc.CPUAccessFlags		= 0;
-	ppBlurTexDesc.Format				= DXGI_FORMAT_R8G8B8A8_UNORM;
-	ppBlurTexDesc.MipLevels				= 1;
-	ppBlurTexDesc.MiscFlags				= 0;
-	ppBlurTexDesc.SampleDesc.Count		= 1;
-	ppBlurTexDesc.SampleDesc.Quality	= 0;
-	ppBlurTexDesc.Usage					= D3D11_USAGE_DEFAULT;
-	
+	D3D11_TEXTURE2D_DESC ppBlurTexDesc = {};
+	ppBlurTexDesc.Width = Window::Width();
+	ppBlurTexDesc.Height = Window::Height();
+	ppBlurTexDesc.ArraySize = 1;
+	ppBlurTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	ppBlurTexDesc.CPUAccessFlags = 0;
+	ppBlurTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	ppBlurTexDesc.MipLevels = 1;
+	ppBlurTexDesc.MiscFlags = 0;
+	ppBlurTexDesc.SampleDesc.Count = 1;
+	ppBlurTexDesc.SampleDesc.Quality = 0;
+	ppBlurTexDesc.Usage = D3D11_USAGE_DEFAULT;
+
 	// Create the texture
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppBlurTex;
 	Graphics::Device->CreateTexture2D(&ppBlurTexDesc, 0, ppBlurTex.ReleaseAndGetAddressOf());
 
-
-
 	// Describe the Render Target View
 	D3D11_RENDER_TARGET_VIEW_DESC ppBlurRTVDesc = {};
-	ppBlurRTVDesc.Format				= ppBlurTexDesc.Format;
-	ppBlurRTVDesc.Texture2D.MipSlice	= 0;
-	ppBlurRTVDesc.ViewDimension			= D3D11_RTV_DIMENSION_TEXTURE2D;
+	ppBlurRTVDesc.Format = ppBlurTexDesc.Format;
+	ppBlurRTVDesc.Texture2D.MipSlice = 0;
+	ppBlurRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
 	// Create the RTV
 	Graphics::Device->CreateRenderTargetView(ppBlurTex.Get(), &ppBlurRTVDesc, ppBlurRTV.ReleaseAndGetAddressOf());
-	
+
 	// Create the SRV
 	Graphics::Device->CreateShaderResourceView(ppBlurTex.Get(), 0, ppBlurSRV.ReleaseAndGetAddressOf());
 }
