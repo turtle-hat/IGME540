@@ -1,5 +1,9 @@
 #include "ShaderStructs.hlsli"
 
+cbuffer PrimaryBuffer : register(b0) {
+
+}
+
 Texture2D BaseRender		: register(t0);
 SamplerState ClampSampler	: register(s0);
 

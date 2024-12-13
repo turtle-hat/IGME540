@@ -486,6 +486,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppBlurPS->SetShader();
 		ppBlurPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
 		ppBlurPS->SetSamplerState("ClampSampler", ppSampler.Get());
+
+		
 		
 		// Draw
 		Graphics::Context->Draw(3, 0);
