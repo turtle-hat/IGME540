@@ -295,6 +295,8 @@ void Game::OnResize()
 			cameras[pCameraCurrent]->SetAspect((Window::Width() + 0.0f) / Window::Height());
 		}
 
+		ppPixelSize = XMFLOAT2(1.0f / Window::Width(), 1.0f / Window::Height());
+
 		RebuildPostProcesses();
 	}
 }
@@ -487,7 +489,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppBlurPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
 		ppBlurPS->SetSamplerState("ClampSampler", ppSampler.Get());
 
-		
+		ppBlurPS->SetInt("blurRadius", ppBlurRadius);
+		ppBlurPS->SetFloat2("pixelSize", ppPixelSize);
+		ppBlurPS->CopyAllBufferData();
 		
 		// Draw
 		Graphics::Context->Draw(3, 0);
@@ -564,7 +568,9 @@ void Game::InitializeSimulationParameters() {
 	pShadowAreaCenter = XMFLOAT3(0.0f, -5.0f, 0.0f);
 	pShadowLightDistance = 500.0f;
 
+	ppPixelSize = XMFLOAT2(1.0f / Window::Width(), 1.0f / Window::Height());
 	ppBlurRun = true;
+	ppBlurRadius = 5;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -1660,6 +1666,8 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 
 		if (ppBlurRun) {
+			ImGui::SliderInt("Blur Radius", &ppBlurRadius, 0, 30);
+
 			ImGui::Text("Initial Render:");
 			ImGui::Spacing();
 			ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(240, 240));

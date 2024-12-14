@@ -191,8 +191,11 @@ private:
 	// POST-PROCESSING
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppSampler;
 	std::shared_ptr<SimpleVertexShader> ppVS;
+	DirectX::XMFLOAT2 ppPixelSize;
+
 	// POST-PROCESS 1: Blur
 	bool ppBlurRun;
+	int ppBlurRadius;
 	std::shared_ptr<SimplePixelShader> ppBlurPS;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppBlurRTV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppBlurSRV;
