@@ -403,7 +403,6 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Set render target based on the first post-process that will run, if any
 	if (ppBlurRun) {
-		printf("\nFIRST RTV: BLUR\n");
 		// Set render target to our blur's render target
 		Graphics::Context->OMSetRenderTargets(
 			1,
@@ -413,7 +412,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 	// If no blur but yes dither, set render target to the dither's texture
 	else if (ppDitherRun) {
-		printf("\nFIRST RTV: DITHER\n");
 		// Set render target to our dither's render target
 		Graphics::Context->OMSetRenderTargets(
 			1,
@@ -423,7 +421,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 	// If no blur or dither, set render target to back buffer
 	else {
-		printf("\nFIRST RTV: BACK BUFFER\n");
 		Graphics::Context->OMSetRenderTargets(
 			1,
 			Graphics::BackBufferRTV.GetAddressOf(),
@@ -504,12 +501,10 @@ void Game::Draw(float deltaTime, float totalTime)
 	if (ppBlurRun) {
 		// If doing dither after this, set render target to dither's RTV
 		if (ppDitherRun) {
-			printf("BLUR RTV: DITHER\n");
 			Graphics::Context->OMSetRenderTargets(1, ppDitherRTV.GetAddressOf(), 0);
 		}
 		// If not, set render target to back buffer
 		else {
-			printf("BLUR RTV: BACK BUFFER\n");
 			Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
 		}
 
@@ -528,23 +523,22 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 	// Dither
 	if (ppDitherRun) {
-		printf("DITHER RTV: BACK BUFFER\n");
 		// Set render target to back buffer
 		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
 
 		// Bind shaders
 		ppVS->SetShader();
 		ppDitherPS->SetShader();
-		ppDitherPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
+		ppDitherPS->SetShaderResourceView("BaseRender", ppDitherSRV.Get());
 		// Set the appropriate dither map 
 		ppDitherPS->SetShaderResourceView("MapDither", ppDitherUseBlueNoise ? ppDitherMapBlueNoise.Get() : ppDitherMapBayer.Get());
 		ppDitherPS->SetSamplerState("ClampSampler", ppSampler.Get());
 		// Set the appropriate sampler
 		ppDitherPS->SetSamplerState("DitherMapSampler", ppDitherMapSampler.Get());
 
-		ppBlurPS->SetInt("ditherPixelSize", ppDitherPixelSize);
-		ppBlurPS->SetFloat2("pixelSize", ppPixelSize);
-		ppBlurPS->CopyAllBufferData();
+		ppDitherPS->SetInt("ditherPixelSize", ppDitherPixelSize);
+		ppDitherPS->SetFloat2("pixelSize", ppPixelSize);
+		ppDitherPS->CopyAllBufferData();
 
 		// Draw
 		Graphics::Context->Draw(3, 0);
@@ -623,12 +617,12 @@ void Game::InitializeSimulationParameters() {
 
 	ppPixelSize = XMFLOAT2(1.0f / Window::Width(), 1.0f / Window::Height());
 	
-	ppBlurRun = true;
+	ppBlurRun = false;
 	ppBlurRadius = 5;
 
 	ppDitherRun = true;
 	ppDitherUseBlueNoise = true;
-	ppDitherPixelSize = 1;
+	ppDitherPixelSize = 16;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -1407,7 +1401,7 @@ void Game::ImGuiBuild() {
 						if (blah.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D) {
 							ImGui::Image(
 								(void*)texture,
-								ImVec2(240, 240),
+								ImVec2(256, 256),
 								ImVec2(uv_pos.x, uv_pos.y),
 								ImVec2(uv_pos.x + uv_sca.x, uv_pos.y + uv_sca.y)
 							);
@@ -1745,7 +1739,7 @@ void Game::ImGuiBuild() {
 			ImGui::SetItemTooltip("The distance from the area center to pull back the camera.");
 
 			ImGui::Spacing();
-			ImGui::Image((void*)shadowSRV.Get(), ImVec2(240, 240));
+			ImGui::Image((void*)shadowSRV.Get(), ImVec2(256, 256));
 		}
 
 		ImGui::Spacing();
@@ -1763,7 +1757,7 @@ void Game::ImGuiBuild() {
 
 				ImGui::Text("Initial Render:");
 				ImGui::Spacing();
-				ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(240, 240));
+				ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(256, 256));
 			}
 
 			ImGui::TreePop();
