@@ -1,8 +1,17 @@
 #include "ShaderStructs.hlsli"
 
 cbuffer PrimaryBuffer : register(b0) {
+	float3 colorLight;
 	int ditherPixelSize;
+
+	float3 colorDark;
+	float bias;
+
+	float3 cameraRotation;
+	float cameraFov;
+	
 	float2 pixelSize;
+	float2 screenSize;
 }
 
 Texture2D BaseRender : register(t0);
@@ -12,11 +21,23 @@ SamplerState DitherMapSampler : register(s1);
 
 float4 main(VertexToPixel_PostProcess input) : SV_TARGET
 {
-	float2 uv = (input.uv / (pixelSize * 256.0f) / ditherPixelSize);
+	// Quantize UV for base render and sample
+	float2 baseUV = floor(input.uv / pixelSize / ditherPixelSize) * pixelSize * ditherPixelSize;
+	float4 sampleBase = BaseRender.Sample(DitherMapSampler, baseUV);
+	
+	float2 ditherOffset = cameraRotation.yx / cameraFov;
+	float2 ditherUV = input.uv / (pixelSize * 256.0f) / ditherPixelSize;
 
-	float4 sampleBase = BaseRender.Sample(ClampSampler, input.uv);
-	float4 sampleDitherMap = MapDither.Sample(DitherMapSampler, uv);
+	float4 sampleDitherMap = MapDither.Sample(DitherMapSampler, ditherUV);
+
+	//return sampleDitherMap;
+
+	float baseGrey = (sampleBase.x + sampleBase.y + sampleBase.z) / 3.0f;
+	float isLight = saturate(ceil(baseGrey + bias - sampleDitherMap.r));
 
 	// Return average color
-	return sampleDitherMap;
+	return float4(
+		(isLight * colorLight) +
+		((1.0f - isLight) * colorDark),
+	1.0f);
 }

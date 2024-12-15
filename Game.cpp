@@ -514,6 +514,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppBlurPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
 		ppBlurPS->SetSamplerState("ClampSampler", ppSampler.Get());
 
+		// Set constant buffer data
 		ppBlurPS->SetInt("blurRadius", ppBlurRadius);
 		ppBlurPS->SetFloat2("pixelSize", ppPixelSize);
 		ppBlurPS->CopyAllBufferData();
@@ -536,8 +537,21 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Set the appropriate sampler
 		ppDitherPS->SetSamplerState("DitherMapSampler", ppDitherMapSampler.Get());
 
+		// Set constant buffer data
+		ppDitherPS->SetFloat3("colorLight", ppDitherColorLight);
 		ppDitherPS->SetInt("ditherPixelSize", ppDitherPixelSize);
+
+		ppDitherPS->SetFloat3("colorDark", ppDitherColorDark);
+		ppDitherPS->SetFloat("bias", ppDitherBias);
+
+		XMFLOAT3 camRotation = cameras[pCameraCurrent]->GetTransform()->GetRotation();
+		float camFov = cameras[pCameraCurrent]->GetFov();
+
+		ppDitherPS->SetFloat3("cameraRotation", camRotation);
+		ppDitherPS->SetFloat("cameraFov", camFov);
+
 		ppDitherPS->SetFloat2("pixelSize", ppPixelSize);
+		ppDitherPS->SetFloat2("screenSize", XMFLOAT2((float)Window::Width(), (float)Window::Height()));
 		ppDitherPS->CopyAllBufferData();
 
 		// Draw
@@ -621,8 +635,11 @@ void Game::InitializeSimulationParameters() {
 	ppBlurRadius = 5;
 
 	ppDitherRun = true;
-	ppDitherUseBlueNoise = true;
-	ppDitherPixelSize = 16;
+	ppDitherUseBlueNoise = false;
+	ppDitherPixelSize = 4;
+	ppDitherBias = -0.25f;
+	ppDitherColorLight = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	ppDitherColorDark = XMFLOAT3(0.25f, 0.25f, 0.25f);
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -1770,24 +1787,30 @@ void Game::ImGuiBuild() {
 
 			if (ppDitherRun) {
 				ImGui::SliderInt("Dither Pixel Size", &ppDitherPixelSize, 1, 32);
+				ImGui::SliderFloat("Bias", &ppDitherBias, -1.0f, 1.0f, "%.2f");
+				ImGui::SetItemTooltip("Adjusts overall brightness of the image");
+				ImGui::ColorEdit3("Light Color", &ppDitherColorLight.x);
+				ImGui::ColorEdit3("Dark Color", &ppDitherColorDark.x);
+
+
+				ImGui::Spacing();
+				ImGui::Text(ppDitherUseBlueNoise ? "Dither Map: Blue Noise" : "Dither Map: Bayer Matrix");
 
 				int useBlueNoise = ppDitherUseBlueNoise ? 1 : 0;
-				
-				if (ImGui::SliderInt("Dither Map", &useBlueNoise, 0, 1, "")) {
+				ImGui::PushID("Dither Map Type");
+				if (ImGui::SliderInt("", &useBlueNoise, 0, 1, "")) {
 					ppDitherUseBlueNoise = useBlueNoise == 1;
 				}
-				if (ppDitherUseBlueNoise) {
-					ImGui::Text("Dither Map: Blue Noise");
-					ImGui::Image((void*)ppDitherMapBlueNoise.Get(), ImVec2(240, 240));
-				}
-				else {
-					ImGui::Text("Dither Map: Bayer Matrix");
-					ImGui::Image((void*)ppDitherMapBayer.Get(), ImVec2(240, 240));
-				}
+				ImGui::Image(ppDitherUseBlueNoise ?
+					(void*)ppDitherMapBlueNoise.Get() :
+					(void*)ppDitherMapBayer.Get(),
+					ImVec2(256, 256)
+				);
+				ImGui::PopID();
 
 				ImGui::Text("Initial Render:");
 				ImGui::Spacing();
-				ImGui::Image((void*)ppDitherSRV.Get(), ImVec2(240, 240));
+				ImGui::Image((void*)ppDitherSRV.Get(), ImVec2(256, 256));
 			}
 
 			ImGui::TreePop();

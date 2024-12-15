@@ -214,6 +214,11 @@ private:
 	bool ppDitherUseBlueNoise;
 	// The number of screen pixels each output pixel should occupy
 	int ppDitherPixelSize;
+	// Biases the dither calculations to make the image overall lighter or darker
+	float ppDitherBias;
+	// Colors to use for light and dark pixels
+	DirectX::XMFLOAT3 ppDitherColorLight;
+	DirectX::XMFLOAT3 ppDitherColorDark;
 	// The two possible dither textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherMapBayer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherMapBlueNoise;
