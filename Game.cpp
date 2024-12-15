@@ -120,10 +120,11 @@ void Game::LoadShaders()
 	// POST-PROCESS SHADERS
 
 	// VERTEX SHADER
-	AddVertexShader(L"VS_PostProcess.cso",		ppVS);
+	AddVertexShader(L"VS_PostProcess.cso",			ppVS);
 
 	// PIXEL SHADERS
-	AddPixelShader(L"PS_PostProcess_Blur.cso",	ppBlurPS);
+	AddPixelShader(L"PS_PostProcess_Blur.cso",		ppBlurPS);
+	AddPixelShader(L"PS_PostProcess_Dither.cso",	ppDitherPS);
 }
 
 // --------------------------------------------------------
@@ -390,10 +391,19 @@ void Game::Draw(float deltaTime, float totalTime)
 
 
 	// POST-PROCESS SETUP
-	// If running the blur post-process, set render target to the blur's texture
+	// Clear RTVs for active post-processes
 	if (ppBlurRun) {
-		// Clear blur render target view
 		Graphics::Context->ClearRenderTargetView(ppBlurRTV.Get(), pBackgroundColor);
+	}
+	if (ppDitherRun) {
+		Graphics::Context->ClearRenderTargetView(ppDitherRTV.Get(), pBackgroundColor);
+	}
+
+
+
+	// Set render target based on the first post-process that will run, if any
+	if (ppBlurRun) {
+		printf("\nFIRST RTV: BLUR\n");
 		// Set render target to our blur's render target
 		Graphics::Context->OMSetRenderTargets(
 			1,
@@ -401,8 +411,19 @@ void Game::Draw(float deltaTime, float totalTime)
 			Graphics::DepthBufferDSV.Get()
 		);
 	}
-	// If no blur, set render target to back buffer
+	// If no blur but yes dither, set render target to the dither's texture
+	else if (ppDitherRun) {
+		printf("\nFIRST RTV: DITHER\n");
+		// Set render target to our dither's render target
+		Graphics::Context->OMSetRenderTargets(
+			1,
+			ppDitherRTV.GetAddressOf(),
+			Graphics::DepthBufferDSV.Get()
+		);
+	}
+	// If no blur or dither, set render target to back buffer
 	else {
+		printf("\nFIRST RTV: BACK BUFFER\n");
 		Graphics::Context->OMSetRenderTargets(
 			1,
 			Graphics::BackBufferRTV.GetAddressOf(),
@@ -479,9 +500,18 @@ void Game::Draw(float deltaTime, float totalTime)
 
 
 	// POST-PROCESS
+	// Blur
 	if (ppBlurRun) {
-		// Set render target to back buffer
-		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
+		// If doing dither after this, set render target to dither's RTV
+		if (ppDitherRun) {
+			printf("BLUR RTV: DITHER\n");
+			Graphics::Context->OMSetRenderTargets(1, ppDitherRTV.GetAddressOf(), 0);
+		}
+		// If not, set render target to back buffer
+		else {
+			printf("BLUR RTV: BACK BUFFER\n");
+			Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
+		}
 
 		// Bind shaders
 		ppVS->SetShader();
@@ -493,6 +523,29 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppBlurPS->SetFloat2("pixelSize", ppPixelSize);
 		ppBlurPS->CopyAllBufferData();
 		
+		// Draw
+		Graphics::Context->Draw(3, 0);
+	}
+	// Dither
+	if (ppDitherRun) {
+		printf("DITHER RTV: BACK BUFFER\n");
+		// Set render target to back buffer
+		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), 0);
+
+		// Bind shaders
+		ppVS->SetShader();
+		ppDitherPS->SetShader();
+		ppDitherPS->SetShaderResourceView("BaseRender", ppBlurSRV.Get());
+		// Set the appropriate dither map 
+		ppDitherPS->SetShaderResourceView("MapDither", ppDitherUseBlueNoise ? ppDitherMapBlueNoise.Get() : ppDitherMapBayer.Get());
+		ppDitherPS->SetSamplerState("ClampSampler", ppSampler.Get());
+		// Set the appropriate sampler
+		ppDitherPS->SetSamplerState("DitherMapSampler", ppDitherMapSampler.Get());
+
+		ppBlurPS->SetInt("ditherPixelSize", ppDitherPixelSize);
+		ppBlurPS->SetFloat2("pixelSize", ppPixelSize);
+		ppBlurPS->CopyAllBufferData();
+
 		// Draw
 		Graphics::Context->Draw(3, 0);
 	}
@@ -569,8 +622,13 @@ void Game::InitializeSimulationParameters() {
 	pShadowLightDistance = 500.0f;
 
 	ppPixelSize = XMFLOAT2(1.0f / Window::Width(), 1.0f / Window::Height());
+	
 	ppBlurRun = true;
 	ppBlurRadius = 5;
+
+	ppDitherRun = true;
+	ppDitherUseBlueNoise = true;
+	ppDitherPixelSize = 1;
 
 	// Framerate graph variables
 	igFrameGraphSamples = new float[IG_FRAME_GRAPH_TOTAL_SAMPLES];
@@ -619,15 +677,20 @@ void Game::AddTexture(const wchar_t* _path)
 {
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
 
+	LoadTexture(_path, srv);
+
+	textures.push_back(srv);
+}
+
+void Game::LoadTexture(const wchar_t* _path, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _srv)
+{
 	CreateWICTextureFromFile(
 		Graphics::Device.Get(),
 		Graphics::Context.Get(),
 		FixPath(_path).c_str(),
 		nullptr,
-		srv.GetAddressOf()
+		_srv.GetAddressOf()
 	);
-
-	textures.push_back(srv);
 }
 
 // --------------------------------------------------------
@@ -994,12 +1057,11 @@ void Game::BuildShadowMatrices() {
 }
 
 // --------------------------------------------------------
-// Builds or rebuilds the texture, RTV, and SRV for each
-// post-process
+// Builds post-process resources for the first time
 // --------------------------------------------------------
 void Game::BuildPostProcesses()
 {
-	// Describe sampler state for post processing
+	// Describe sampler state for reading screen renders during post processing
 	D3D11_SAMPLER_DESC ppSamplerDesc = {};
 	ppSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	ppSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -1010,41 +1072,71 @@ void Game::BuildPostProcesses()
 	// Create the sampler state
 	Graphics::Device->CreateSamplerState(&ppSamplerDesc, ppSampler.GetAddressOf());
 
-	// Build other resources
+	// Describe sampler state for reading the dither maps during post processing
+	D3D11_SAMPLER_DESC ppDitherMapSamplerDesc = {};
+	ppDitherMapSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	ppDitherMapSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	ppDitherMapSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	// Use point sampling for dither map
+	ppDitherMapSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	ppDitherMapSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the sampler state
+	Graphics::Device->CreateSamplerState(&ppDitherMapSamplerDesc, ppDitherMapSampler.GetAddressOf());
+
+	// Load dither map textures
+	LoadTexture(L"../../Assets/Textures/T_bayer.png", ppDitherMapBayer);
+	LoadTexture(L"../../Assets/Textures/T_bluenoise.png", ppDitherMapBlueNoise);
+
+	// Build other resources that may need to change during runtime
 	RebuildPostProcesses();
 }
 
+// --------------------------------------------------------
+// Builds or rebuilds the texture, RTV, and SRV for all
+// post-processes
+// --------------------------------------------------------
 void Game::RebuildPostProcesses()
 {
+	RebuildPostProcess(ppBlurRTV, ppBlurSRV);
+	RebuildPostProcess(ppDitherRTV, ppDitherSRV);
+}
+
+// --------------------------------------------------------
+// Builds or rebuilds the texture, RTV, and SRV for one
+// post-process
+// --------------------------------------------------------
+void Game::RebuildPostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& _ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _ppSRV)
+{
 	// Describe the texture
-	D3D11_TEXTURE2D_DESC ppBlurTexDesc = {};
-	ppBlurTexDesc.Width = Window::Width();
-	ppBlurTexDesc.Height = Window::Height();
-	ppBlurTexDesc.ArraySize = 1;
-	ppBlurTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	ppBlurTexDesc.CPUAccessFlags = 0;
-	ppBlurTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	ppBlurTexDesc.MipLevels = 1;
-	ppBlurTexDesc.MiscFlags = 0;
-	ppBlurTexDesc.SampleDesc.Count = 1;
-	ppBlurTexDesc.SampleDesc.Quality = 0;
-	ppBlurTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	D3D11_TEXTURE2D_DESC ppTexDesc = {};
+	ppTexDesc.Width = Window::Width();
+	ppTexDesc.Height = Window::Height();
+	ppTexDesc.ArraySize = 1;
+	ppTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	ppTexDesc.CPUAccessFlags = 0;
+	ppTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	ppTexDesc.MipLevels = 1;
+	ppTexDesc.MiscFlags = 0;
+	ppTexDesc.SampleDesc.Count = 1;
+	ppTexDesc.SampleDesc.Quality = 0;
+	ppTexDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	// Create the texture
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppBlurTex;
-	Graphics::Device->CreateTexture2D(&ppBlurTexDesc, 0, ppBlurTex.ReleaseAndGetAddressOf());
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppTex;
+	Graphics::Device->CreateTexture2D(&ppTexDesc, 0, ppTex.ReleaseAndGetAddressOf());
 
 	// Describe the Render Target View
-	D3D11_RENDER_TARGET_VIEW_DESC ppBlurRTVDesc = {};
-	ppBlurRTVDesc.Format = ppBlurTexDesc.Format;
-	ppBlurRTVDesc.Texture2D.MipSlice = 0;
-	ppBlurRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	D3D11_RENDER_TARGET_VIEW_DESC ppRTVDesc = {};
+	ppRTVDesc.Format = ppTexDesc.Format;
+	ppRTVDesc.Texture2D.MipSlice = 0;
+	ppRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
 	// Create the RTV
-	Graphics::Device->CreateRenderTargetView(ppBlurTex.Get(), &ppBlurRTVDesc, ppBlurRTV.ReleaseAndGetAddressOf());
+	Graphics::Device->CreateRenderTargetView(ppTex.Get(), &ppRTVDesc, _ppRTV.ReleaseAndGetAddressOf());
 
 	// Create the SRV
-	Graphics::Device->CreateShaderResourceView(ppBlurTex.Get(), 0, ppBlurSRV.ReleaseAndGetAddressOf());
+	Graphics::Device->CreateShaderResourceView(ppTex.Get(), 0, _ppSRV.ReleaseAndGetAddressOf());
 }
 
 // --------------------------------------------------------
@@ -1659,18 +1751,53 @@ void Game::ImGuiBuild() {
 		ImGui::Spacing();
 	}
 
-	if (ImGui::CollapsingHeader("Post-Process")) {				// Info about the shadow map
+	if (ImGui::CollapsingHeader("Post-Processing")) {			// Info about post-process effects
 		ImGui::Spacing();
 
-		ImGui::Checkbox("Run Blur?", &ppBlurRun);
-		ImGui::Spacing();
-
-		if (ppBlurRun) {
-			ImGui::SliderInt("Blur Radius", &ppBlurRadius, 0, 30);
-
-			ImGui::Text("Initial Render:");
+		if (ImGui::TreeNode("Blur")) {								// Box Blur
+			ImGui::Checkbox("Run Blur?", &ppBlurRun);
 			ImGui::Spacing();
-			ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(240, 240));
+
+			if (ppBlurRun) {
+				ImGui::SliderInt("Blur Radius", &ppBlurRadius, 0, 30);
+
+				ImGui::Text("Initial Render:");
+				ImGui::Spacing();
+				ImGui::Image((void*)ppBlurSRV.Get(), ImVec2(240, 240));
+			}
+
+			ImGui::TreePop();
+			ImGui::Spacing();
+		}
+
+		if (ImGui::TreeNode("Dither")) {							// Dithering (method by Lucas Pope)
+			ImGui::Checkbox("Run Dither?", &ppDitherRun);
+			ImGui::Spacing();
+
+			if (ppDitherRun) {
+				ImGui::SliderInt("Dither Pixel Size", &ppDitherPixelSize, 1, 32);
+
+				int useBlueNoise = ppDitherUseBlueNoise ? 1 : 0;
+				
+				if (ImGui::SliderInt("Dither Map", &useBlueNoise, 0, 1, "")) {
+					ppDitherUseBlueNoise = useBlueNoise == 1;
+				}
+				if (ppDitherUseBlueNoise) {
+					ImGui::Text("Dither Map: Blue Noise");
+					ImGui::Image((void*)ppDitherMapBlueNoise.Get(), ImVec2(240, 240));
+				}
+				else {
+					ImGui::Text("Dither Map: Bayer Matrix");
+					ImGui::Image((void*)ppDitherMapBayer.Get(), ImVec2(240, 240));
+				}
+
+				ImGui::Text("Initial Render:");
+				ImGui::Spacing();
+				ImGui::Image((void*)ppDitherSRV.Get(), ImVec2(240, 240));
+			}
+
+			ImGui::TreePop();
+			ImGui::Spacing();
 		}
 
 		ImGui::Spacing();

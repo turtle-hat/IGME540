@@ -43,6 +43,9 @@
     <FxCompile Include="PS_PostProcess_Blur.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="PS_PostProcess_Dither.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -208,5 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="TextureReadMe.txt" />
+    <Text Include="Final_ReadMe.txt" />
   </ItemGroup>
 </Project>

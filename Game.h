@@ -42,6 +42,7 @@ private:
 	void AddVertexShader(const wchar_t* _path, std::shared_ptr<SimpleVertexShader>& _shader);
 	void AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader>& _shader);
 	void AddTexture(const wchar_t* _path);
+	void LoadTexture(const wchar_t* _path, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _srv);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint);
@@ -67,6 +68,7 @@ private:
 	void BuildShadowMatrices();
 	void BuildPostProcesses();
 	void RebuildPostProcesses();
+	void RebuildPostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& _ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _ppSRV);
 	void ImGuiUpdate(float _deltaTime);
 
 	// Update helper methods
@@ -194,11 +196,29 @@ private:
 	DirectX::XMFLOAT2 ppPixelSize;
 
 	// POST-PROCESS 1: Blur
-	bool ppBlurRun;
-	int ppBlurRadius;
 	std::shared_ptr<SimplePixelShader> ppBlurPS;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppBlurRTV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppBlurSRV;
+	// Whether to run the blur effect
+	bool ppBlurRun;
+	// The width/height of the box blur
+	int ppBlurRadius;
+
+	// POST-PROCESS 1: Dither
+	std::shared_ptr<SimplePixelShader> ppDitherPS;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> ppDitherRTV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherSRV;
+	// Whether to run the dither effect
+	bool ppDitherRun;
+	// If true, uses blue noise texture; if false, uses Bayer matrix texture
+	bool ppDitherUseBlueNoise;
+	// The number of screen pixels each output pixel should occupy
+	int ppDitherPixelSize;
+	// The two possible dither textures
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherMapBayer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherMapBlueNoise;
+	// Normal texture sampler for dither
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppDitherMapSampler;
 
 
 
