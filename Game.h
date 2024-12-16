@@ -43,7 +43,7 @@ private:
 	void AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShader>& _shader);
 	void AddTexture(const wchar_t* _path);
 	void LoadTexture(const wchar_t* _path, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _srv);
-	void LoadTexture(const wchar_t* _path, std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> _srvVector);
+	void LoadTexture(const wchar_t* _path, std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& _srvVector);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness, bool _useGlobalEnvironmentMap);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint, float _roughness);
 	void AddMaterial(const char* _name, std::shared_ptr<SimpleVertexShader> _vertexShader, std::shared_ptr<SimplePixelShader> _pixelShader, DirectX::XMFLOAT4 _colorTint);

@@ -640,7 +640,7 @@ void Game::InitializeSimulationParameters() {
 	ppBlurRadius = 5;
 
 	ppDitherRun = true;
-	ppDitherMapTextureID = false;
+	ppDitherMapTextureID = 0;
 	ppDitherPixelSize = 2;
 	ppDitherBias = -0.25f;
 	ppDitherColorLight = XMFLOAT3(1.0f, 1.0f, 1.0f);
@@ -701,7 +701,7 @@ void Game::AddTexture(const wchar_t* _path)
 // --------------------------------------------------------
 // Adds a texture to a given list of textures
 // --------------------------------------------------------
-void Game::LoadTexture(const wchar_t* _path, std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> _srvVector)
+void Game::LoadTexture(const wchar_t* _path, std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& _srvVector)
 {
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
 
@@ -1833,7 +1833,7 @@ void Game::ImGuiBuild() {
 				}
 
 				ImGui::PushID("Dither Map Texture");
-				ImGui::SliderInt("", &ppDitherMapTextureID, 0, ppDitherMaps.size() - 1, "");
+				ImGui::SliderInt("", &ppDitherMapTextureID, 0, (int)ppDitherMaps.size() - 1, "");
 				ImGui::Image((void*)ppDitherMaps[ppDitherMapTextureID].Get(), ImVec2(256, 256));
 				ImGui::PopID();
 
