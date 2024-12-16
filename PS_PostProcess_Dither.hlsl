@@ -25,10 +25,12 @@ float4 main(VertexToPixel_PostProcess input) : SV_TARGET
 	float2 baseUV = floor(input.uv / pixelSize / ditherPixelSize) * pixelSize * ditherPixelSize;
 	float4 sampleBase = BaseRender.Sample(DitherMapSampler, baseUV);
 	
-	float2 ditherOffset = cameraRotation.yx / cameraFov;
+	float2 ditherOffset = floor(screenSize * cameraRotation.yx / cameraFov / ditherPixelSize) / 256.0f;
 	float2 ditherUV = input.uv / (pixelSize * 256.0f) / ditherPixelSize;
 
-	float4 sampleDitherMap = MapDither.Sample(DitherMapSampler, ditherUV);
+	
+
+	float4 sampleDitherMap = MapDither.Sample(DitherMapSampler, ditherUV + ditherOffset);
 
 	//return sampleDitherMap;
 

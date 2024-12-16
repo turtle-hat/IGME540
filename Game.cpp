@@ -554,6 +554,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppDitherPS->SetFloat2("screenSize", XMFLOAT2((float)Window::Width(), (float)Window::Height()));
 		ppDitherPS->CopyAllBufferData();
 
+		float dithOff = Window::Width() * camRotation.y / camFov;
+		printf("DitherOffset in px: %f\n", dithOff);
+		printf("DitherMapOffset in UVs (8px): %f\n", floor(dithOff / 8.0f) / 256.0f);
+		printf("DitherMapOffset in UVs (4px): %f\n", floor(dithOff / 4.0f) / 256.0f);
+
 		// Draw
 		Graphics::Context->Draw(3, 0);
 	}
@@ -636,7 +641,7 @@ void Game::InitializeSimulationParameters() {
 
 	ppDitherRun = true;
 	ppDitherUseBlueNoise = false;
-	ppDitherPixelSize = 4;
+	ppDitherPixelSize = 2;
 	ppDitherBias = -0.25f;
 	ppDitherColorLight = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	ppDitherColorDark = XMFLOAT3(0.25f, 0.25f, 0.25f);
