@@ -211,7 +211,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ppDitherSRV;
 	// Whether to run the dither effect
 	bool ppDitherRun;
-	// If true, uses blue noise texture; if false, uses Bayer matrix texture
+	// Which dither map texture to use
 	int ppDitherMapTextureID;
 	// The number of screen pixels each output pixel should occupy
 	int ppDitherPixelSize;
@@ -220,7 +220,7 @@ private:
 	// Colors to use for light and dark pixels
 	DirectX::XMFLOAT3 ppDitherColorLight;
 	DirectX::XMFLOAT3 ppDitherColorDark;
-	// The two possible dither textures
+	// List of possible dither textures
 	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> ppDitherMaps;
 	// Normal texture sampler for dither
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> ppDitherMapSampler;

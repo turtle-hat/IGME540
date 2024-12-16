@@ -554,11 +554,6 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppDitherPS->SetFloat2("screenSize", XMFLOAT2((float)Window::Width(), (float)Window::Height()));
 		ppDitherPS->CopyAllBufferData();
 
-		float dithOff = Window::Width() * camRotation.y / camFov;
-		printf("DitherOffset in px: %f\n", dithOff);
-		printf("DitherMapOffset in UVs (8px): %f\n", floor(dithOff / 8.0f) / 256.0f);
-		printf("DitherMapOffset in UVs (4px): %f\n", floor(dithOff / 4.0f) / 256.0f);
-
 		// Draw
 		Graphics::Context->Draw(3, 0);
 	}
@@ -640,7 +635,7 @@ void Game::InitializeSimulationParameters() {
 	ppBlurRadius = 5;
 
 	ppDitherRun = true;
-	ppDitherMapTextureID = 0;
+	ppDitherMapTextureID = 3;
 	ppDitherPixelSize = 2;
 	ppDitherBias = -0.25f;
 	ppDitherColorLight = XMFLOAT3(1.0f, 1.0f, 1.0f);
@@ -1120,6 +1115,7 @@ void Game::BuildPostProcesses()
 	LoadTexture(L"../../Assets/Textures/T_bayer4px.png", ppDitherMaps);
 	LoadTexture(L"../../Assets/Textures/T_bayer8px.png", ppDitherMaps);
 	LoadTexture(L"../../Assets/Textures/T_bluenoise.png", ppDitherMaps);
+	LoadTexture(L"../../Assets/Textures/T_bayer8px_test.png", ppDitherMaps);
 
 	// Build other resources that may need to change during runtime
 	RebuildPostProcesses();
@@ -1829,6 +1825,9 @@ void Game::ImGuiBuild() {
 					break;
 				case 3:
 					ImGui::Text("Dither Map: Blue Noise");
+					break;
+				case 4:
+					ImGui::Text("Dither Map: Test Bayer Matrix (8px)");
 					break;
 				}
 
