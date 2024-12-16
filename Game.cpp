@@ -532,7 +532,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppDitherPS->SetShader();
 		ppDitherPS->SetShaderResourceView("BaseRender", ppDitherSRV.Get());
 		// Set the appropriate dither map 
-		ppDitherPS->SetShaderResourceView("MapDither", ppDitherUseBlueNoise ? ppDitherMapBlueNoise.Get() : ppDitherMapBayer.Get());
+		ppDitherPS->SetShaderResourceView("MapDither", ppDitherMaps[ppDitherMapTextureID].Get());
 		ppDitherPS->SetSamplerState("ClampSampler", ppSampler.Get());
 		// Set the appropriate sampler
 		ppDitherPS->SetSamplerState("DitherMapSampler", ppDitherMapSampler.Get());
@@ -640,7 +640,7 @@ void Game::InitializeSimulationParameters() {
 	ppBlurRadius = 5;
 
 	ppDitherRun = true;
-	ppDitherUseBlueNoise = false;
+	ppDitherMapTextureID = false;
 	ppDitherPixelSize = 2;
 	ppDitherBias = -0.25f;
 	ppDitherColorLight = XMFLOAT3(1.0f, 1.0f, 1.0f);
@@ -687,7 +687,7 @@ void Game::AddPixelShader(const wchar_t* _path, std::shared_ptr<SimplePixelShade
 }
 
 // --------------------------------------------------------
-// Adds a texture to the list of textures
+// Adds a texture to the list of material textures
 // --------------------------------------------------------
 void Game::AddTexture(const wchar_t* _path)
 {
@@ -698,6 +698,21 @@ void Game::AddTexture(const wchar_t* _path)
 	textures.push_back(srv);
 }
 
+// --------------------------------------------------------
+// Adds a texture to a given list of textures
+// --------------------------------------------------------
+void Game::LoadTexture(const wchar_t* _path, std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> _srvVector)
+{
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+
+	LoadTexture(_path, srv);
+
+	_srvVector.push_back(srv);
+}
+
+// --------------------------------------------------------
+// Loads a texture into the given SRV
+// --------------------------------------------------------
 void Game::LoadTexture(const wchar_t* _path, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& _srv)
 {
 	CreateWICTextureFromFile(
@@ -1101,8 +1116,10 @@ void Game::BuildPostProcesses()
 	Graphics::Device->CreateSamplerState(&ppDitherMapSamplerDesc, ppDitherMapSampler.GetAddressOf());
 
 	// Load dither map textures
-	LoadTexture(L"../../Assets/Textures/T_bayer.png", ppDitherMapBayer);
-	LoadTexture(L"../../Assets/Textures/T_bluenoise.png", ppDitherMapBlueNoise);
+	LoadTexture(L"../../Assets/Textures/T_bayer2px.png", ppDitherMaps);
+	LoadTexture(L"../../Assets/Textures/T_bayer4px.png", ppDitherMaps);
+	LoadTexture(L"../../Assets/Textures/T_bayer8px.png", ppDitherMaps);
+	LoadTexture(L"../../Assets/Textures/T_bluenoise.png", ppDitherMaps);
 
 	// Build other resources that may need to change during runtime
 	RebuildPostProcesses();
@@ -1799,18 +1816,25 @@ void Game::ImGuiBuild() {
 
 
 				ImGui::Spacing();
-				ImGui::Text(ppDitherUseBlueNoise ? "Dither Map: Blue Noise" : "Dither Map: Bayer Matrix");
 
-				int useBlueNoise = ppDitherUseBlueNoise ? 1 : 0;
-				ImGui::PushID("Dither Map Type");
-				if (ImGui::SliderInt("", &useBlueNoise, 0, 1, "")) {
-					ppDitherUseBlueNoise = useBlueNoise == 1;
+				switch (ppDitherMapTextureID) {
+				case 0:
+					ImGui::Text("Dither Map: Bayer Matrix (2px)");
+					break;
+				case 1:
+					ImGui::Text("Dither Map: Bayer Matrix (4px)");
+					break;
+				case 2:
+					ImGui::Text("Dither Map: Bayer Matrix (8px)");
+					break;
+				case 3:
+					ImGui::Text("Dither Map: Blue Noise");
+					break;
 				}
-				ImGui::Image(ppDitherUseBlueNoise ?
-					(void*)ppDitherMapBlueNoise.Get() :
-					(void*)ppDitherMapBayer.Get(),
-					ImVec2(256, 256)
-				);
+
+				ImGui::PushID("Dither Map Texture");
+				ImGui::SliderInt("", &ppDitherMapTextureID, 0, ppDitherMaps.size() - 1, "");
+				ImGui::Image((void*)ppDitherMaps[ppDitherMapTextureID].Get(), ImVec2(256, 256));
 				ImGui::PopID();
 
 				ImGui::Text("Initial Render:");
